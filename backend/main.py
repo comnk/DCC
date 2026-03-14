@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from db.supabase import create_supabase_client
-from models.user import User
+from schemas.user import User
 from routers import users
 
 app = FastAPI()
