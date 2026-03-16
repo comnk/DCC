@@ -1,13 +1,19 @@
+"use client";
+
 import Navbar from "@/components/Navbar/Navbar";
+import UpdateProfileForm from "@/components/UpdateProfileForm/UpdateProfileForm";
+import { useRequireAuth } from "@/hooks/useRequiredAuth";
 
 export default function ProfilePage() {
+  const { user, loading } = useRequireAuth();
+
+  if (loading) return null;
+
   return (
-    <>
+    <div className="profile-page">
       <Navbar />
-      <div className="profile-page">
-        <h1>Profile Page</h1>
-        <p>This is where user profile information will be displayed.</p>
-      </div>
-    </>
+      <h1>Profile Page</h1>
+      <UpdateProfileForm />
+    </div>
   );
 }

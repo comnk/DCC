@@ -1,21 +1,19 @@
 "use client";
 
+import CampaignForm from "@/components/CampaignForm/CampaignForm";
 import Navbar from "@/components/Navbar/Navbar";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
-import Link from "next/link";
 
-export default function DashboardPage() {
+export default function NewCampaignPage() {
   const { user, loading } = useRequireAuth();
 
   if (loading) return null;
 
   return (
-    <>
+    <div>
       <Navbar />
-      <h1>Dashboard</h1>
-      <button>
-        <Link href="/campaign/new">Create Campaign</Link>
-      </button>
-    </>
+      <h1>New Campaign</h1>
+      <CampaignForm />
+    </div>
   );
 }

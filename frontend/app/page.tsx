@@ -1,19 +1,14 @@
 "use client";
 
-import Navbar from "@/components/Navbar/Navbar";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push("/login");
-  }, [router]);
+    router.replace("/login");
+  }, []);
 
-  return (
-    <div>
-      <Navbar />
-    </div>
-  );
+  return null;
 }
