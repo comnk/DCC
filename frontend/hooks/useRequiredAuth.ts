@@ -7,21 +7,22 @@ import { useEffect, useState } from "react";
 
 export function useRequireAuth() {
     const [user, setUser] = useState<User | null>(null);
+    const [accessToken, setAccessToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const supabase = createClient();
 
     useEffect(() => {
-        supabase.auth.getUser().then(({ data: { user } }) => {
-            if (!user) {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!session) {
                 router.push("/login");
             } else {
-                setUser(user);
+                setUser(session.user);
+                setAccessToken(session.access_token);
             }
-
             setLoading(false);
         });
-    }, []);
+    });
 
-    return { user, loading };
+    return { user, accessToken, loading };
 }

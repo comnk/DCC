@@ -1,14 +1,17 @@
-import datetime
+from datetime import datetime
+from uuid import UUID
+from enum import Enum
+from models.campaign import Campaign
 
-from pydantic import BaseModel
+class Status(str, Enum):
+    PLANNING = "planning"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+    ARCHIVED = "archived"
 
-class Campaign(BaseModel):
+class CampaignSchema(Campaign):
     id: int
-    title: str
-    description: str
-    created_by: str
-    start_date: datetime
-    end_date: datetime
-    status: str
+    status: Status
+    created_by: UUID
     created_at: datetime
     updated_at: datetime
