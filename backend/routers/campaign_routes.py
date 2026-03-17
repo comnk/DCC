@@ -1,7 +1,7 @@
 import jwt
 
 from fastapi import APIRouter, HTTPException, Header
-from db.supabase import create_supabase_client_with_token
+from db.supabase import create_supabase_client, create_supabase_client_with_token
 from models.campaign import Campaign
 
 router = APIRouter(prefix="/campaigns", tags=["campaign"])

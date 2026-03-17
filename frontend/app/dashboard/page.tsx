@@ -41,7 +41,7 @@ export default function DashboardPage() {
   return (
     <>
       <Navbar />
-      <h1>Dashboard</h1>
+      <h2>Welcome back!</h2>
       <button>
         <Link href="/campaign/new">Create Campaign</Link>
       </button>

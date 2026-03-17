@@ -15,14 +15,14 @@ export function useRequireAuth() {
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (!session) {
-                router.push("/login");
+            router.push("/login");
             } else {
-                setUser(session.user);
-                setAccessToken(session.access_token);
+            setUser(session.user);
+            setAccessToken(session.access_token);
             }
             setLoading(false);
         });
-    });
+    }, []);
 
     return { user, accessToken, loading };
 }

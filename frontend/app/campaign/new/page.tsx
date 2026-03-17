@@ -1,6 +1,6 @@
 "use client";
 
-import CampaignForm from "@/components/CampaignForm/CampaignForm";
+import CampaignForm from "@/components/forms/CampaignForm/CampaignForm";
 import Navbar from "@/components/Navbar/Navbar";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
 

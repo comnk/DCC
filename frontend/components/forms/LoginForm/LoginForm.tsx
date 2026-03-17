@@ -3,7 +3,7 @@
 import { useState } from "react";
 import "./LoginForm.scss";
 import Link from "next/link";
-import GoogleSignInButton from "../GoogleSignInButton/GoogleSignInButton";
+import GoogleSignInButton from "../../GoogleSignInButton/GoogleSignInButton";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginForm() {

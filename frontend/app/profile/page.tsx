@@ -1,7 +1,7 @@
 "use client";
 
 import Navbar from "@/components/Navbar/Navbar";
-import UpdateProfileForm from "@/components/UpdateProfileForm/UpdateProfileForm";
+import UpdateProfileForm from "@/components/forms/UpdateProfileForm/UpdateProfileForm";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
 
 export default function ProfilePage() {

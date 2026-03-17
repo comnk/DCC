@@ -2,12 +2,17 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/login");
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) router.replace("/dashboard");
+      else router.replace("/login");
+    });
   }, []);
 
   return null;
