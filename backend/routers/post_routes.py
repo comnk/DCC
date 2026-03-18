@@ -34,3 +34,14 @@ def get_all_posts(authorization: str = Header(...)):
         raise HTTPException(status_code=404, detail="No posts found")
 
     return response.data[0]
+
+@router.get("/{post_id}")
+def get_post(post_id: int, authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    supabase = create_supabase_client_with_token(token)
+    response = supabase.table("posts").select("*").eq("id", post_id).execute()
+
+    if not response.data:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    return response.data[0]
