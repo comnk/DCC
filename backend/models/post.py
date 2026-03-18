@@ -1,10 +1,9 @@
-import datetime
-
+from datetime import datetime
 from pydantic import BaseModel
 
 class Post(BaseModel):
     campaign_id: int
-    author_id: int
-    platform: str
+    platform: list[str]
+    title: str
     caption: str
     scheduled_time: datetime

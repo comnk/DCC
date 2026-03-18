@@ -1,7 +1,5 @@
-import datetime
-
+from datetime import datetime
 from enum import Enum
-
 from models.post import Post
 
 class PostStatus(str, Enum):
@@ -12,11 +10,6 @@ class PostStatus(str, Enum):
 
 class PostSchema(Post):
     id: int
-    campaign_id: int
-    author_id: int
-    platform: str
-    caption: str
+    author_id: str
     post_status: PostStatus
-    scheduled_time: datetime
     created_at: datetime
-    updated_at: datetime

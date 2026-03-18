@@ -1,7 +1,7 @@
 import jwt
 
 from fastapi import APIRouter, HTTPException, Header
-from db.supabase import create_supabase_client, create_supabase_client_with_token
+from db.supabase import create_supabase_client_with_token
 from models.campaign import Campaign
 
 router = APIRouter(prefix="/campaigns", tags=["campaign"])
@@ -74,3 +74,14 @@ def delete_campaign(campaign_id: int, authorization: str = Header(...)):
         raise HTTPException(status_code=500, detail="Campaign not found or failed to delete")
     
     return {"message": "Campaign deleted successfully"}
+
+@router.get("/{campaign_id}/posts")
+def get_campaign_posts(campaign_id: int, authorization: str = Header(...)):
+    """Get all posts associated with a campaign"""
+    supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
+    response = supabase.table("posts").select("*").eq("campaign_id", campaign_id).execute()
+    
+    if not response.data:
+        return []
+    
+    return response.data

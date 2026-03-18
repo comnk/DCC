@@ -7,9 +7,10 @@ export default function NewPostForm({ campaignId }: { campaignId: string }) {
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     title: "",
-    content: "",
+    campaign_id: parseInt(campaignId),
+    platform: [] as string[],
+    caption: "",
     scheduled_time: "",
-    campaignId: campaignId,
   });
 
   const handleSubmit = async (e: React.BaseSyntheticEvent) => {
@@ -35,7 +36,14 @@ export default function NewPostForm({ campaignId }: { campaignId: string }) {
 
     if (!res.ok) {
       const errorData = await res.json();
-      setError(errorData.detail ?? "Something went wrong");
+
+      if (Array.isArray(errorData.detail)) {
+        setError(
+          errorData.detail.map((e: { msg: string }) => e.msg).join(", "),
+        );
+      } else {
+        setError(errorData.detail ?? "Something went wrong");
+      }
     } else {
       window.location.href = "/campaign/" + campaignId;
     }
@@ -52,13 +60,85 @@ export default function NewPostForm({ campaignId }: { campaignId: string }) {
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           required
         />
-
-        <label htmlFor="content">Content:</label>
+        <label htmlFor="platform">Platform:</label>
+        <div>
+          <input
+            type="checkbox"
+            id="instagram"
+            name="platform"
+            value="instagram"
+            onChange={(e) => {
+              if (e.target.checked) {
+                setFormData({
+                  ...formData,
+                  platform: [...formData.platform, e.target.value],
+                });
+              } else {
+                setFormData({
+                  ...formData,
+                  platform: formData.platform.filter(
+                    (v) => v !== e.target.value,
+                  ),
+                });
+              }
+            }}
+          />
+          <label htmlFor="instagram">Instagram</label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            id="linkedin"
+            name="platform"
+            value="linkedin"
+            onChange={(e) => {
+              if (e.target.checked) {
+                setFormData({
+                  ...formData,
+                  platform: [...formData.platform, e.target.value],
+                });
+              } else {
+                setFormData({
+                  ...formData,
+                  platform: formData.platform.filter(
+                    (v) => v !== e.target.value,
+                  ),
+                });
+              }
+            }}
+          />
+          <label htmlFor="linkedin">LinkedIn</label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            id="discord"
+            name="platform"
+            value="discord"
+            onChange={(e) => {
+              if (e.target.checked) {
+                setFormData({
+                  ...formData,
+                  platform: [...formData.platform, e.target.value],
+                });
+              } else {
+                setFormData({
+                  ...formData,
+                  platform: formData.platform.filter(
+                    (v) => v !== e.target.value,
+                  ),
+                });
+              }
+            }}
+          />
+          <label htmlFor="discord">Discord</label>
+        </div>
+        <label htmlFor="caption">Caption:</label>
         <textarea
-          id="content"
-          name="content"
+          id="caption"
+          name="caption"
           onChange={(e) =>
-            setFormData({ ...formData, content: e.target.value })
+            setFormData({ ...formData, caption: e.target.value })
           }
           required
         ></textarea>
