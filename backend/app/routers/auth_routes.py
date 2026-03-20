@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
-from db.supabase import create_supabase_client
+from ..db.supabase import create_supabase_client
 
 router = APIRouter(prefix="/users", tags=["users"])
 supa = create_supabase_client()

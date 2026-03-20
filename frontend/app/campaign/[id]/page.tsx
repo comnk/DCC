@@ -1,8 +1,7 @@
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/server";
+import { Params } from "@/types/Params";
 import Link from "next/link";
-
-type Params = Promise<{ id: string }>;
 
 interface Post {
   id: number;
@@ -46,9 +45,14 @@ export default async function CampaignPage({ params }: { params: Params }) {
     <div>
       <Navbar />
       <h1>Campaign Details</h1>
-      <button>
-        <Link href={`/campaign/${id}/posts/new`}>Create Content</Link>
-      </button>
+      <div>
+        <button>
+          <Link href={`/campaign/${id}/posts/new`}>Create Content</Link>
+        </button>
+        <button>
+          <Link href={`/campaign/${id}/update`}>Update Campaign</Link>
+        </button>
+      </div>
       <p>
         <strong>Name:</strong> {campaign.name}
       </p>
@@ -57,11 +61,11 @@ export default async function CampaignPage({ params }: { params: Params }) {
       </p>
       <p>
         <strong>Start Date:</strong>{" "}
-        {new Date(campaign.start_date).toLocaleDateString()}
+        {new Date(campaign.start_date + "T00:00:00").toLocaleDateString()}
       </p>
       <p>
         <strong>End Date:</strong>{" "}
-        {new Date(campaign.end_date).toLocaleDateString()}
+        {new Date(campaign.end_date + "T00:00:00").toLocaleDateString()}
       </p>
       <h2>Posts</h2>
       <ul>

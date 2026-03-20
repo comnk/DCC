@@ -1,8 +1,7 @@
 import NewPostForm from "@/components/forms/NewPostForm/NewPostForm";
 import Navbar from "@/components/Navbar/Navbar";
 import PostPreviewPanel from "@/components/PostPreviewPanel/PostPreviewPanel";
-
-type Params = Promise<{ id: string }>;
+import { Params } from "@/types/Params";
 
 export default async function NewPostPage({ params }: { params: Params }) {
   const { id } = await params;

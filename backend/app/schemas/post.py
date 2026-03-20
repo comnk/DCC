@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from models.post import Post
+from ..models.post import Post
 
 class PostStatus(str, Enum):
     DRAFT = "draft"

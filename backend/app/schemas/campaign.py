@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 from enum import Enum
-from models.campaign import Campaign
+from ..models.campaign import Campaign
 
 class Status(str, Enum):
     PLANNING = "planning"

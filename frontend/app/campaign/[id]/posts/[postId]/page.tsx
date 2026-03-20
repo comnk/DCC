@@ -1,7 +1,6 @@
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/server";
-
-type Params = Promise<{ id: string }>;
+import { Params } from "@/types/Params";
 
 export default async function PostPage({ params }: { params: Params }) {
   const { id } = await params;

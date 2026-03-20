@@ -1,8 +1,8 @@
 import jwt
 
 from fastapi import APIRouter, HTTPException, Header
-from db.supabase import create_supabase_client_with_token
-from models.campaign import Campaign
+from ..db.supabase import create_supabase_client_with_token
+from ..models.campaign import Campaign
 
 router = APIRouter(prefix="/campaigns", tags=["campaign"])
 
@@ -53,7 +53,7 @@ def get_campaign(campaign_id: int, authorization: str = Header(...)):
     
     return response.data[0]
 
-@router.put("/update/{campaign_id}")
+@router.put("/{campaign_id}")
 def update_campaign(campaign_id: int, campaign: Campaign, authorization: str = Header(...)):
     """Update campaign details by ID"""
     supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
@@ -64,7 +64,7 @@ def update_campaign(campaign_id: int, campaign: Campaign, authorization: str = H
     
     return response.data[0]
 
-@router.delete("/delete/{campaign_id}")
+@router.delete("/{campaign_id}")
 def delete_campaign(campaign_id: int, authorization: str = Header(...)):
     """Delete a campaign by ID"""
     supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))

@@ -1,8 +1,8 @@
 import jwt
 
 from fastapi import APIRouter, HTTPException, Header
-from db.supabase import create_supabase_client_with_token
-from models.post import Post
+from ..db.supabase import create_supabase_client_with_token
+from ..models.post import Post
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
