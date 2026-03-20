@@ -43,5 +43,16 @@ def get_post(post_id: int, authorization: str = Header(...)):
 
     if not response.data:
         raise HTTPException(status_code=404, detail="Post not found")
+    
+    return response.data[0]
 
+@router.put("/{post_id}")
+def update_post(post_id: int, post: Post, authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    supabase = create_supabase_client_with_token(token)
+    response = supabase.table("posts").update(post.model_dump(mode="json")).eq("id", post_id).execute()
+
+    if not response.data:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
     return response.data[0]

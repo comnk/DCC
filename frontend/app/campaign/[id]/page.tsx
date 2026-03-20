@@ -1,3 +1,4 @@
+import PostCard from "@/components/cards/PostCard/PostCard";
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { Params } from "@/types/Params";
@@ -70,12 +71,7 @@ export default async function CampaignPage({ params }: { params: Params }) {
       <h2>Posts</h2>
       <ul>
         {campaign_posts.map((post: Post) => (
-          <li key={post.id}>
-            <Link href={`/campaign/${id}/posts/${post.id}`}>
-              <strong>{post.title}</strong>
-            </Link>
-            <p>{post.caption}</p>
-          </li>
+          <PostCard key={post.id} postData={post} />
         ))}
       </ul>
     </div>

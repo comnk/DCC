@@ -1,17 +1,11 @@
 "use client";
 
+import CampaignCard from "@/components/cards/CampaignCard/CampaignCard";
 import Navbar from "@/components/Navbar/Navbar";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
+import { Campaign } from "@/types/Campaign";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-interface Campaign {
-  id: number;
-  name: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-}
 
 export default function DashboardPage() {
   const { user, accessToken, loading } = useRequireAuth();
@@ -49,9 +43,7 @@ export default function DashboardPage() {
         <h2>Campaigns</h2>
         <ul>
           {campaigns.map((campaign) => (
-            <li key={campaign.id}>
-              <Link href={`/campaign/${campaign.id}`}>{campaign.name}</Link>
-            </li>
+            <CampaignCard key={campaign.id} campaignData={campaign} />
           ))}
         </ul>
       </div>

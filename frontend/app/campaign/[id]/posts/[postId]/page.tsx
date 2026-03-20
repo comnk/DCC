@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { Params } from "@/types/Params";
+import Link from "next/link";
 
 export default async function PostPage({ params }: { params: Params }) {
   const { id } = await params;
@@ -23,10 +24,17 @@ export default async function PostPage({ params }: { params: Params }) {
   return (
     <div>
       <Navbar />
-      <h1>Post Details</h1>
-      <p>{postData.title}</p>
-      <p>{postData.caption}</p>
-      <p>{postData.scheduled_time}</p>
+      <h2>Post Details</h2>
+      <button>
+        <Link href={`/campaign/${id}/posts/${postData.id}/update`}>
+          Update Post
+        </Link>
+      </button>
+      <div>
+        <p>{postData.title}</p>
+        <p>{postData.caption}</p>
+        <p>{postData.scheduled_time}</p>
+      </div>
     </div>
   );
 }
