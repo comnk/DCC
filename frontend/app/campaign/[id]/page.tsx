@@ -1,14 +1,11 @@
+import ArchiveCampaignButton from "@/components/buttons/ArchiveCampaignButton/ArchiveCampaignButton";
+import DeleteCampaignButton from "@/components/buttons/DeleteCampaignButton/DeleteCampaignButton";
 import PostCard from "@/components/cards/PostCard/PostCard";
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { Params } from "@/types/Params";
+import { Post } from "@/types/Post";
 import Link from "next/link";
-
-interface Post {
-  id: number;
-  title: string;
-  caption: string;
-}
 
 export default async function CampaignPage({ params }: { params: Params }) {
   const { id } = await params;
@@ -45,7 +42,7 @@ export default async function CampaignPage({ params }: { params: Params }) {
   return (
     <div>
       <Navbar />
-      <h1>Campaign Details</h1>
+      <h2>Campaign Details</h2>
       <div>
         <button>
           <Link href={`/campaign/${id}/posts/new`}>Create Content</Link>
@@ -53,6 +50,12 @@ export default async function CampaignPage({ params }: { params: Params }) {
         <button>
           <Link href={`/campaign/${id}/update`}>Update Campaign</Link>
         </button>
+        <DeleteCampaignButton id={id} />
+        <ArchiveCampaignButton id={id} is_archived={campaign.is_archived} />
+      </div>
+      <hr />
+      <div>
+        <h2>Campaign Overview</h2>
       </div>
       <p>
         <strong>Name:</strong> {campaign.name}

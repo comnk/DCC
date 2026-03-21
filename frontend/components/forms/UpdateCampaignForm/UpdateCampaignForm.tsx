@@ -31,6 +31,11 @@ export default function UpdateCampaignForm({
       return;
     }
 
+    if (formData.end_date < formData.start_date) {
+      setError("End date cannot be before start date");
+      return;
+    }
+
     const res = await fetch(`http://localhost:8000/campaigns/${campaignId}`, {
       method: "PUT",
       headers: {

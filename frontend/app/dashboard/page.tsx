@@ -11,6 +11,11 @@ export default function DashboardPage() {
   const { user, accessToken, loading } = useRequireAuth();
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [tab, setTab] = useState<"active" | "archived">("active");
+
+  const filteredCampaigns = campaigns.filter((c) =>
+    tab === "active" ? !c.is_archived : c.is_archived,
+  );
 
   useEffect(() => {
     if (!accessToken) return;
@@ -41,8 +46,22 @@ export default function DashboardPage() {
       </button>
       <div>
         <h2>Campaigns</h2>
+        <div>
+          <button
+            onClick={() => setTab("active")}
+            style={{ fontWeight: tab === "active" ? "bold" : "normal" }}
+          >
+            Active
+          </button>
+          <button
+            onClick={() => setTab("archived")}
+            style={{ fontWeight: tab === "archived" ? "bold" : "normal" }}
+          >
+            Archived
+          </button>
+        </div>
         <ul>
-          {campaigns.map((campaign) => (
+          {filteredCampaigns.map((campaign) => (
             <CampaignCard key={campaign.id} campaignData={campaign} />
           ))}
         </ul>

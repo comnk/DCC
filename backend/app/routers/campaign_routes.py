@@ -64,13 +64,34 @@ def update_campaign(campaign_id: int, campaign: Campaign, authorization: str = H
     
     return response.data[0]
 
+@router.post("/{campaign_id}/toggle_archive")
+def toggle_archive_campaign(campaign_id: int, authorization: str = Header(...)):
+    """Toggle archive status of a campaign by ID"""
+    supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
+    current = supabase.table("campaigns").select("is_archived").eq("id", campaign_id).execute()
+    
+    if not current.data:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    
+    is_archived = current.data[0]["is_archived"]
+    
+    response = supabase.table("campaigns").update({
+        "is_archived": not is_archived,
+        "archived_at": "now()" if not is_archived else None
+    }).eq("id", campaign_id).execute()
+
+    if not response.data:
+        raise HTTPException(status_code=500, detail="Failed to update campaign")
+
+    return {"message": "Campaign archived successfully" if not is_archived else "Campaign unarchived successfully"}
+
 @router.delete("/{campaign_id}")
 def delete_campaign(campaign_id: int, authorization: str = Header(...)):
     """Delete a campaign by ID"""
     supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
     response = supabase.table("campaigns").delete().eq("id", campaign_id).execute()
     
-    if (response.status_code != 204):
+    if (not response.data):
         raise HTTPException(status_code=500, detail="Campaign not found or failed to delete")
     
     return {"message": "Campaign deleted successfully"}

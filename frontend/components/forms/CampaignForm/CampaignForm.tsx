@@ -24,6 +24,11 @@ export default function CampaignForm() {
       return;
     }
 
+    if (formData.end_date < formData.start_date) {
+      setError("End date cannot be before start date");
+      return;
+    }
+
     const res = await fetch(`http://localhost:8000/campaigns/create`, {
       method: "POST",
       headers: {
