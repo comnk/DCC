@@ -8,6 +8,7 @@ import MobileLogo from "./Logos/MobileLogo";
 
 import Link from "next/link";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
+import Button from "../buttons/Button/Button";
 
 const supabase = createClient();
 
@@ -40,7 +41,7 @@ export default function Navbar() {
             )}
             {user && (
               <li>
-                <button onClick={handleLogout}>Logout</button>
+                <Button text="Logout" link="#" onClick={handleLogout} />
               </li>
             )}
           </>

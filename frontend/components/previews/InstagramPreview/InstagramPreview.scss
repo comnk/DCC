@@ -1,0 +1,93 @@
+.igCard {
+  background: #fff;
+  border: 1px solid #dbdbdb;
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 480px;
+}
+
+.igHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+}
+ 
+.igAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+ 
+  span {
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+  }
+}
+
+.igUsername {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #262626;
+}
+ 
+.igSponsored {
+  margin: 0;
+  font-size: 11px;
+  color: #8e8e8e;
+}
+
+.igMore {
+  margin-left: auto;
+  font-size: 20px;
+  color: #262626;
+}
+ 
+.igImageWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #f0f0f0;
+}
+ 
+.igActions {
+  display: flex;
+  gap: 14px;
+  padding: 10px 14px 4px;
+  font-size: 22px;
+}
+ 
+.igActionIcon {
+  cursor: pointer;
+}
+ 
+.igBookmark {
+  margin-left: auto;
+}
+ 
+.igBody {
+  padding: 4px 14px 14px;
+}
+ 
+.igCaption {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #262626;
+  line-height: 1.5;
+ 
+  strong {
+    font-weight: 600;
+  }
+}
+ 
+.igDate {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: #8e8e8e;
+  text-transform: uppercase;
+}

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import Button from "../Button/Button";
 
 export default function DeleteCampaignButton({ id }: { id: string }) {
   const router = useRouter();
@@ -41,5 +42,7 @@ export default function DeleteCampaignButton({ id }: { id: string }) {
     router.push("/dashboard");
   };
 
-  return <button onClick={handleDelete}>Delete Campaign</button>;
+  return (
+    <Button text="Delete Campaign" link="#" onClick={handleDelete}></Button>
+  );
 }

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { Campaign } from "@/types/Campaign";
+import { Button } from "@mui/material";
 import { useState } from "react";
 
 export default function UpdateCampaignForm({
@@ -90,7 +91,9 @@ export default function UpdateCampaignForm({
           required
         />
 
-        <button type="submit">Update Campaign</button>
+        <Button variant="contained" color="primary" type="submit">
+          Update Campaign
+        </Button>
       </form>
       {error && <p className="error">{error}</p>}
     </div>

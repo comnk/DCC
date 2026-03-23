@@ -1,0 +1,96 @@
+.dcCard {
+  background: #36393f;
+  border-radius: 8px;
+  padding: 16px;
+  max-width: 480px;
+}
+ 
+.dcHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+ 
+.dcAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #5865f2;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+ 
+.dcUsername {
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+}
+ 
+.dcBadge {
+  background: #5865f2;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+ 
+.dcTimestamp {
+  color: #72767d;
+  font-size: 12px;
+}
+ 
+.dcCaption {
+  color: #dcddde;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 10px 50px;
+}
+ 
+.dcImageWrap {
+  position: relative;
+  margin-left: 50px;
+  width: calc(100% - 50px);
+  aspect-ratio: 16 / 9;
+  background: #2f3136;
+  border-radius: 4px;
+  overflow: hidden;
+}
+ 
+.dcImagePlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+ 
+  .placeholderText {
+    color: #72767d;
+  }
+}
+ 
+.dcReactions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  margin-left: 50px;
+}
+ 
+.dcReactionChip {
+  background: #40444b;
+  border: 1px solid #5865f2;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 13px;
+  color: #dcddde;
+  cursor: pointer;
+}

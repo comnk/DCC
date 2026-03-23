@@ -2,6 +2,7 @@ import UpdateCampaignForm from "@/components/forms/UpdateCampaignForm/UpdateCamp
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { Params } from "@/types/Params";
+import { redirect } from "next/navigation";
 
 export default async function UpdateCampaignPage({
   params,
@@ -14,7 +15,12 @@ export default async function UpdateCampaignPage({
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  const token = session?.access_token;
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  const token = session.access_token;
 
   const res = await fetch(`http://localhost:8000/campaigns/${id}`, {
     method: "GET",

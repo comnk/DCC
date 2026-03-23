@@ -1,0 +1,81 @@
+.liCard {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 480px;
+}
+ 
+.liHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px 8px;
+}
+
+.liAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #0a66c2;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+ 
+.liMore {
+  margin-left: auto;
+  font-size: 20px;
+  color: #666;
+}
+ 
+.liName {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+}
+ 
+.liMeta {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+}
+ 
+.liCaption {
+  margin: 0 16px 10px;
+  font-size: 14px;
+  color: #000;
+  line-height: 1.6;
+}
+ 
+.liImageWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #f0f0f0;
+}
+ 
+.liReactions {
+  display: flex;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 8px;
+ 
+  span {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 13px;
+    color: #666;
+    cursor: pointer;
+    transition: background 0.15s;
+ 
+    &:hover {
+      background: #f3f2ef;
+    }
+  }
+}

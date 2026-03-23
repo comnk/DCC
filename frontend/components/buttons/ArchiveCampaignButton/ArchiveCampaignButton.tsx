@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import Button from "../Button/Button";
 
 export default function ArchiveCampaignButton({
   id,
@@ -45,8 +46,10 @@ export default function ArchiveCampaignButton({
   };
 
   return (
-    <button onClick={handleToggleArchive}>
-      {is_archived ? "Unarchive Campaign" : "Archive Campaign"}
-    </button>
+    <Button
+      text={is_archived ? "Unarchive Campaign" : "Archive Campaign"}
+      link="#"
+      onClick={handleToggleArchive}
+    ></Button>
   );
 }

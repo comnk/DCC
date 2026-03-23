@@ -1,11 +1,12 @@
 import ArchiveCampaignButton from "@/components/buttons/ArchiveCampaignButton/ArchiveCampaignButton";
+import Button from "@/components/buttons/Button/Button";
 import DeleteCampaignButton from "@/components/buttons/DeleteCampaignButton/DeleteCampaignButton";
 import PostCard from "@/components/cards/PostCard/PostCard";
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { Params } from "@/types/Params";
 import { Post } from "@/types/Post";
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function CampaignPage({ params }: { params: Params }) {
   const { id } = await params;
@@ -14,7 +15,12 @@ export default async function CampaignPage({ params }: { params: Params }) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  const token = session?.access_token;
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  const token = session.access_token;
 
   const res = await fetch(`http://localhost:8000/campaigns/${id}`, {
     cache: "no-store",
@@ -44,12 +50,8 @@ export default async function CampaignPage({ params }: { params: Params }) {
       <Navbar />
       <h2>Campaign Details</h2>
       <div>
-        <button>
-          <Link href={`/campaign/${id}/posts/new`}>Create Content</Link>
-        </button>
-        <button>
-          <Link href={`/campaign/${id}/update`}>Update Campaign</Link>
-        </button>
+        <Button text="Create Content" link={`/campaign/${id}/posts/new`} />
+        <Button text="Update Campaign" link={`/campaign/${id}/update`} />
         <DeleteCampaignButton id={id} />
         <ArchiveCampaignButton id={id} is_archived={campaign.is_archived} />
       </div>

@@ -2,6 +2,7 @@ import UpdatePostForm from "@/components/forms/UpdatePostForm/UpdatePostForm";
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/server";
 import { PostParams } from "@/types/Params";
+import { redirect } from "next/navigation";
 
 export default async function UpdatePostPage({
   params,
@@ -14,7 +15,12 @@ export default async function UpdatePostPage({
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  const token = session?.access_token;
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  const token = session.access_token;
 
   const res = await fetch(`http://localhost:8000/posts/${postId}`, {
     method: "GET",

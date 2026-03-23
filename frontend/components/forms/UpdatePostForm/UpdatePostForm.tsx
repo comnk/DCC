@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { Post } from "@/types/Post";
+import { Button } from "@mui/material";
 import { useState } from "react";
 
 export default function UpdatePostForm({
@@ -81,7 +82,9 @@ export default function UpdatePostForm({
           value={postData.scheduled_time.slice(0, 16)}
           required
         />
-        <button type="submit">Update Post</button>
+        <Button variant="contained" color="primary" type="submit">
+          Update Post
+        </Button>
       </form>
       {error && <p style={{ color: "red" }}>{error}</p>}
     </div>

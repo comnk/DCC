@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@mui/material";
 import { useState } from "react";
 
 export default function CampaignForm() {
@@ -81,7 +82,9 @@ export default function CampaignForm() {
           required
         />
 
-        <button type="submit">Create Campaign</button>
+        <Button variant="contained" color="primary" type="submit">
+          Create Campaign
+        </Button>
       </form>
       {error && <p className="error">{error}</p>}
     </div>

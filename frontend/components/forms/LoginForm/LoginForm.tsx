@@ -5,6 +5,7 @@ import "./LoginForm.scss";
 import Link from "next/link";
 import GoogleSignInButton from "../../buttons/GoogleSignInButton/GoogleSignInButton";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@mui/material";
 
 export default function LoginForm() {
   const [error, setError] = useState("");
@@ -52,7 +53,9 @@ export default function LoginForm() {
             setFormData({ ...formData, password: e.target.value })
           }
         />
-        <button type="submit">Login</button>
+        <Button variant="contained" color="primary" type="submit">
+          Login
+        </Button>
       </form>
       <GoogleSignInButton onError={setError} />
       {error && <p className="error">{error}</p>}

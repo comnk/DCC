@@ -1,17 +1,32 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { PostPreviewData } from "@/types/PostPreviewData";
+import { Button } from "@mui/material";
 import { useState } from "react";
 
-export default function NewPostForm({ campaignId }: { campaignId: string }) {
+export default function NewPostForm({
+  campaignId,
+  onFormChange,
+}: {
+  campaignId: string;
+  onFormChange: (data: PostPreviewData) => void;
+}) {
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     campaign_id: parseInt(campaignId),
     platform: [] as string[],
     caption: "",
+    photo_url: "",
     scheduled_time: "",
   });
+
+  const updateForm = (updates: Partial<typeof formData>) => {
+    const next = { ...formData, ...updates };
+    setFormData(next);
+    onFormChange(next);
+  };
 
   const handleSubmit = async (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
@@ -49,6 +64,13 @@ export default function NewPostForm({ campaignId }: { campaignId: string }) {
     }
   };
 
+  const handlePlatformChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const next = e.target.checked
+      ? [...formData.platform, e.target.value]
+      : formData.platform.filter((v) => v !== e.target.value);
+    updateForm({ platform: next });
+  };
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -57,7 +79,7 @@ export default function NewPostForm({ campaignId }: { campaignId: string }) {
           type="text"
           id="title"
           name="title"
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          onChange={(e) => updateForm({ title: e.target.value })}
           required
         />
         <label htmlFor="platform">Platform:</label>
@@ -67,21 +89,7 @@ export default function NewPostForm({ campaignId }: { campaignId: string }) {
             id="instagram"
             name="platform"
             value="instagram"
-            onChange={(e) => {
-              if (e.target.checked) {
-                setFormData({
-                  ...formData,
-                  platform: [...formData.platform, e.target.value],
-                });
-              } else {
-                setFormData({
-                  ...formData,
-                  platform: formData.platform.filter(
-                    (v) => v !== e.target.value,
-                  ),
-                });
-              }
-            }}
+            onChange={handlePlatformChange}
           />
           <label htmlFor="instagram">Instagram</label>
         </div>
@@ -91,21 +99,7 @@ export default function NewPostForm({ campaignId }: { campaignId: string }) {
             id="linkedin"
             name="platform"
             value="linkedin"
-            onChange={(e) => {
-              if (e.target.checked) {
-                setFormData({
-                  ...formData,
-                  platform: [...formData.platform, e.target.value],
-                });
-              } else {
-                setFormData({
-                  ...formData,
-                  platform: formData.platform.filter(
-                    (v) => v !== e.target.value,
-                  ),
-                });
-              }
-            }}
+            onChange={handlePlatformChange}
           />
           <label htmlFor="linkedin">LinkedIn</label>
         </div>
@@ -115,21 +109,7 @@ export default function NewPostForm({ campaignId }: { campaignId: string }) {
             id="discord"
             name="platform"
             value="discord"
-            onChange={(e) => {
-              if (e.target.checked) {
-                setFormData({
-                  ...formData,
-                  platform: [...formData.platform, e.target.value],
-                });
-              } else {
-                setFormData({
-                  ...formData,
-                  platform: formData.platform.filter(
-                    (v) => v !== e.target.value,
-                  ),
-                });
-              }
-            }}
+            onChange={handlePlatformChange}
           />
           <label htmlFor="discord">Discord</label>
         </div>
@@ -137,9 +117,7 @@ export default function NewPostForm({ campaignId }: { campaignId: string }) {
         <textarea
           id="caption"
           name="caption"
-          onChange={(e) =>
-            setFormData({ ...formData, caption: e.target.value })
-          }
+          onChange={(e) => updateForm({ caption: e.target.value })}
           required
         ></textarea>
 
@@ -149,12 +127,29 @@ export default function NewPostForm({ campaignId }: { campaignId: string }) {
           id="scheduled_time"
           min={new Date().toISOString().slice(0, 16)}
           name="scheduled_time"
-          onChange={(e) =>
-            setFormData({ ...formData, scheduled_time: e.target.value })
-          }
+          onChange={(e) => updateForm({ scheduled_time: e.target.value })}
           required
         />
-        <button type="submit">Create Post</button>
+        <label htmlFor="image">Image:</label>
+        <input
+          type="file"
+          id="image"
+          name="image"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+              updateForm({ photo_url: reader.result as string });
+            };
+            reader.readAsDataURL(file);
+          }}
+        />
+        <Button variant="contained" color="primary" type="submit">
+          Create Post
+        </Button>
       </form>
       {error && <p className="error">{error}</p>}
     </div>
