@@ -1,6 +1,8 @@
 import Image from "next/image";
 import "./InstagramPreview.scss";
 
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 import { PostPreviewData } from "@/types/PostPreviewData";
 import { formatScheduled } from "@/utils/formatScheduled";
 
@@ -19,13 +21,35 @@ export default function InstagramPreview({ data }: { data: PostPreviewData }) {
       </div>
 
       <div className="igImageWrap">
-        {data.photo_url ? (
-          <Image
-            src={data.photo_url}
-            alt="Post"
-            fill
-            style={{ objectFit: "cover" }}
-          />
+        {data.photo_urls && data.photo_urls.length > 0 ? (
+          <Swiper
+            spaceBetween={50}
+            slidesPerView={1}
+            onSlideChange={() => console.log("slide change")}
+            onSwiper={(swiper) => console.log(swiper)}
+          >
+            {data.photo_urls.map((url, index) => (
+              <SwiperSlide key={index}>
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    paddingTop: "100%",
+                  }}
+                >
+                  <Image
+                    src={url}
+                    alt={`Post image ${index + 1}`}
+                    fill
+                    sizes={
+                      "(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+                    }
+                    style={{ objectFit: "cover", borderRadius: 4 }}
+                  />
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         ) : (
           <div className="igImagePlaceholder">
             <span className="igPlaceholderIcon">🖼</span>

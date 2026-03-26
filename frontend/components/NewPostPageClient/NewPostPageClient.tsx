@@ -14,7 +14,7 @@ export default function NewPostPageClient({
     title: "",
     platform: [],
     caption: "",
-    photo_url: "",
+    photo_urls: [],
     scheduled_time: "",
   });
 

@@ -23,13 +23,20 @@ export default function DiscordPreview({ data }: { data: PostPreviewData }) {
       {data.caption && <p className="dcCaption">{data.caption}</p>}
 
       <div className="dcImageWrap">
-        {data.photo_url ? (
-          <Image
-            src={data.photo_url}
-            alt="Post"
-            fill
-            style={{ objectFit: "cover", borderRadius: 4 }}
-          />
+        {data.photo_urls && data.photo_urls.length > 0 ? (
+          data.photo_urls.map((url, index) => (
+            <div
+              key={index}
+              style={{ position: "relative", width: "100%", height: "100%" }}
+            >
+              <Image
+                src={url}
+                alt={`Post image ${index + 1}`}
+                fill
+                style={{ objectFit: "cover", borderRadius: 4 }}
+              />
+            </div>
+          ))
         ) : (
           <div className="dcImagePlaceholder">
             <span className="placeholderIcon">🖼</span>

@@ -3,5 +3,5 @@ export type PostPreviewData = {
   caption: string;
   platform: string[];
   scheduled_time: string;
-  photo_url: string;
+  photo_urls: string[];
 };

@@ -7,3 +7,5 @@ class Post(BaseModel):
     title: str
     caption: str
     scheduled_time: datetime
+    photo_urls: list[str] = []
+    is_draft: bool = False

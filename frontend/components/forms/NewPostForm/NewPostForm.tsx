@@ -13,12 +13,13 @@ export default function NewPostForm({
   onFormChange: (data: PostPreviewData) => void;
 }) {
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     campaign_id: parseInt(campaignId),
     platform: [] as string[],
     caption: "",
-    photo_url: "",
+    photo_urls: [] as string[],
     scheduled_time: "",
   });
 
@@ -69,6 +70,44 @@ export default function NewPostForm({
       ? [...formData.platform, e.target.value]
       : formData.platform.filter((v) => v !== e.target.value);
     updateForm({ platform: next });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setUploading(true);
+    setError("");
+
+    try {
+      const supabase = createClient();
+
+      const uploadPromises = files.map(async (file) => {
+        const ext = file.name.split(".").pop();
+        const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("post-images")
+          .upload(path, file);
+
+        if (uploadError) throw new Error(uploadError.message);
+
+        const { data: signedData, error: signedError } = await supabase.storage
+          .from("post-images")
+          .createSignedUrl(path, 60 * 60);
+
+        if (signedError) throw new Error(signedError.message);
+
+        return signedData.signedUrl;
+      });
+
+      const urls = await Promise.all(uploadPromises);
+      updateForm({ photo_urls: [...formData.photo_urls, ...urls] });
+    } catch (err) {
+      setError("Failed to upload images: " + (err as Error).message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -136,17 +175,14 @@ export default function NewPostForm({
           id="image"
           name="image"
           accept="image/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = () => {
-              updateForm({ photo_url: reader.result as string });
-            };
-            reader.readAsDataURL(file);
-          }}
+          multiple
+          disabled={uploading}
+          onChange={handleImageUpload}
         />
+        {uploading && <p>Uploading images…</p>}
+        {formData.photo_urls.length > 0 && (
+          <p>{formData.photo_urls.length} image(s) uploaded ✓</p>
+        )}
         <Button variant="contained" color="primary" type="submit">
           Create Post
         </Button>
