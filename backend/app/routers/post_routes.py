@@ -18,7 +18,7 @@ def create_post(post: Post, authorization: str = Header(...)):
     supabase = create_supabase_client_with_token(token)
     
     post_data = post.model_dump(mode="json")
-    photo_urls = post_data.get("photo_urls", [])
+    photo_urls = post_data.pop("photo_urls", [])
     
     response = supabase.table("posts").insert({**post_data, "author_id": author_id}).execute()
 
@@ -45,6 +45,23 @@ def create_post(post: Post, authorization: str = Header(...)):
         
     return response.data[0]
 
+@router.get("/drafts")
+def get_draft_posts(authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    payload = jwt.decode(token, options={"verify_signature": False})
+    author_id = payload.get("sub")
+
+    if not author_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    supabase = create_supabase_client_with_token(token)
+    response = supabase.table("posts").select("*").eq("author_id", author_id).eq("is_draft", True).execute()
+
+    if not response.data:
+        raise HTTPException(status_code=404, detail="No draft posts found")
+
+    return response.data[0] or []
+
 @router.get("/all")
 def get_all_posts(authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
@@ -54,7 +71,7 @@ def get_all_posts(authorization: str = Header(...)):
     if not response.data:
         raise HTTPException(status_code=404, detail="No posts found")
 
-    return response.data[0]
+    return response.data[0] or []
 
 @router.get("/{post_id}")
 def get_post(post_id: int, authorization: str = Header(...)):
@@ -70,10 +87,22 @@ def get_post(post_id: int, authorization: str = Header(...)):
 @router.put("/{post_id}")
 def update_post(post_id: int, post: Post, authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
+    payload = jwt.decode(token, options={"verify_signature": False})
+    author_id = payload.get("sub")
+
+    if not author_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
     supabase = create_supabase_client_with_token(token)
-    response = supabase.table("posts").update(post.model_dump(mode="json")).eq("id", post_id).execute()
+    response = (
+        supabase.table("posts")
+        .update(post.model_dump(mode="json"))
+        .eq("id", post_id)
+        .eq("author_id", author_id)
+        .execute()
+    )
 
     if not response.data:
-        raise HTTPException(status_code=404, detail="Post not found")
+        raise HTTPException(status_code=404, detail="Post not found or unauthorized")
     
     return response.data[0]

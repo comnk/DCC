@@ -21,6 +21,7 @@ export default function NewPostForm({
     caption: "",
     photo_urls: [] as string[],
     scheduled_time: "",
+    is_draft: false,
   });
 
   const updateForm = (updates: Partial<typeof formData>) => {
@@ -29,7 +30,10 @@ export default function NewPostForm({
     onFormChange(next);
   };
 
-  const handleSubmit = async (e: React.BaseSyntheticEvent) => {
+  const handleSubmit = async (
+    e: React.BaseSyntheticEvent,
+    isDraft: boolean = false,
+  ) => {
     e.preventDefault();
     setError("");
 
@@ -38,6 +42,11 @@ export default function NewPostForm({
 
     if (!data.session) {
       setError("You must be logged in to create a post");
+      return;
+    }
+
+    if (!isDraft && !formData.scheduled_time) {
+      setError("Please set a scheduled time");
       return;
     }
 
@@ -112,7 +121,7 @@ export default function NewPostForm({
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={(e) => handleSubmit(e, false)}>
         <label htmlFor="title">Title:</label>
         <input
           type="text"
@@ -183,9 +192,22 @@ export default function NewPostForm({
         {formData.photo_urls.length > 0 && (
           <p>{formData.photo_urls.length} image(s) uploaded ✓</p>
         )}
-        <Button variant="contained" color="primary" type="submit">
-          Create Post
-        </Button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={(e) => handleSubmit(e, true)}
+          >
+            Save as Draft
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={(e) => handleSubmit(e, false)}
+          >
+            Create Post
+          </Button>
+        </div>
       </form>
       {error && <p className="error">{error}</p>}
     </div>
