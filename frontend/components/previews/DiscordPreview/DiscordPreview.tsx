@@ -23,8 +23,8 @@ export default function DiscordPreview({ data }: { data: PostPreviewData }) {
       {data.caption && <p className="dcCaption">{data.caption}</p>}
 
       <div className="dcImageWrap">
-        {data.photo_urls && data.photo_urls.length > 0 ? (
-          data.photo_urls.map((url, index) => (
+        {data.media_asset && data.media_asset.length > 0 ? (
+          data.media_asset.map((url, index) => (
             <div
               key={index}
               style={{ position: "relative", width: "100%", height: "100%" }}

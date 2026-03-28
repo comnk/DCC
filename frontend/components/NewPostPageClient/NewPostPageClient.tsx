@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import NewPostForm from "../forms/NewPostForm/NewPostForm";
+import PostForm from "../forms/PostForm/PostForm";
 import PostPreviewPanel from "@/components/PostPreviewPanel/PostPreviewPanel";
 import { PostPreviewData } from "@/types/PostPreviewData";
 
@@ -14,13 +14,13 @@ export default function NewPostPageClient({
     title: "",
     platform: [],
     caption: "",
-    photo_urls: [],
+    media_asset: [],
     scheduled_time: "",
   });
 
   return (
     <div>
-      <NewPostForm campaignId={campaignId} onFormChange={setPreviewData} />
+      <PostForm campaignId={campaignId} onFormChange={setPreviewData} />
       <PostPreviewPanel data={previewData} />
     </div>
   );

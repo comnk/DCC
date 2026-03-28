@@ -45,23 +45,6 @@ def create_post(post: Post, authorization: str = Header(...)):
         
     return response.data[0]
 
-@router.get("/drafts")
-def get_draft_posts(authorization: str = Header(...)):
-    token = authorization.replace("Bearer ", "")
-    payload = jwt.decode(token, options={"verify_signature": False})
-    author_id = payload.get("sub")
-
-    if not author_id:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-    supabase = create_supabase_client_with_token(token)
-    response = supabase.table("posts").select("*").eq("author_id", author_id).eq("is_draft", True).execute()
-
-    if not response.data:
-        raise HTTPException(status_code=404, detail="No draft posts found")
-
-    return response.data[0] or []
-
 @router.get("/all")
 def get_all_posts(authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
@@ -71,7 +54,7 @@ def get_all_posts(authorization: str = Header(...)):
     if not response.data:
         raise HTTPException(status_code=404, detail="No posts found")
 
-    return response.data[0] or []
+    return response.data or []
 
 @router.get("/{post_id}")
 def get_post(post_id: int, authorization: str = Header(...)):

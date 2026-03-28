@@ -1,16 +1,19 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { Post } from "@/types/Post";
 import { PostPreviewData } from "@/types/PostPreviewData";
 import { Button } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function NewPostForm({
+export default function PostForm({
   campaignId,
   onFormChange,
+  existingPost,
 }: {
   campaignId: string;
   onFormChange: (data: PostPreviewData) => void;
+  existingPost?: Post | null;
 }) {
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -19,10 +22,27 @@ export default function NewPostForm({
     campaign_id: parseInt(campaignId),
     platform: [] as string[],
     caption: "",
-    photo_urls: [] as string[],
+    media_asset: [] as string[],
     scheduled_time: "",
     is_draft: false,
   });
+
+  useEffect(() => {
+    if (!existingPost) return;
+
+    const prefilled = {
+      title: existingPost.title,
+      campaign_id: parseInt(campaignId),
+      platform: existingPost.platform,
+      caption: existingPost.caption,
+      media_asset: existingPost.media_asset.map((a) => a.file_url),
+      scheduled_time: existingPost.scheduled_time,
+      is_draft: existingPost.is_draft,
+    };
+
+    setFormData(prefilled);
+    onFormChange(prefilled);
+  }, [existingPost, campaignId, onFormChange]);
 
   const updateForm = (updates: Partial<typeof formData>) => {
     const next = { ...formData, ...updates };
@@ -111,7 +131,7 @@ export default function NewPostForm({
       });
 
       const urls = await Promise.all(uploadPromises);
-      updateForm({ photo_urls: [...formData.photo_urls, ...urls] });
+      updateForm({ media_asset: [...formData.media_asset, ...urls] });
     } catch (err) {
       setError("Failed to upload images: " + (err as Error).message);
     } finally {
@@ -128,6 +148,7 @@ export default function NewPostForm({
           id="title"
           name="title"
           onChange={(e) => updateForm({ title: e.target.value })}
+          value={formData.title}
           required
         />
         <label htmlFor="platform">Platform:</label>
@@ -137,6 +158,7 @@ export default function NewPostForm({
             id="instagram"
             name="platform"
             value="instagram"
+            checked={formData.platform.includes("instagram")}
             onChange={handlePlatformChange}
           />
           <label htmlFor="instagram">Instagram</label>
@@ -147,6 +169,7 @@ export default function NewPostForm({
             id="linkedin"
             name="platform"
             value="linkedin"
+            checked={formData.platform.includes("linkedin")}
             onChange={handlePlatformChange}
           />
           <label htmlFor="linkedin">LinkedIn</label>
@@ -157,6 +180,7 @@ export default function NewPostForm({
             id="discord"
             name="platform"
             value="discord"
+            checked={formData.platform.includes("discord")}
             onChange={handlePlatformChange}
           />
           <label htmlFor="discord">Discord</label>
@@ -166,6 +190,7 @@ export default function NewPostForm({
           id="caption"
           name="caption"
           onChange={(e) => updateForm({ caption: e.target.value })}
+          value={formData.caption}
           required
         ></textarea>
 
@@ -176,6 +201,7 @@ export default function NewPostForm({
           min={new Date().toISOString().slice(0, 16)}
           name="scheduled_time"
           onChange={(e) => updateForm({ scheduled_time: e.target.value })}
+          value={formData.scheduled_time}
           required
         />
         <label htmlFor="image">Image:</label>
@@ -189,8 +215,8 @@ export default function NewPostForm({
           onChange={handleImageUpload}
         />
         {uploading && <p>Uploading images…</p>}
-        {formData.photo_urls.length > 0 && (
-          <p>{formData.photo_urls.length} image(s) uploaded ✓</p>
+        {formData.media_asset.length > 0 && (
+          <p>{formData.media_asset.length} image(s) uploaded ✓</p>
         )}
         <div style={{ display: "flex", gap: "8px" }}>
           <Button

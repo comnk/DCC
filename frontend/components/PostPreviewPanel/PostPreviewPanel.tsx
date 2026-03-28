@@ -27,7 +27,7 @@ export default function PostPreviewPanel({ data }: Props) {
 
   const hasData =
     (data?.caption ?? "") !== "" ||
-    (data?.photo_urls ?? []).length > 0 ||
+    (data?.media_asset ?? []).length > 0 ||
     (data?.scheduled_time ?? "") !== "";
 
   return (

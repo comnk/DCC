@@ -31,9 +31,14 @@ export default function Navbar() {
         {!loading && (
           <>
             {user ? (
-              <li>
-                <Link href="/profile">Profile</Link>
-              </li>
+              <>
+                <li>
+                  <Link href="/profile">Profile</Link>
+                </li>
+                <li>
+                  <Link href="/posts">Posts</Link>
+                </li>
+              </>
             ) : (
               <li>
                 <Link href="/login">Login</Link>

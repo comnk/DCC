@@ -10,7 +10,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 
 export default function LinkedInPreview({ data }: { data: PostPreviewData }) {
-  const hasImages = data.photo_urls && data.photo_urls.length > 0;
+  const hasImages = data.media_asset && data.media_asset.length > 0;
 
   return (
     <div className="liCard">
@@ -38,17 +38,18 @@ export default function LinkedInPreview({ data }: { data: PostPreviewData }) {
           <Swiper
             modules={[Pagination, Navigation]}
             pagination={{ clickable: true }}
-            navigation={data.photo_urls!.length > 1}
+            navigation={data.media_asset!.length > 1}
             slidesPerView={1}
             className="liSwiper"
           >
-            {data.photo_urls!.map((url, index) => (
+            {data.media_asset!.map((url, index) => (
               <SwiperSlide key={index}>
                 <div className="liSlide">
                   <Image
                     src={url}
                     alt={`Post image ${index + 1}`}
                     fill
+                    loading="eager"
                     sizes={
                       "(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
                     }

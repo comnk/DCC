@@ -1,46 +1,66 @@
+"use client";
+
 import Navbar from "@/components/Navbar/Navbar";
-import { createClient } from "@/lib/supabase/server";
-import { Params } from "@/types/Params";
-import { Button } from "@mui/material";
+import { createClient } from "@/lib/supabase/client";
+import { Post } from "@/types/Post";
+import { Button, CircularProgress } from "@mui/material";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export default async function PostPage({ params }: { params: Params }) {
-  const { id } = await params;
+export default function PostPage() {
+  const { id, postId } = useParams<{ id: string; postId: string }>();
+  const router = useRouter();
+  const [postData, setPostData] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  useEffect(() => {
+    const fetchPost = async () => {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-  if (!session) {
-    redirect("/login");
-  }
+      if (!session) {
+        router.push("/login");
+        return;
+      }
 
-  const token = session.access_token;
+      const res = await fetch(`http://localhost:8000/posts/${postId}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
 
-  const res = await fetch(`http://localhost:8000/posts/${id}`, {
-    cache: "no-store",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+      if (!res.ok) {
+        router.push(`/campaign/${id}/posts`);
+        return;
+      }
 
-  const postData = await res.json();
+      const data = await res.json();
+      setPostData(data);
+      setLoading(false);
+    };
+
+    fetchPost();
+  }, [postId, router, id]);
+
+  if (loading) return <CircularProgress />;
 
   return (
     <div>
       <Navbar />
       <h2>Post Details</h2>
-      <Button variant="contained" color="primary">
-        <Link href={`/campaign/${id}/posts/${postData.id}/update`}>
-          Update Post
-        </Link>
+      <Button
+        variant="contained"
+        color="primary"
+        component={Link}
+        href={`/campaign/${id}/posts/${postData?.id}/update`}
+      >
+        Update Post
       </Button>
       <div>
-        <p>{postData.title}</p>
-        <p>{postData.caption}</p>
-        <p>{postData.scheduled_time}</p>
+        <p>{postData?.title}</p>
+        <p>{postData?.caption}</p>
+        <p>{postData?.scheduled_time}</p>
       </div>
     </div>
   );

@@ -21,14 +21,14 @@ export default function InstagramPreview({ data }: { data: PostPreviewData }) {
       </div>
 
       <div className="igImageWrap">
-        {data.photo_urls && data.photo_urls.length > 0 ? (
+        {data.media_asset && data.media_asset.length > 0 ? (
           <Swiper
             spaceBetween={50}
             slidesPerView={1}
             onSlideChange={() => console.log("slide change")}
             onSwiper={(swiper) => console.log(swiper)}
           >
-            {data.photo_urls.map((url, index) => (
+            {data.media_asset.map((url, index) => (
               <SwiperSlide key={index}>
                 <div
                   style={{
@@ -41,6 +41,7 @@ export default function InstagramPreview({ data }: { data: PostPreviewData }) {
                     src={url}
                     alt={`Post image ${index + 1}`}
                     fill
+                    loading="eager"
                     sizes={
                       "(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
                     }

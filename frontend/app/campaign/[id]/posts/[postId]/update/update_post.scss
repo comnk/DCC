@@ -1,0 +1,29 @@
+.updatePostPage {
+  min-height: 100vh;
+  background-color: #f9fafb;
+
+  .updatePostTitle {
+    padding: 1rem 2rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .updatePostLayout {
+    display: flex;
+    gap: 2rem;
+    padding: 1.5rem 2rem 2rem;
+    align-items: flex-start;
+
+    .formSection {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .previewSection {
+      flex: 1;
+      min-width: 0;
+      position: sticky;
+      top: 1.5rem;
+    }
+  }
+}
