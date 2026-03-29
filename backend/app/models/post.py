@@ -8,5 +8,5 @@ class Post(BaseModel):
     title: str
     caption: str
     scheduled_time: Optional[datetime] = None
-    photo_urls: list[str] = []
+    media_asset: list[str] = []
     is_draft: bool = False

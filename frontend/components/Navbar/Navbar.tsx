@@ -13,7 +13,7 @@ import Button from "../buttons/Button/Button";
 const supabase = createClient();
 
 export default function Navbar() {
-  const { user, loading } = useRequireAuth();
+  const { user, loading } = useRequireAuth({ requireAuth: false });
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.location.href = "/";

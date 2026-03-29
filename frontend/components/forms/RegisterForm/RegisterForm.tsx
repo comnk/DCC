@@ -51,7 +51,7 @@ export default function RegisterForm() {
     if (error) {
       setError(error.message);
     } else {
-      router.push("/login");
+      router.push("/onboarding");
     }
   };
 

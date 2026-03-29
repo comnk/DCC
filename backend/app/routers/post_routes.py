@@ -18,7 +18,7 @@ def create_post(post: Post, authorization: str = Header(...)):
     supabase = create_supabase_client_with_token(token)
     
     post_data = post.model_dump(mode="json")
-    photo_urls = post_data.pop("photo_urls", [])
+    photo_urls = post_data.pop("media_asset", [])
     
     response = supabase.table("posts").insert({**post_data, "author_id": author_id}).execute()
 
@@ -62,10 +62,30 @@ def get_post(post_id: int, authorization: str = Header(...)):
     supabase = create_supabase_client_with_token(token)
     response = supabase.table("posts").select("*, media_asset(*)").eq("id", post_id).execute()
 
+    files = supabase.storage.from_("post-images").list("posts")
+    print(f"DEBUG files in posts/: {files}")
+    
     if not response.data:
         raise HTTPException(status_code=404, detail="Post not found")
 
-    return response.data[0]
+    post = response.data[0]
+
+    for asset in post.get("media_asset", []):
+        stored_url = asset.get("file_url", "")
+        if "/object/sign/post-images/" in stored_url:
+            path = stored_url.split("/object/sign/post-images/")[1].split("?")[0]
+        elif "/object/public/post-images/" in stored_url:
+            path = stored_url.split("/object/public/post-images/")[1]
+        else:
+            continue
+
+        try:
+            signed = supabase.storage.from_("post-images").create_signed_url(path, 3600)
+            asset["file_url"] = signed["signedURL"]
+        except Exception as e:
+            print(f"Failed to re-sign URL for path '{path}': {e}")
+
+    return post
 
 @router.put("/{post_id}")
 def update_post(post_id: int, post: Post, authorization: str = Header(...)):

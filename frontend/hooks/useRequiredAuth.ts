@@ -5,7 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export function useRequireAuth() {
+export function useRequireAuth({ requireAuth = true } = {}) {
     const [user, setUser] = useState<User | null>(null);
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -14,11 +14,11 @@ export function useRequireAuth() {
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
-            if (!session) {
-            router.push("/login");
+            if (!session && requireAuth) {
+                router.push("/login");
             } else {
-            setUser(session.user);
-            setAccessToken(session.access_token);
+                setUser(session?.user ?? null);
+                setAccessToken(session?.access_token ?? null);
             }
             setLoading(false);
         });

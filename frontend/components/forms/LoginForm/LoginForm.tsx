@@ -22,13 +22,24 @@ export default function LoginForm() {
 
     const supabase = createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
       setError(error.message);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("display_name")
+      .eq("id", data.user.id)
+      .single();
+
+    if (!profile?.display_name) {
+      window.location.href = "/onboarding";
     } else {
       window.location.href = "/dashboard";
     }
