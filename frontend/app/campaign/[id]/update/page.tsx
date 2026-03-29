@@ -1,39 +1,61 @@
-import UpdateCampaignForm from "@/components/forms/UpdateCampaignForm/UpdateCampaignForm";
+"use client";
+
+import CampaignForm from "@/components/forms/CampaignForm/CampaignForm";
 import Navbar from "@/components/Navbar/Navbar";
-import { createClient } from "@/lib/supabase/server";
-import { Params } from "@/types/Params";
-import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { Campaign } from "@/types/Campaign";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export default async function UpdateCampaignPage({
-  params,
-}: {
-  params: Params;
-}) {
-  const { id } = await params;
+export default function UpdateCampaignPage() {
+  const { id: campaignId } = useParams<{
+    id: string;
+    postId: string;
+  }>();
+  const router = useRouter();
+  const [campaign, setCampaign] = useState<Campaign>();
 
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  useEffect(() => {
+    if (!campaignId) return;
 
-  if (!session) {
-    redirect("/login");
-  }
+    const id = Array.isArray(campaignId) ? campaignId[0] : campaignId;
 
-  const token = session.access_token;
+    const fetchCampaignData = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getSession();
 
-  const res = await fetch(`http://localhost:8000/campaigns/${id}`, {
-    method: "GET",
-    cache: "no-store",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const campaign = await res.json();
+      if (!data.session) {
+        router.push("/login");
+        return;
+      }
+
+      const res = await fetch(`http://localhost:8000/campaigns/${id}`, {
+        headers: {
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+      });
+
+      if (!res.ok) {
+        router.push("/dashboard");
+        return;
+      }
+
+      const campaign = await res.json();
+      setCampaign(campaign);
+    };
+
+    fetchCampaignData();
+  }, [campaignId]);
 
   return (
     <div>
       <Navbar />
       <h2>Update Campaign</h2>
-      <UpdateCampaignForm campaignId={id} campaignData={campaign} />
+      <CampaignForm
+        key={campaign?.id}
+        campaignId={campaignId}
+        campaignData={campaign}
+      />
     </div>
   );
 }

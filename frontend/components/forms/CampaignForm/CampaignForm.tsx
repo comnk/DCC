@@ -1,19 +1,26 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { Campaign } from "@/types/Campaign";
 import { Button } from "@mui/material";
 import { useState } from "react";
 
-export default function CampaignForm() {
+export default function CampaignForm({
+  campaignId,
+  campaignData,
+}: {
+  campaignId?: string;
+  campaignData?: Campaign;
+}) {
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    start_date: "",
-    end_date: "",
+    name: campaignData?.name ?? "",
+    description: campaignData?.description ?? "",
+    start_date: campaignData?.start_date?.split("T")[0] ?? "",
+    end_date: campaignData?.end_date?.split("T")[0] ?? "",
   });
 
-  const handleCreateCampaign = async (e: React.BaseSyntheticEvent) => {
+  const handleSubmit = async (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
     setError("");
 
@@ -21,7 +28,7 @@ export default function CampaignForm() {
     const { data } = await supabase.auth.getSession();
 
     if (!data.session) {
-      setError("You must be logged in to create a campaign");
+      setError("You must be logged in");
       return;
     }
 
@@ -30,8 +37,14 @@ export default function CampaignForm() {
       return;
     }
 
-    const res = await fetch(`http://localhost:8000/campaigns/create`, {
-      method: "POST",
+    const isUpdate = !!campaignId;
+    const url = isUpdate
+      ? `http://localhost:8000/campaigns/${campaignId}`
+      : `http://localhost:8000/campaigns/create`;
+    const method = isUpdate ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${data.session.access_token}`,
@@ -43,29 +56,35 @@ export default function CampaignForm() {
       const errorData = await res.json();
       setError(errorData.detail ?? "Something went wrong");
     } else {
-      window.location.href = "/dashboard";
+      window.location.href = isUpdate
+        ? `/campaigns/${campaignId}`
+        : "/dashboard";
     }
   };
 
+  const isUpdate = !!campaignId;
+
   return (
     <div>
-      <form onSubmit={handleCreateCampaign}>
+      <form onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Campaign Name"
+          value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           required
         />
         <textarea
           placeholder="Campaign Description"
+          value={formData.description}
           onChange={(e) =>
             setFormData({ ...formData, description: e.target.value })
           }
           required
-        ></textarea>
+        />
         <input
           type="date"
-          placeholder="Campaign Start Date"
+          value={formData.start_date}
           min={new Date().toISOString().split("T")[0]}
           onChange={(e) =>
             setFormData({ ...formData, start_date: e.target.value })
@@ -74,7 +93,7 @@ export default function CampaignForm() {
         />
         <input
           type="date"
-          placeholder="Campaign End Date"
+          value={formData.end_date}
           min={new Date().toISOString().split("T")[0]}
           onChange={(e) =>
             setFormData({ ...formData, end_date: e.target.value })
@@ -83,7 +102,7 @@ export default function CampaignForm() {
         />
 
         <Button variant="contained" color="primary" type="submit">
-          Create Campaign
+          {isUpdate ? "Update Campaign" : "Create Campaign"}
         </Button>
       </form>
       {error && <p className="error">{error}</p>}

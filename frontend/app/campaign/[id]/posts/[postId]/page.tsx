@@ -1,8 +1,11 @@
 "use client";
 
 import Navbar from "@/components/Navbar/Navbar";
+import PostPreviewPanel from "@/components/PostPreviewPanel/PostPreviewPanel";
 import { createClient } from "@/lib/supabase/client";
+import { MediaAsset } from "@/types/MediaAsset";
 import { Post } from "@/types/Post";
+import { PostPreviewData } from "@/types/PostPreviewData";
 import { Button, CircularProgress } from "@mui/material";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -11,8 +14,15 @@ import { useEffect, useState } from "react";
 export default function PostPage() {
   const { id, postId } = useParams<{ id: string; postId: string }>();
   const router = useRouter();
-  const [postData, setPostData] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+  const [postData, setPostData] = useState<Post | null>(null);
+  const [previewData, setPreviewData] = useState<PostPreviewData>({
+    title: "",
+    platform: [],
+    caption: "",
+    media_asset: [],
+    scheduled_time: "",
+  });
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -37,6 +47,13 @@ export default function PostPage() {
 
       const data = await res.json();
       setPostData(data);
+      setPreviewData({
+        title: data.title,
+        platform: data.platform,
+        caption: data.caption,
+        media_asset: data.media_asset.map((a: MediaAsset) => a.file_url),
+        scheduled_time: data.scheduled_time,
+      });
       setLoading(false);
     };
 
@@ -61,6 +78,8 @@ export default function PostPage() {
         <p>{postData?.title}</p>
         <p>{postData?.caption}</p>
         <p>{postData?.scheduled_time}</p>
+        <p>{postData?.platform.join(", ")}</p>
+        <PostPreviewPanel data={previewData} />
       </div>
     </div>
   );

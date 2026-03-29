@@ -49,7 +49,6 @@ export default function UpdatePostPage() {
       }
 
       const data = await res.json();
-      console.log(data);
       setPostData(data);
       setPreviewData({
         title: data.title,

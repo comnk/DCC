@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { Campaign } from "@/types/Campaign";
 import { Post } from "@/types/Post";
 import { PostPreviewData } from "@/types/PostPreviewData";
 import { Button } from "@mui/material";
@@ -17,6 +18,7 @@ export default function PostForm({
 }) {
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [campaign, setCampaign] = useState<Campaign>();
   const [formData, setFormData] = useState({
     title: "",
     campaign_id: parseInt(campaignId),
@@ -26,6 +28,22 @@ export default function PostForm({
     scheduled_time: "",
     is_draft: false,
   });
+
+  useEffect(() => {
+    const fetchCampaign = async () => {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+
+      const res = await fetch(`http://localhost:8000/campaigns/${campaignId}`, {
+        headers: { Authorization: `Bearer ${data.session.access_token}` },
+      });
+
+      if (res.ok) setCampaign(await res.json());
+    };
+
+    fetchCampaign();
+  }, [campaignId]);
 
   useEffect(() => {
     if (!existingPost) return;
@@ -68,6 +86,24 @@ export default function PostForm({
     if (!isDraft && !formData.scheduled_time) {
       setError("Please set a scheduled time");
       return;
+    }
+
+    if (formData.scheduled_time) {
+      if (!campaign) {
+        setError("Campaign data not loaded yet, please try again");
+        return;
+      }
+
+      const scheduled = new Date(formData.scheduled_time);
+      const start = new Date(campaign.start_date);
+      const end = new Date(campaign.end_date);
+
+      if (scheduled < start || scheduled > end) {
+        setError(
+          `Scheduled time must be between ${start.toLocaleDateString()} and ${end.toLocaleDateString()}`,
+        );
+        return;
+      }
     }
 
     const res = await fetch(`http://localhost:8000/posts/create`, {
@@ -198,7 +234,23 @@ export default function PostForm({
         <input
           type="datetime-local"
           id="scheduled_time"
-          min={new Date().toISOString().slice(0, 16)}
+          min={
+            campaign
+              ? new Date(
+                  Math.max(
+                    new Date(campaign.start_date).getTime(),
+                    new Date().getTime(),
+                  ),
+                )
+                  .toISOString()
+                  .slice(0, 16)
+              : new Date().toISOString().slice(0, 16)
+          }
+          max={
+            campaign
+              ? new Date(campaign.end_date).toISOString().slice(0, 16)
+              : undefined
+          }
           name="scheduled_time"
           onChange={(e) => updateForm({ scheduled_time: e.target.value })}
           value={formData.scheduled_time}
