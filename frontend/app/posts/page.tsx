@@ -32,6 +32,10 @@ export default function PostsPage() {
     fetchPosts();
   }, [accessToken]);
 
+  const filteredPosts = posts.filter((post: Post) =>
+    tab === "posted" ? !post.is_draft : post.is_draft
+  );
+
   if (loading) return <CircularProgress />;
 
   return (
@@ -57,7 +61,7 @@ export default function PostsPage() {
           <CircularProgress />
         ) : (
           <ul>
-            {posts.map((post: Post) => (
+            {filteredPosts.map((post: Post) => (
               <PostCard key={post.id} postData={post} />
             ))}
           </ul>

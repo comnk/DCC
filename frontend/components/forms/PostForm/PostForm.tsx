@@ -1,7 +1,7 @@
 "use client";
 
+import { useCampaign } from "@/hooks/useCampaign";
 import { createClient } from "@/lib/supabase/client";
-import { Campaign } from "@/types/Campaign";
 import { Post } from "@/types/Post";
 import { PostPreviewData } from "@/types/PostPreviewData";
 import { Button } from "@mui/material";
@@ -18,7 +18,7 @@ export default function PostForm({
 }) {
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [campaign, setCampaign] = useState<Campaign>();
+  const campaign = useCampaign(campaignId);
   const [formData, setFormData] = useState({
     title: "",
     campaign_id: parseInt(campaignId),
@@ -28,22 +28,6 @@ export default function PostForm({
     scheduled_time: "",
     is_draft: false,
   });
-
-  useEffect(() => {
-    const fetchCampaign = async () => {
-      const supabase = createClient();
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) return;
-
-      const res = await fetch(`http://localhost:8000/campaigns/${campaignId}`, {
-        headers: { Authorization: `Bearer ${data.session.access_token}` },
-      });
-
-      if (res.ok) setCampaign(await res.json());
-    };
-
-    fetchCampaign();
-  }, [campaignId]);
 
   useEffect(() => {
     if (!existingPost) return;
@@ -106,13 +90,15 @@ export default function PostForm({
       }
     }
 
+    const payload = { ...formData, is_draft: isDraft };
+
     const res = await fetch(`http://localhost:8000/posts/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${data.session.access_token}`,
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -177,7 +163,7 @@ export default function PostForm({
 
   return (
     <div>
-      <form onSubmit={(e) => handleSubmit(e, false)}>
+      <form>
         <label htmlFor="title">Title:</label>
         <input
           type="text"
@@ -254,7 +240,6 @@ export default function PostForm({
           name="scheduled_time"
           onChange={(e) => updateForm({ scheduled_time: e.target.value })}
           value={formData.scheduled_time}
-          required
         />
         <label htmlFor="image">Image:</label>
         <input
@@ -272,6 +257,7 @@ export default function PostForm({
         )}
         <div style={{ display: "flex", gap: "8px" }}>
           <Button
+            type="button"
             variant="outlined"
             color="secondary"
             onClick={(e) => handleSubmit(e, true)}
@@ -279,6 +265,7 @@ export default function PostForm({
             Save as Draft
           </Button>
           <Button
+            type="button"
             variant="contained"
             color="primary"
             onClick={(e) => handleSubmit(e, false)}

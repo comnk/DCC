@@ -38,6 +38,9 @@ export default function Navbar() {
                 <li>
                   <Link href="/posts">Posts</Link>
                 </li>
+                <li>
+                  <Link href="/campaign">Campaigns</Link>
+                </li>
               </>
             ) : (
               <li>
