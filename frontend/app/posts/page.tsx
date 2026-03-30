@@ -4,8 +4,7 @@ import PostCard from "@/components/cards/PostCard/PostCard";
 import Navbar from "@/components/Navbar/Navbar";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
 import { Post } from "@/types/Post";
-import { CircularProgress, Button as MUIButton, Chip } from "@mui/material";
-import { EditNote, Schedule, CheckCircle } from "@mui/icons-material";
+import { CircularProgress, Button as MUIButton } from "@mui/material";
 import { useEffect, useState } from "react";
 
 type Tab = "published" | "scheduled" | "draft";
@@ -46,8 +45,6 @@ export default function PostsPage() {
     (post: Post) => getPostStatus(post) === tab,
   );
 
-  if (loading) return <CircularProgress />;
-
   const tabs: { label: string; value: Tab }[] = [
     { label: "Published", value: "published" },
     { label: "Scheduled", value: "scheduled" },
@@ -69,60 +66,17 @@ export default function PostsPage() {
           </MUIButton>
         ))}
       </div>
-      {postsLoading ? (
+      {loading || postsLoading ? (
         <CircularProgress />
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
           {filteredPosts.map((post: Post) => (
             <li key={post.id}>
-              <PostStatusBadge post={post} />
               <PostCard postData={post} />
             </li>
           ))}
         </ul>
       )}
     </div>
-  );
-}
-
-function PostStatusBadge({ post }: { post: Post }) {
-  const status = getPostStatus(post);
-
-  if (status === "draft") {
-    return (
-      <Chip
-        icon={<EditNote fontSize="small" />}
-        label="Draft"
-        size="small"
-        color="default"
-        variant="outlined"
-      />
-    );
-  }
-
-  if (status === "scheduled") {
-    return (
-      <Chip
-        icon={<Schedule fontSize="small" />}
-        label={`Scheduled · ${new Date(post.scheduled_time!).toLocaleDateString()}`}
-        size="small"
-        color="warning"
-        variant="outlined"
-      />
-    );
-  }
-
-  return (
-    <Chip
-      icon={<CheckCircle fontSize="small" />}
-      label={
-        post.scheduled_time
-          ? `Published · ${new Date(post.scheduled_time).toLocaleDateString()}`
-          : "Published"
-      }
-      size="small"
-      color="success"
-      variant="outlined"
-    />
   );
 }

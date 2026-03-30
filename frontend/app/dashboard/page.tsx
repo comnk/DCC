@@ -6,19 +6,16 @@ import { useRequireAuth } from "@/hooks/useRequiredAuth";
 import { Campaign } from "@/types/Campaign";
 import { useEffect, useState } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Button as MUIButton } from "@mui/material";
-import Button from "@/components/buttons/Button/Button";
+import { Post } from "@/types/Post";
+import PostCard from "@/components/cards/PostCard/PostCard";
 
 export default function DashboardPage() {
   const { user, accessToken, loading } = useRequireAuth();
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
-  const [tab, setTab] = useState<"active" | "archived">("active");
-
-  const filteredCampaigns = campaigns.filter((c) =>
-    tab === "active" ? !c.is_archived : c.is_archived,
-  );
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [postsLoading, setPostsLoading] = useState(true);
 
   useEffect(() => {
     if (!accessToken) return;
@@ -36,39 +33,61 @@ export default function DashboardPage() {
       setCampaignsLoading(false);
     };
 
+    const fetchPosts = async () => {
+      const res = await fetch(`http://localhost:8000/posts/all`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const data = await res.json();
+      setPosts(data);
+      setPostsLoading(false);
+    };
+
     fetchCampaigns();
+    fetchPosts();
   }, [accessToken]);
 
-  if (loading) return <CircularProgress />;
+  const filteredCampaigns = campaigns.filter(
+    (c) => !c.is_archived && c.end_date > new Date().toISOString(),
+  );
+
+  const filteredPosts = posts.filter(
+    (p) =>
+      !p.is_draft &&
+      p.scheduled_time &&
+      new Date(p.scheduled_time) > new Date(),
+  );
 
   return (
     <>
       <Navbar />
       <h2>Welcome back!</h2>
-      <Button text="Create Campaign" link="/campaign/new" />
       <div>
-        <h2>Campaigns</h2>
-        <div>
-          <MUIButton
-            variant={tab === "active" ? "contained" : "outlined"}
-            onClick={() => setTab("active")}
-          >
-            Active
-          </MUIButton>
-          <MUIButton
-            variant={tab === "archived" ? "contained" : "outlined"}
-            onClick={() => setTab("archived")}
-          >
-            Archived
-          </MUIButton>
-        </div>
+        <h2>Current Campaigns</h2>
         <ul>
-          {campaignsLoading ? (
+          {loading || campaignsLoading ? (
             <CircularProgress />
           ) : (
             <ul>
               {filteredCampaigns.map((campaign) => (
                 <CampaignCard key={campaign.id} campaignData={campaign} />
+              ))}
+            </ul>
+          )}
+        </ul>
+      </div>
+      <div>
+        <h2>Upcoming Posts</h2>
+        <ul>
+          {loading || postsLoading ? (
+            <CircularProgress />
+          ) : (
+            <ul>
+              {filteredPosts.map((post) => (
+                <PostCard key={post.id} postData={post} />
               ))}
             </ul>
           )}

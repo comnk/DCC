@@ -1,0 +1,89 @@
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 56px 32px 80px;
+ 
+  @media (max-width: 768px) {
+    padding: 40px 20px 60px;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  gap: 20px;
+ 
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.loadingWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f7f6f3;
+}
+
+.tabBar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #ffffff;
+  border: 1.5px solid #e5e3de;
+  border-radius: 6px;
+  padding: 4px;
+  width: fit-content;
+  margin-bottom: 40px;
+}
+
+.campaignList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+ 
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+  border: 1.5px dashed #e5e3de;
+  border-radius: 20px;
+  background: #ffffff;
+}
+ 
+.emptyIcon {
+  font-size: 40px;
+  margin-bottom: 16px;
+  opacity: 0.35;
+}
+ 
+.emptyTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333333;
+  margin: 0 0 8px;
+}
+ 
+.emptySubtitle {
+  font-size: 14px;
+  color: #666666;
+  margin: 0;
+  max-width: 280px;
+  line-height: 1.6;
+}
