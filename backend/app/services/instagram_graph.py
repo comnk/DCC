@@ -15,11 +15,11 @@ HEADERS = {
     "Authorization": f"Bearer {ACCESS_TOKEN}"
 }
 
-def create_photo_container(photo_url):
+def create_photo_container(photo_url, caption="Test photo upload via Instagram Graph API"):
     url = f"{BASE_URL}/{ACCOUNT_ID}/media"
     payload = {
         "image_url": photo_url,
-        "caption": "Test photo upload via Instagram Graph API"
+        "caption": caption
     }
     response = requests.post(url, json=payload, headers=HEADERS)
     data = response.json()
@@ -33,9 +33,21 @@ def create_photo_container(photo_url):
 
 def create_carousel_container(media_urls):
     url = f"{BASE_URL}/{ACCOUNT_ID}/media"
+    children = []
+    
+    if (len(media_urls) < 2 or len(media_urls) > 10):
+        print("Carousel must have between 2 and 10 media items.")
+        return None
+    
+    for media_url in media_urls:
+        if (media_url.endswith(".mp4") or media_url.endswith(".mov")):
+            children.append({"video_url": media_url})
+        else:
+            children.append({"image_url": media_url})
+    
     payload = {
         "media_type": "CAROUSEL",
-        "children": [{"image_url": url} for url in media_urls],
+        "children": children,
         "caption": "Test carousel upload via Instagram Graph API"
     }
     response = requests.post(url, json=payload, headers=HEADERS)
@@ -48,11 +60,11 @@ def create_carousel_container(media_urls):
         print(f"Error creating carousel container: {data}")
         return None
 
-def create_video_container():
+def create_video_container(media_url="https://res.cloudinary.com/dlzor5lap/video/upload/v1758201802/b4xfa8yel6chwqx7ou6j.mp4", caption="Test video upload via Instagram Graph API"):
     url = f"{BASE_URL}/{ACCOUNT_ID}/media"
     payload = {
-        "video_url": "https://res.cloudinary.com/dlzor5lap/video/upload/v1758201802/b4xfa8yel6chwqx7ou6j.mp4",
-        "caption": "Test video upload via Instagram Graph API",
+        "video_url": media_url,
+        "caption": caption,
         "media_type": "VIDEO"
     }
     response = requests.post(url, json=payload, headers=HEADERS)
@@ -65,10 +77,11 @@ def create_video_container():
         print(f"Error creating video container: {data}")
         return None
 
-def create_reels_container():
+def create_reels_container(video_url="https://res.cloudinary.com/dlzor5lap/video/upload/v1758201802/b4xfa8yel6chwqx7ou6j.mp4", caption="Test reels upload via Instagram Graph API"):
     url = f"{BASE_URL}/{ACCOUNT_ID}/media"
     payload = {
-        "video_url": "https://res.cloudinary.com/dlzor5lap/video/upload/v1758201802/b4xfa8yel6chwqx7ou6j.mp4",
+        "video_url": video_url,
+        "caption": caption,
         "media_type": "REELS"
     }
     response = requests.post(url, json=payload, headers=HEADERS)
@@ -81,17 +94,19 @@ def create_reels_container():
         print(f"Error creating container: {data}")
         return None
 
-def create_stories_container(url, media_type="IMAGE"):
+def create_stories_container(media_url, media_type="IMAGE", user_tags=None):
     url = f"{BASE_URL}/{ACCOUNT_ID}/media"
     
-    if (media_type == "VIDEO"):
+    if media_type == "VIDEO":
         payload = {
-            "video_url": url,
+            "video_url": media_url,
+            "user_tags": user_tags,
             "media_type": "STORIES"
         }
     else:
         payload = {
-            "image_url": url,
+            "image_url": media_url,
+            "user_tags": user_tags,
             "media_type": "STORIES"
         }
         

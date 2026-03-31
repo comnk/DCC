@@ -42,41 +42,101 @@ def refresh_access_token():
     print("🔄 Token refreshed automatically.")
     return new_token
 
-
-def post_to_linkedin(post_text):
-    access_token = os.getenv("LINKEDIN_ACCESS_TOKEN")
-
-    api_url = "https://api.linkedin.com/v2/ugcPosts"
+def upload_image_to_linkedin(image_url, access_token):
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json",
-        "X-Restli-Protocol-Version": "2.0.0"
+        "X-Restli-Protocol-Version": "2.0.0",
+        "LinkedIn-Version": "202602"
     }
-    post_data = {
-        "author": AUTHOR_URN,
-        "lifecycleState": "PUBLISHED",
-        "specificContent": {
-            "com.linkedin.ugc.ShareContent": {
-                "shareCommentary": {"text": post_text},
-                "shareMediaCategory": "NONE"
-            }
-        },
-        "visibility": {
-            "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
+
+    initialize_url = "https://api.linkedin.com/rest/images?action=initializeUpload"
+    initialize_payload = {
+        "initializeUploadRequest": {
+            "owner": AUTHOR_URN
         }
     }
 
-    response = requests.post(api_url, headers=headers, data=json.dumps(post_data))
+    initialize_response = requests.post(initialize_url, headers=headers, json=initialize_payload)
+    initialize_data = initialize_response.json()
+    print(f"Initialize response: {initialize_data}")
+
+    upload_url = initialize_data["value"]["uploadUrl"]
+    asset_urn = initialize_data["value"]["image"]
+
+    image_data = requests.get(image_url).content
+    put_response = requests.put(
+        upload_url,
+        data=image_data,
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/octet-stream"
+        }
+    )
+    print(f"Upload status: {put_response.status_code}")
+
+    print(f"Image uploaded! Asset URN: {asset_urn}")
+    return asset_urn
+    
+def post_to_linkedin(post_text, image_url=None):
+    access_token = os.getenv("LINKEDIN_ACCESS_TOKEN")
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "X-Restli-Protocol-Version": "2.0.0",
+        "LinkedIn-Version": "202602"
+    }
+
+    if image_url:
+        asset_urn = upload_image_to_linkedin(image_url, access_token)
+        post_data = {
+            "author": AUTHOR_URN,
+            "lifecycleState": "PUBLISHED",
+            "visibility": "PUBLIC",
+            "commentary": post_text,
+            "distribution": {
+                "feedDistribution": "MAIN_FEED",
+                "targetEntities": [],
+                "thirdPartyDistributionChannels": []
+            },
+            "content": {
+                "media": {
+                    "altText": "Image",
+                    "id": asset_urn
+                }
+            }
+        }
+    else:
+        post_data = {
+            "author": AUTHOR_URN,
+            "lifecycleState": "PUBLISHED",
+            "visibility": "PUBLIC",
+            "commentary": post_text,
+            "distribution": {
+                "feedDistribution": "MAIN_FEED",
+                "targetEntities": [],
+                "thirdPartyDistributionChannels": []
+            }
+        }
+
+    response = requests.post(
+        "https://api.linkedin.com/rest/posts",
+        headers=headers,
+        json=post_data
+    )
 
     if response.status_code == 401:
         print("Token expired, refreshing...")
         access_token = refresh_access_token()
         headers["Authorization"] = f"Bearer {access_token}"
-        response = requests.post(api_url, headers=headers, data=json.dumps(post_data))
+        response = requests.post("https://api.linkedin.com/rest/posts", headers=headers, json=post_data)
 
     if response.ok:
         print("✅ Post successful!")
     else:
         print(f"❌ Failed: {response.json()}")
 
-post_to_linkedin("Exciting news from our company! This is a test post for the gram #LinkedInAPI #Automation")
+test_text = "Exciting news from our company! This is a test post for the gram #LinkedInAPI #Automation"
+test_image_url = "https://image2url.com/r2/default/images/1774978157264-1a3f586a-f907-4560-afbb-dbf608f13ae7.jpg"
+post_to_linkedin(test_text, test_image_url)
