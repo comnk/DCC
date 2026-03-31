@@ -1,23 +1,16 @@
-from instabot import Bot
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+from instagrapi import Client
 
 load_dotenv()
 
-USERNAME = os.getenv("INSTAGRAM_USERNAME")
-PASSWORD = os.getenv("INSTAGRAM_PASSWORD")
+ACCOUNT_USERNAME = os.getenv("INSTAGRAM_USERNAME")
+ACCOUNT_PASSWORD = os.getenv("INSTAGRAM_PASSWORD")
 
-def start_instagram_bot():
-    bot = Bot()
-    bot.login(username=USERNAME, password=PASSWORD)
-    return bot
+cl = Client()
 
-def post_to_instagram(image_path: str, caption: str):
-    bot = start_instagram_bot()
-    bot.upload_photo(image_path, caption=caption)
-    bot.logout()
+cl.login(ACCOUNT_USERNAME, ACCOUNT_PASSWORD)
 
-def post_story_to_instagram(image_path: str, caption: str = ""):
-    bot = start_instagram_bot()
-    bot.upload_story_photo(image_path, caption=caption)
-    bot.logout()
+user_id = cl.user_id_from_username(ACCOUNT_USERNAME)
+medias = cl.user_medias(user_id, 20)
