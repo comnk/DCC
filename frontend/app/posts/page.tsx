@@ -1,5 +1,7 @@
 "use client";
 
+import "./posts_page.scss";
+
 import PostCard from "@/components/cards/PostCard/PostCard";
 import Navbar from "@/components/Navbar/Navbar";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
@@ -52,31 +54,42 @@ export default function PostsPage() {
   ];
 
   return (
-    <div>
+    <div className="posts-page">
       <Navbar />
-      <h2>All Posts</h2>
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        {tabs.map(({ label, value }) => (
-          <MUIButton
-            key={value}
-            variant={tab === value ? "contained" : "outlined"}
-            onClick={() => setTab(value)}
-          >
-            {label}
-          </MUIButton>
-        ))}
-      </div>
-      {loading || postsLoading ? (
-        <CircularProgress />
-      ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {filteredPosts.map((post: Post) => (
-            <li key={post.id}>
-              <PostCard postData={post} />
-            </li>
+      <div className="posts-page__content">
+        <h1 className="posts-page__title">All Posts</h1>
+
+        <div className="posts-page__tabs">
+          {tabs.map(({ label, value }) => (
+            <MUIButton
+              key={value}
+              variant={tab === value ? "contained" : "outlined"}
+              onClick={() => setTab(value)}
+              className={`posts-page__tab ${tab === value ? "posts-page__tab--active" : ""}`}
+            >
+              {label}
+            </MUIButton>
           ))}
-        </ul>
-      )}
+        </div>
+
+        {loading || postsLoading ? (
+          <div className="posts-page__loading">
+            <CircularProgress />
+          </div>
+        ) : filteredPosts.length === 0 ? (
+          <div className="posts-page__empty">
+            <p>No {tab} posts found.</p>
+          </div>
+        ) : (
+          <ul className="posts-page__list">
+            {filteredPosts.map((post: Post) => (
+              <li key={post.id}>
+                <PostCard postData={post} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

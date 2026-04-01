@@ -32,7 +32,7 @@ export default function PostPreviewPanel({ data }: Props) {
 
   return (
     <div>
-      <h2>Post Preview</h2>
+      <h2 className="preview-panel__title">Post Preview</h2>
       {platforms.length === 0 || !hasData ? (
         <div className="empty">
           <span className="emptyIcon">📋</span>

@@ -14,4 +14,5 @@ def create_supabase_client() -> Client:
 def create_supabase_client_with_token(token: str) -> Client:
     client = create_client(url, key)
     client.postgrest.auth(token)
+    client.storage._client.headers["Authorization"] = f"Bearer {token}"
     return client

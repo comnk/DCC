@@ -1,5 +1,7 @@
 "use client";
 
+import "./NewPostPageClient.scss";
+
 import { useState } from "react";
 import PostForm from "../forms/PostForm/PostForm";
 import PostPreviewPanel from "@/components/PostPreviewPanel/PostPreviewPanel";
@@ -19,9 +21,13 @@ export default function NewPostPageClient({
   });
 
   return (
-    <div>
-      <PostForm campaignId={campaignId} onFormChange={setPreviewData} />
-      <PostPreviewPanel data={previewData} />
+    <div className="new-post-layout">
+      <div className="new-post-layout__form">
+        <PostForm campaignId={campaignId} onFormChange={setPreviewData} />
+      </div>
+      <div className="new-post-layout__preview">
+        <PostPreviewPanel data={previewData} />
+      </div>
     </div>
   );
 }

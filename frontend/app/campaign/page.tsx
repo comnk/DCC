@@ -49,7 +49,7 @@ export default function CampaignsPage() {
     );
 
   return (
-    <div>
+    <div className="campaigns-page">
       <Navbar />
       <div className="content">
         <div className="header">

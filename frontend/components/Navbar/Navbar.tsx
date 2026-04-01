@@ -8,6 +8,7 @@ import MobileLogo from "./Logos/MobileLogo";
 import Link from "next/link";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
 import Dropdown from "../dropdown/Dropdown";
+import Button from "../buttons/Button/Button";
 
 export default function Navbar() {
   const { user, loading } = useRequireAuth({ requireAuth: false });
@@ -34,7 +35,7 @@ export default function Navbar() {
               </>
             ) : (
               <li>
-                <Link href="/login">Login</Link>
+                <Button text="Login" link="/login" />
               </li>
             )}
             {user && <Dropdown />}

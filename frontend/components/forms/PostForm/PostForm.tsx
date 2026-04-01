@@ -1,11 +1,13 @@
 "use client";
 
+import "./PostForm.scss";
+
 import { useCampaign } from "@/hooks/useCampaign";
 import { createClient } from "@/lib/supabase/client";
 import { Post } from "@/types/Post";
 import { PostPreviewData } from "@/types/PostPreviewData";
 import { Button } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function PostForm({
   campaignId,
@@ -18,6 +20,8 @@ export default function PostForm({
 }) {
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const previewUrlsRef = useRef<string[]>([]);
   const campaign = useCampaign(campaignId);
   const [formData, setFormData] = useState({
     title: "",
@@ -28,6 +32,10 @@ export default function PostForm({
     scheduled_time: "",
     is_draft: false,
   });
+
+  useEffect(() => {
+    previewUrlsRef.current = previewUrls;
+  }, [previewUrls]);
 
   useEffect(() => {
     if (!existingPost) return;
@@ -43,13 +51,23 @@ export default function PostForm({
     };
 
     setFormData(prefilled);
-    onFormChange(prefilled);
+    setPreviewUrls(existingPost.media_asset.map((a) => a.file_url));
+    onFormChange({
+      ...prefilled,
+      media_asset: existingPost.media_asset.map((a) => a.file_url),
+    });
   }, [existingPost, campaignId, onFormChange]);
 
-  const updateForm = (updates: Partial<typeof formData>) => {
+  const updateForm = (
+    updates: Partial<typeof formData>,
+    displayUrls?: string[],
+  ) => {
     const next = { ...formData, ...updates };
     setFormData(next);
-    onFormChange(next);
+    onFormChange({
+      ...next,
+      media_asset: displayUrls ?? previewUrlsRef.current,
+    });
   };
 
   const handleSubmit = async (
@@ -103,7 +121,6 @@ export default function PostForm({
 
     if (!res.ok) {
       const errorData = await res.json();
-
       if (Array.isArray(errorData.detail)) {
         setError(
           errorData.detail.map((e: { msg: string }) => e.msg).join(", "),
@@ -149,11 +166,20 @@ export default function PostForm({
 
         if (signedError) throw new Error(signedError.message);
 
-        return signedData.signedUrl;
+        return { path, previewUrl: signedData.signedUrl };
       });
 
-      const urls = await Promise.all(uploadPromises);
-      updateForm({ media_asset: [...formData.media_asset, ...urls] });
+      const results = await Promise.all(uploadPromises);
+      const newPaths = results.map((r) => r.path);
+      const newPreviews = results.map((r) => r.previewUrl);
+
+      const updatedPreviews = [...previewUrls, ...newPreviews];
+      setPreviewUrls(updatedPreviews);
+
+      updateForm(
+        { media_asset: [...formData.media_asset, ...newPaths] },
+        updatedPreviews,
+      );
     } catch (err) {
       setError("Failed to upload images: " + (err as Error).message);
     } finally {
@@ -162,119 +188,129 @@ export default function PostForm({
   };
 
   return (
-    <div>
-      <form>
-        <label htmlFor="title">Title:</label>
-        <input
-          type="text"
-          id="title"
-          name="title"
-          onChange={(e) => updateForm({ title: e.target.value })}
-          value={formData.title}
-          required
-        />
-        <label htmlFor="platform">Platform:</label>
-        <div>
+    <div className="post-form">
+      <form className="post-form__form">
+        <div className="post-form__field">
+          <label className="post-form__label" htmlFor="title">
+            Title
+          </label>
           <input
-            type="checkbox"
-            id="instagram"
-            name="platform"
-            value="instagram"
-            checked={formData.platform.includes("instagram")}
-            onChange={handlePlatformChange}
+            className="post-form__input"
+            type="text"
+            id="title"
+            name="title"
+            onChange={(e) => updateForm({ title: e.target.value })}
+            value={formData.title}
+            required
           />
-          <label htmlFor="instagram">Instagram</label>
         </div>
-        <div>
-          <input
-            type="checkbox"
-            id="linkedin"
-            name="platform"
-            value="linkedin"
-            checked={formData.platform.includes("linkedin")}
-            onChange={handlePlatformChange}
-          />
-          <label htmlFor="linkedin">LinkedIn</label>
-        </div>
-        <div>
-          <input
-            type="checkbox"
-            id="discord"
-            name="platform"
-            value="discord"
-            checked={formData.platform.includes("discord")}
-            onChange={handlePlatformChange}
-          />
-          <label htmlFor="discord">Discord</label>
-        </div>
-        <label htmlFor="caption">Caption:</label>
-        <textarea
-          id="caption"
-          name="caption"
-          onChange={(e) => updateForm({ caption: e.target.value })}
-          value={formData.caption}
-          required
-        ></textarea>
 
-        <label htmlFor="scheduled_time">Scheduled Time:</label>
-        <input
-          type="datetime-local"
-          id="scheduled_time"
-          min={
-            campaign
-              ? new Date(
-                  Math.max(
-                    new Date(campaign.start_date).getTime(),
-                    new Date().getTime(),
-                  ),
-                )
-                  .toISOString()
-                  .slice(0, 16)
-              : new Date().toISOString().slice(0, 16)
-          }
-          max={
-            campaign
-              ? new Date(campaign.end_date).toISOString().slice(0, 16)
-              : undefined
-          }
-          name="scheduled_time"
-          onChange={(e) => updateForm({ scheduled_time: e.target.value })}
-          value={formData.scheduled_time}
-        />
-        <label htmlFor="image">Image:</label>
-        <input
-          type="file"
-          id="image"
-          name="image"
-          accept="image/*"
-          multiple
-          disabled={uploading}
-          onChange={handleImageUpload}
-        />
-        {uploading && <p>Uploading images…</p>}
-        {formData.media_asset.length > 0 && (
-          <p>{formData.media_asset.length} image(s) uploaded ✓</p>
-        )}
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div className="post-form__field">
+          <label className="post-form__label">Platform</label>
+          <div className="post-form__checkboxes">
+            {["instagram", "linkedin", "discord"].map((platform) => (
+              <label key={platform} className="post-form__checkbox-label">
+                <input
+                  type="checkbox"
+                  name="platform"
+                  value={platform}
+                  checked={formData.platform.includes(platform)}
+                  onChange={handlePlatformChange}
+                />
+                {platform.charAt(0).toUpperCase() + platform.slice(1)}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="post-form__field">
+          <label className="post-form__label" htmlFor="caption">
+            Caption
+          </label>
+          <textarea
+            className="post-form__textarea"
+            id="caption"
+            name="caption"
+            onChange={(e) => updateForm({ caption: e.target.value })}
+            value={formData.caption}
+            required
+          />
+        </div>
+
+        <div className="post-form__field">
+          <label className="post-form__label" htmlFor="scheduled_time">
+            Scheduled Time
+          </label>
+          <input
+            className="post-form__input"
+            type="datetime-local"
+            id="scheduled_time"
+            name="scheduled_time"
+            min={
+              campaign
+                ? new Date(
+                    Math.max(
+                      new Date(campaign.start_date).getTime(),
+                      new Date().getTime(),
+                    ),
+                  )
+                    .toISOString()
+                    .slice(0, 16)
+                : new Date().toISOString().slice(0, 16)
+            }
+            max={
+              campaign
+                ? new Date(campaign.end_date).toISOString().slice(0, 16)
+                : undefined
+            }
+            onChange={(e) => updateForm({ scheduled_time: e.target.value })}
+            value={formData.scheduled_time}
+          />
+        </div>
+
+        <div className="post-form__field">
+          <label className="post-form__label" htmlFor="image">
+            Images
+          </label>
+          <label className="post-form__file-label" htmlFor="image">
+            {uploading
+              ? "Uploading…"
+              : formData.media_asset.length > 0
+                ? `${formData.media_asset.length} image(s) uploaded ✓`
+                : "Choose files"}
+          </label>
+          <input
+            className="post-form__file-input"
+            type="file"
+            id="image"
+            name="image"
+            accept="image/*"
+            multiple
+            disabled={uploading}
+            onChange={handleImageUpload}
+          />
+        </div>
+
+        <div className="post-form__actions">
           <Button
             type="button"
             variant="outlined"
-            color="secondary"
             onClick={(e) => handleSubmit(e, true)}
+            className="post-form__btn-draft"
           >
             Save as Draft
           </Button>
           <Button
             type="button"
             variant="contained"
-            color="primary"
             onClick={(e) => handleSubmit(e, false)}
+            className="post-form__btn-submit"
           >
             Create Post
           </Button>
         </div>
       </form>
-      {error && <p className="error">{error}</p>}
+      {error && <p className="post-form__error">{error}</p>}
     </div>
   );
 }

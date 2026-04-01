@@ -1,0 +1,84 @@
+.campaign-form {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 28px;
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #111;
+    background: #fff;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+
+    &:focus {
+      border-color: #111;
+    }
+  }
+
+  &__textarea {
+    @extend .campaign-form__input;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+  }
+
+  &__dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__submit {
+    align-self: flex-start;
+
+    &.MuiButton-root {
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 600;
+      font-size: 14px;
+      border-radius: 8px;
+      padding: 10px 24px;
+      background-color: #111;
+      box-shadow: none;
+
+      &:hover {
+        background-color: #333;
+        box-shadow: none;
+      }
+    }
+  }
+
+  &__error {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #dc2626;
+  }
+}

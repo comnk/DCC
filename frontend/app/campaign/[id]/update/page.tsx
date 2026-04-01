@@ -1,5 +1,7 @@
 "use client";
 
+import "./update_campaign.scss";
+
 import CampaignForm from "@/components/forms/CampaignForm/CampaignForm";
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/client";
@@ -48,14 +50,16 @@ export default function UpdateCampaignPage() {
   }, [campaignId]);
 
   return (
-    <div>
+    <div className="update-campaign-page">
       <Navbar />
-      <h2>Update Campaign</h2>
-      <CampaignForm
-        key={campaign?.id}
-        campaignId={campaignId}
-        campaignData={campaign}
-      />
+      <div className="update-campaign-page__content">
+        <h2 className="update-campaign-page__title">Update Campaign</h2>
+        <CampaignForm
+          key={campaign?.id}
+          campaignId={campaignId}
+          campaignData={campaign}
+        />
+      </div>
     </div>
   );
 }

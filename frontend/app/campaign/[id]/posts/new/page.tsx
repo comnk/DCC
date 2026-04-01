@@ -1,3 +1,5 @@
+import "./new_post_page.scss";
+
 import NewPostPageClient from "@/components/NewPostPageClient/NewPostPageClient";
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/server";
@@ -17,10 +19,12 @@ export default async function NewPostPage({ params }: { params: Params }) {
   }
 
   return (
-    <div>
+    <div className="new-post-page">
       <Navbar />
-      <h2>Create New Post</h2>
-      <NewPostPageClient campaignId={id} />
+      <div className="new-post-page__content">
+        <h1 className="new-post-page__title">Create New Post</h1>
+        <NewPostPageClient campaignId={id} />
+      </div>
     </div>
   );
 }

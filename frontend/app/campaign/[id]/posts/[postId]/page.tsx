@@ -47,11 +47,22 @@ export default function PostPage() {
 
       const data = await res.json();
       setPostData(data);
+
+      const signedUrls = await Promise.all(
+        data.media_asset.map(async (a: MediaAsset) => {
+          const { data: signed, error } = await supabase.storage
+            .from("post-images")
+            .createSignedUrl(a.file_url, 3600);
+          if (error) console.error("Failed to sign URL for", a.file_url, error);
+          return signed?.signedUrl ?? null;
+        }),
+      );
+
       setPreviewData({
         title: data.title,
         platform: data.platform,
         caption: data.caption,
-        media_asset: data.media_asset.map((a: MediaAsset) => a.file_url),
+        media_asset: signedUrls.filter(Boolean) as string[],
         scheduled_time: data.scheduled_time,
       });
       setLoading(false);

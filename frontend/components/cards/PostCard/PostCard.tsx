@@ -1,3 +1,7 @@
+"use client";
+
+import "./PostCard.scss";
+
 import { Post } from "@/types/Post";
 import { CheckCircle, EditNote, Schedule } from "@mui/icons-material";
 import { Chip } from "@mui/material";
@@ -31,7 +35,9 @@ function PostStatusBadge({ post }: { post: Post }) {
     return (
       <Chip
         icon={<Schedule fontSize="small" />}
-        label={`Scheduled · ${new Date(post.scheduled_time!).toLocaleDateString()}`}
+        label={`Scheduled · ${new Date(post.scheduled_time!).toLocaleDateString(
+          "en-US",
+        )}`}
         size="small"
         color="warning"
         variant="outlined"
@@ -44,7 +50,7 @@ function PostStatusBadge({ post }: { post: Post }) {
       icon={<CheckCircle fontSize="small" />}
       label={
         post.scheduled_time
-          ? `Published · ${new Date(post.scheduled_time).toLocaleDateString()}`
+          ? `Published · ${new Date(post.scheduled_time).toLocaleDateString("en-US")}`
           : "Published"
       }
       size="small"
@@ -56,13 +62,16 @@ function PostStatusBadge({ post }: { post: Post }) {
 
 export default function PostCard({ postData }: { postData: Post }) {
   return (
-    <div>
+    <div className="post-card">
       <PostStatusBadge post={postData} />
-      <div>
-        <Link href={`/campaign/${postData.id}/posts/${postData.id}`}>
-          <strong>{postData.title}</strong>
+      <div className="post-card__body">
+        <Link
+          href={`/campaign/${postData.id}/posts/${postData.id}`}
+          className="post-card__title"
+        >
+          {postData.title}
         </Link>
-        <p>{postData.caption}</p>
+        <p className="post-card__caption">{postData.caption}</p>
       </div>
     </div>
   );

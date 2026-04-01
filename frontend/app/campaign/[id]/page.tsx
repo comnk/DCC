@@ -1,3 +1,5 @@
+import "./campaign_page.scss";
+
 import ArchiveCampaignButton from "@/components/buttons/ArchiveCampaignButton/ArchiveCampaignButton";
 import Button from "@/components/buttons/Button/Button";
 import DeleteCampaignButton from "@/components/buttons/DeleteCampaignButton/DeleteCampaignButton";
@@ -46,39 +48,62 @@ export default async function CampaignPage({ params }: { params: Params }) {
   ).then((res) => res.json());
 
   return (
-    <div>
+    <div className="campaign-page">
       <Navbar />
-      <h2>Campaign Details</h2>
-      <div>
-        <Button text="Create Content" link={`/campaign/${id}/posts/new`} />
-        <Button text="Update Campaign" link={`/campaign/${id}/update`} />
-        <DeleteCampaignButton id={id} />
-        <ArchiveCampaignButton id={id} is_archived={campaign.is_archived} />
+      <div className="campaign-page__content">
+        <div className="campaign-page__header">
+          <h2 className="campaign-page__title">Campaign Details</h2>
+          <div className="campaign-page__actions">
+            <Button text="Create Content" link={`/campaign/${id}/posts/new`} />
+            <Button text="Update Campaign" link={`/campaign/${id}/update`} />
+            <DeleteCampaignButton id={id} />
+            <ArchiveCampaignButton id={id} is_archived={campaign.is_archived} />
+          </div>
+        </div>
+
+        <section className="campaign-overview">
+          <h2 className="campaign-overview__title">Campaign Overview</h2>
+          <div className="campaign-overview__fields">
+            <div className="campaign-overview__field">
+              <span className="campaign-overview__label">Name</span>
+              <span className="campaign-overview__value">{campaign.name}</span>
+            </div>
+            <div className="campaign-overview__field">
+              <span className="campaign-overview__label">Description</span>
+              <span className="campaign-overview__value">
+                {campaign.description}
+              </span>
+            </div>
+            <div className="campaign-overview__field">
+              <span className="campaign-overview__label">Start Date</span>
+              <span className="campaign-overview__value">
+                {new Date(campaign.start_date + "T00:00:00").toLocaleDateString(
+                  "en-US",
+                )}
+              </span>
+            </div>
+            <div className="campaign-overview__field">
+              <span className="campaign-overview__label">End Date</span>
+              <span className="campaign-overview__value">
+                {new Date(campaign.end_date + "T00:00:00").toLocaleDateString(
+                  "en-US",
+                )}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section className="campaign-posts">
+          <h2 className="campaign-posts__title">Posts</h2>
+          <ul className="campaign-posts__list">
+            {campaign_posts.map((post: Post) => (
+              <li key={post.id}>
+                <PostCard postData={post} />
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
-      <hr />
-      <div>
-        <h2>Campaign Overview</h2>
-      </div>
-      <p>
-        <strong>Name:</strong> {campaign.name}
-      </p>
-      <p>
-        <strong>Description:</strong> {campaign.description}
-      </p>
-      <p>
-        <strong>Start Date:</strong>{" "}
-        {new Date(campaign.start_date + "T00:00:00").toLocaleDateString()}
-      </p>
-      <p>
-        <strong>End Date:</strong>{" "}
-        {new Date(campaign.end_date + "T00:00:00").toLocaleDateString()}
-      </p>
-      <h2>Posts</h2>
-      <ul>
-        {campaign_posts.map((post: Post) => (
-          <PostCard key={post.id} postData={post} />
-        ))}
-      </ul>
     </div>
   );
 }
