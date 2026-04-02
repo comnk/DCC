@@ -25,13 +25,33 @@
     display: flex;
     gap: 8px;
 
-    // override MUI button defaults
     .MuiButton-root {
       text-transform: none;
       letter-spacing: 0;
       font-weight: 500;
       border-radius: 8px;
       padding: 6px 20px;
+    }
+
+    .MuiButton-contained {
+      background-color: #111;
+      color: #fff;
+      box-shadow: none;
+
+      &:hover {
+        background-color: #333;
+        box-shadow: none;
+      }
+    }
+
+    .MuiButton-outlined {
+      background-color: transparent;
+      color: #666;
+      border: none;
+
+      &:hover {
+        background-color: #f0efec;
+      }
     }
   }
 

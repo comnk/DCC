@@ -1,5 +1,7 @@
 "use client";
 
+import "./RegisterForm.scss";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -56,9 +58,10 @@ export default function RegisterForm() {
   };
 
   return (
-    <div>
-      <form onSubmit={handleRegister}>
+    <div className="register-form">
+      <form className="register-form__form" onSubmit={handleRegister}>
         <input
+          className="register-form__input"
           type="text"
           name="displayName"
           placeholder="Display Name"
@@ -67,6 +70,7 @@ export default function RegisterForm() {
           required
         />
         <input
+          className="register-form__input"
           type="email"
           name="email"
           placeholder="Email"
@@ -75,6 +79,7 @@ export default function RegisterForm() {
           required
         />
         <input
+          className="register-form__input"
           type="password"
           name="password"
           placeholder="Password"
@@ -83,6 +88,7 @@ export default function RegisterForm() {
           required
         />
         <input
+          className="register-form__input"
           type="password"
           name="confirmPassword"
           placeholder="Confirm Password"
@@ -90,12 +96,16 @@ export default function RegisterForm() {
           onChange={handleChange}
           required
         />
-        <button type="submit" disabled={loading}>
+        <button
+          className="register-form__submit"
+          type="submit"
+          disabled={loading}
+        >
           {loading ? "Registering..." : "Register"}
         </button>
       </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <p>
+      {error && <p className="register-form__error">{error}</p>}
+      <p className="register-form__login-link">
         Already have an account? <Link href="/login">Login here</Link>
       </p>
     </div>
