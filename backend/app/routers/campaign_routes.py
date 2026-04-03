@@ -48,6 +48,11 @@ def get_campaign(campaign_id: int, authorization: str = Header(...)):
     supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
     response = supabase.table("campaigns").select("*").eq("id", campaign_id).execute()
     
+    try:
+        response = supabase.table("campaigns").select("*").eq("id", campaign_id).execute()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to retrieve campaign")
+    
     if (not response.data):
         raise HTTPException(status_code=500, detail="Campaign not found")
     

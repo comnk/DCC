@@ -23,9 +23,21 @@ export default function PostForm({
 }) {
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const previewUrlsRef = useRef<string[]>([]);
+
+  const onFormChangeRef = useRef(onFormChange);
+  useEffect(() => {
+    onFormChangeRef.current = onFormChange;
+  }, [onFormChange]);
+
   const campaign = useCampaign(campaignId);
+  const campaignRef = useRef(campaign);
+  useEffect(() => {
+    campaignRef.current = campaign;
+  }, [campaign]);
+
   const [formData, setFormData] = useState({
     title: "",
     campaign_id: parseInt(campaignId),
@@ -43,23 +55,21 @@ export default function PostForm({
   useEffect(() => {
     if (!existingPost) return;
 
+    const mediaUrls = existingPost.media_asset?.map((a) => a.file_url) ?? [];
     const prefilled = {
-      title: existingPost.title,
+      title: existingPost.title ?? "",
       campaign_id: parseInt(campaignId),
-      platform: existingPost.platform,
-      caption: existingPost.caption,
-      media_asset: existingPost.media_asset.map((a) => a.file_url),
-      scheduled_time: existingPost.scheduled_time,
-      is_draft: existingPost.is_draft,
+      platform: existingPost.platform ?? [],
+      caption: existingPost.caption ?? "",
+      media_asset: mediaUrls,
+      scheduled_time: existingPost.scheduled_time ?? "",
+      is_draft: existingPost.is_draft ?? false,
     };
 
     setFormData(prefilled);
-    setPreviewUrls(existingPost.media_asset.map((a) => a.file_url));
-    onFormChange({
-      ...prefilled,
-      media_asset: existingPost.media_asset.map((a) => a.file_url),
-    });
-  }, [existingPost, campaignId, onFormChange]);
+    setPreviewUrls(mediaUrls);
+    onFormChangeRef.current({ ...prefilled, media_asset: mediaUrls });
+  }, [existingPost, campaignId]);
 
   const updateForm = (
     updates: Partial<typeof formData>,
@@ -67,7 +77,7 @@ export default function PostForm({
   ) => {
     const next = { ...formData, ...updates };
     setFormData(next);
-    onFormChange({
+    onFormChangeRef.current({
       ...next,
       media_asset: displayUrls ?? previewUrlsRef.current,
     });
@@ -76,34 +86,40 @@ export default function PostForm({
   const handleSubmit = async (e: React.BaseSyntheticEvent, isDraft = false) => {
     e.preventDefault();
     setError("");
+    setSubmitting(true);
 
-    const supabase = createClient();
-    const { data } = await supabase.auth.getSession();
+    try {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getSession();
 
-    if (!data.session) {
-      setError("You must be logged in to create a post");
-      return;
-    }
-
-    if (!isDraft) {
-      const validationError = validatePost(formData, campaign);
-      if (validationError) {
-        setError(validationError);
+      if (!data.session) {
+        setError("You must be logged in to create a post");
         return;
       }
-    } else if (!formData.title.trim()) {
-      setError("A title is required to save a draft");
-      return;
-    }
 
-    const { ok, error } = await submitPost(
-      { ...formData, is_draft: isDraft },
-      data.session.access_token,
-    );
-    if (!ok) {
-      setError(error ?? "Something went wrong");
-    } else {
-      window.location.href = "/campaign/" + campaignId;
+      if (!isDraft) {
+        const validationError = validatePost(formData, campaignRef.current);
+        if (validationError) {
+          setError(validationError);
+          return;
+        }
+      } else if (!formData.title.trim()) {
+        setError("A title is required to save a draft");
+        return;
+      }
+
+      const { ok, error } = await submitPost(
+        { ...formData, is_draft: isDraft },
+        data.session.access_token,
+        existingPost?.id,
+      );
+      if (!ok) {
+        setError(error ?? "Something went wrong");
+      } else {
+        window.location.href = "/campaign/" + campaignId;
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -214,7 +230,7 @@ export default function PostForm({
             max={
               campaign
                 ? new Date(campaign.end_date).toISOString().slice(0, 16)
-                : undefined
+                : ""
             }
             onChange={(e) => updateForm({ scheduled_time: e.target.value })}
             value={formData.scheduled_time}
@@ -249,17 +265,19 @@ export default function PostForm({
             type="button"
             variant="outlined"
             onClick={(e) => handleSubmit(e, true)}
+            disabled={submitting}
             className="post-form__btn-draft"
           >
-            Save as Draft
+            {submitting ? "Saving…" : "Save as Draft"}
           </Button>
           <Button
             type="button"
             variant="contained"
             onClick={(e) => handleSubmit(e, false)}
+            disabled={submitting}
             className="post-form__btn-submit"
           >
-            Create Post
+            {submitting ? "Submitting…" : "Create Post"}
           </Button>
         </div>
       </form>

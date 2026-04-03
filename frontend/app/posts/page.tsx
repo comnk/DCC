@@ -12,9 +12,8 @@ import { useEffect, useState } from "react";
 type Tab = "published" | "scheduled" | "draft";
 
 function getPostStatus(post: Post): Tab {
-  if (post.is_draft) return "draft";
-  if (post.scheduled_time && new Date(post.scheduled_time) > new Date())
-    return "scheduled";
+  if (post.is_draft || !post.scheduled_time) return "draft";
+  if (new Date(post.scheduled_time) > new Date()) return "scheduled";
   return "published";
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import DeletePostButton from "@/components/buttons/DeletePostButton/DeletePostButton";
 import "./post_page.scss";
 
 import Navbar from "@/components/Navbar/Navbar";
@@ -73,6 +74,37 @@ export default function PostPage() {
     fetchPost();
   }, [postId, router, id]);
 
+  const handleCancelPost = async () => {
+    const supabase = createClient();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      router.push("/login");
+      return;
+    }
+
+    const res = await fetch(
+      `http://localhost:8000/posts/${postId}/cancel_post`,
+      {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      },
+    );
+
+    if (res.ok) {
+      const updatedPost = await res.json();
+      setPostData(updatedPost);
+      setPreviewData((prev) => ({
+        ...prev,
+        scheduled_time: updatedPost.scheduled_time,
+      }));
+    } else {
+      console.error("Failed to cancel post");
+    }
+  };
+
   if (loading)
     return (
       <div className="post-page__loading">
@@ -94,6 +126,10 @@ export default function PostPage() {
           >
             Update Post
           </Button>
+          {postData?.scheduled_time ? (
+            <Button onClick={handleCancelPost}>Cancel Post</Button>
+          ) : null}
+          <DeletePostButton postId={postData?.id} />
         </div>
 
         <div className="post-page__body">
