@@ -44,16 +44,18 @@ export default function LinkedInPreview({ data }: { data: PostPreviewData }) {
           >
             {data.media_asset!.map((url, index) => (
               <SwiperSlide key={index}>
-                <div className="liSlide">
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
                   <Image
                     src={url}
                     alt={`Post image ${index + 1}`}
                     fill
-                    loading="eager"
-                    sizes={
-                      "(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
-                    }
-                    style={{ objectFit: "cover" }}
+                    style={{ objectFit: "contain" }}
                   />
                 </div>
               </SwiperSlide>

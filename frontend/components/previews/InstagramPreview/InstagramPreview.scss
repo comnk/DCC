@@ -53,6 +53,19 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   background: #f0f0f0;
+  overflow: hidden;
+
+  .swiper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .swiper-wrapper,
+  .swiper-slide {
+    height: 100%;
+  }
 }
  
 .igActions {

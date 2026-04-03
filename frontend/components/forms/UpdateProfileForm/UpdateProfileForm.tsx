@@ -1,15 +1,18 @@
 "use client";
 
+import { createClient } from "@/lib/supabase/client";
 import "./UpdateProfileForm.scss";
 
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
 import { Button, CircularProgress } from "@mui/material";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { uploadProfileImage } from "@/lib/posts/uploadProfileImage";
 
 export default function UpdateProfileForm() {
   const { user, accessToken, loading } = useRequireAuth();
 
+  const [previewUrl, setPreviewUrl] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -42,6 +45,26 @@ export default function UpdateProfileForm() {
     fetchUserData();
   }, [user?.id, accessToken]);
 
+  const handleProfileImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const supabase = createClient();
+      const { path, previewUrl } = await uploadProfileImage(
+        file,
+        supabase,
+        formData.profile_picture,
+      );
+      setFormData((prev) => ({ ...prev, profile_picture: path }));
+      setPreviewUrl(previewUrl);
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+    }
+  };
+
   const handleUpdateProfile = async (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
     const res = await fetch(`http://localhost:8000/users/update-profile`, {
@@ -68,7 +91,7 @@ export default function UpdateProfileForm() {
       <div className="update-profile-form__avatar">
         {formData.profile_picture ? (
           <Image
-            src={formData.profile_picture}
+            src={previewUrl || formData.profile_picture}
             alt="Profile Picture"
             width={80}
             height={80}
@@ -91,6 +114,7 @@ export default function UpdateProfileForm() {
             id="profile-pic"
             type="file"
             accept="image/*"
+            onChange={handleProfileImageUpload}
           />
           {!formData.profile_picture && (
             <p className="update-profile-form__no-photo">

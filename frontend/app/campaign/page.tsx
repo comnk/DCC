@@ -26,7 +26,7 @@ export default function CampaignsPage() {
 
     if (tab === "active") return !c.is_archived && !isCompleted;
     if (tab === "completed") return isCompleted && !c.is_archived;
-    if (tab === "archived") return c.is_archived && !isCompleted;
+    if (tab === "archived") return c.is_archived;
   });
 
   useEffect(() => {

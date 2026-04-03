@@ -5,11 +5,12 @@ import "./RegisterForm.scss";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function RegisterForm() {
+  const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [registered, setRegistered] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -49,20 +50,9 @@ export default function RegisterForm() {
     if (error) {
       setError(error.message);
     } else {
-      setRegistered(true);
+      router.push("/onboarding");
     }
   };
-
-  if (registered) {
-    return (
-      <div className="register-form">
-        <p className="register-form__success">
-          Check your email to confirm your account, then you&apos;ll be
-          redirected to onboarding.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="register-form">

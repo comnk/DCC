@@ -42,7 +42,7 @@ export default function ArchiveCampaignButton({
     }
 
     alert(is_archived ? "Campaign unarchived!" : "Campaign archived!");
-    window.location.href = "/dashboard";
+    window.location.href = "/campaign";
   };
 
   return (

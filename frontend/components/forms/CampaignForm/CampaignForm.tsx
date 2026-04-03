@@ -59,7 +59,7 @@ export default function CampaignForm({
       setError(errorData.detail ?? "Something went wrong");
     } else {
       window.location.href = isUpdate
-        ? `/campaigns/${campaignId}`
+        ? `/campaign/${campaignId}`
         : "/dashboard";
     }
   };

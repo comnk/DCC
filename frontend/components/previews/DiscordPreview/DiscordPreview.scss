@@ -57,10 +57,9 @@
  
 .dcImageWrap {
   position: relative;
-  margin-left: 50px;
-  width: calc(100% - 50px);
+  width: 100%;
   aspect-ratio: 16 / 9;
-  background: #2f3136;
+  background: #2b2d31;
   border-radius: 4px;
   overflow: hidden;
 }

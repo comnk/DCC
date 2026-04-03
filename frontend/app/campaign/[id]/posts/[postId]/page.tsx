@@ -122,12 +122,18 @@ export default function PostPage() {
             variant="contained"
             component={Link}
             href={`/campaign/${id}/posts/${postData?.id}/update`}
-            className="post-page__update-btn"
+            className="post-page__btn"
           >
             Update Post
           </Button>
           {postData?.scheduled_time ? (
-            <Button onClick={handleCancelPost}>Cancel Post</Button>
+            <Button
+              variant="contained"
+              className="post-page__btn"
+              onClick={handleCancelPost}
+            >
+              Cancel Post
+            </Button>
           ) : null}
           <DeletePostButton postId={postData?.id} />
         </div>

@@ -2,6 +2,7 @@ import jwt
 
 from fastapi import APIRouter, HTTPException, Header
 from ..db.supabase import create_supabase_client_with_token
+from ..services.posts.posts import delete_post_service
 from ..models.post import Post
 from ..utils.is_post_complete import is_post_complete
 
@@ -135,29 +136,6 @@ def update_post(post_id: int, post: Post, authorization: str = Header(...)):
 
 @router.delete("/{post_id}")
 def delete_post(post_id: int, authorization: str = Header(...)):
-    token = authorization.replace("Bearer ", "")
-    payload = jwt.decode(token, options={"verify_signature": False})
-    author_id = payload.get("sub")
-
-    if not author_id:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-    supabase = create_supabase_client_with_token(token)
-    
-    response = supabase.table("media_asset").delete().eq("post_id", post_id).execute()
-    
-    if (not response.data):
-        raise HTTPException(status_code=500, detail="Failed to delete media assets")
-    
-    response = (
-        supabase.table("posts")
-        .delete()
-        .eq("id", post_id)
-        .eq("author_id", author_id)
-        .execute()
-    )
-
-    if not response.data:
-        raise HTTPException(status_code=404, detail="Post not found or unauthorized")
+    delete_post_service(post_id, authorization)
     
     return {"message": "Post deleted successfully"}

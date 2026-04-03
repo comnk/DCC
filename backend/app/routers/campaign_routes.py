@@ -3,6 +3,7 @@ import jwt
 from fastapi import APIRouter, HTTPException, Header
 from ..db.supabase import create_supabase_client_with_token
 from ..models.campaign import Campaign
+from ..services.posts.posts import delete_post_service
 
 router = APIRouter(prefix="/campaigns", tags=["campaign"])
 
@@ -94,10 +95,17 @@ def toggle_archive_campaign(campaign_id: int, authorization: str = Header(...)):
 def delete_campaign(campaign_id: int, authorization: str = Header(...)):
     """Delete a campaign by ID"""
     supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
-    response = supabase.table("campaigns").delete().eq("id", campaign_id).execute()
     
-    if (not response.data):
-        raise HTTPException(status_code=500, detail="Campaign not found or failed to delete")
+    campaign = supabase.table("campaigns").select("id").eq("id", campaign_id).execute()
+    if not campaign.data:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    
+    posts = supabase.table("posts").select("id").eq("campaign_id", campaign_id).execute()
+    if posts.data:
+        for post in posts.data:
+            delete_post_service(post["id"], authorization)
+    
+    supabase.table("campaigns").delete().eq("id", campaign_id).execute()
     
     return {"message": "Campaign deleted successfully"}
 
