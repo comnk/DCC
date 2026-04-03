@@ -2,18 +2,16 @@
 
 import "./RegisterForm.scss";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
 export default function RegisterForm() {
-  const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
 
   const [formData, setFormData] = useState({
-    displayName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -28,7 +26,7 @@ export default function RegisterForm() {
     setLoading(true);
     setError("");
 
-    const { displayName, email, password, confirmPassword } = formData;
+    const { email, password, confirmPassword } = formData;
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -42,9 +40,7 @@ export default function RegisterForm() {
       email,
       password,
       options: {
-        data: {
-          displayName,
-        },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
@@ -53,22 +49,24 @@ export default function RegisterForm() {
     if (error) {
       setError(error.message);
     } else {
-      router.push("/onboarding");
+      setRegistered(true);
     }
   };
+
+  if (registered) {
+    return (
+      <div className="register-form">
+        <p className="register-form__success">
+          Check your email to confirm your account, then you&apos;ll be
+          redirected to onboarding.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="register-form">
       <form className="register-form__form" onSubmit={handleRegister}>
-        <input
-          className="register-form__input"
-          type="text"
-          name="displayName"
-          placeholder="Display Name"
-          value={formData.displayName}
-          onChange={handleChange}
-          required
-        />
         <input
           className="register-form__input"
           type="email"

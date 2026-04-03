@@ -1,5 +1,7 @@
 "use client";
 
+import "./profile_page.scss";
+
 import Navbar from "@/components/Navbar/Navbar";
 import UpdateProfileForm from "@/components/forms/UpdateProfileForm/UpdateProfileForm";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
@@ -12,8 +14,10 @@ export default function ProfilePage() {
   return (
     <div className="profile-page">
       <Navbar />
-      <h1>Profile Page</h1>
-      <UpdateProfileForm />
+      <div className="profile-page__content">
+        <h1 className="profile-page__title">Profile</h1>
+        <UpdateProfileForm />
+      </div>
     </div>
   );
 }
