@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Post } from "@/types/Post";
 import { PostPreviewData } from "@/types/PostPreviewData";
 import { Button } from "@mui/material";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 export default function PostForm({
@@ -21,9 +22,12 @@ export default function PostForm({
   onFormChange: (data: PostPreviewData) => void;
   existingPost?: Post | null;
 }) {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [pendingDeletes, setPendingDeletes] = useState<string[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const previewUrlsRef = useRef<string[]>([]);
 
@@ -55,20 +59,22 @@ export default function PostForm({
   useEffect(() => {
     if (!existingPost) return;
 
-    const mediaUrls = existingPost.media_asset?.map((a) => a.file_url) ?? [];
+    const mediaPaths = existingPost.media_asset?.map((a) => a.file_url) ?? [];
+    const mediaSignedUrls =
+      existingPost.media_asset?.map((a) => a.signed_url ?? a.file_url) ?? [];
     const prefilled = {
       title: existingPost.title ?? "",
       campaign_id: parseInt(campaignId),
       platform: existingPost.platform ?? [],
       caption: existingPost.caption ?? "",
-      media_asset: mediaUrls,
+      media_asset: mediaPaths,
       scheduled_time: existingPost.scheduled_time ?? "",
       is_draft: existingPost.is_draft ?? false,
     };
 
     setFormData(prefilled);
-    setPreviewUrls(mediaUrls);
-    onFormChangeRef.current({ ...prefilled, media_asset: mediaUrls });
+    setPreviewUrls(mediaSignedUrls);
+    onFormChangeRef.current({ ...prefilled, media_asset: mediaSignedUrls });
   }, [existingPost, campaignId]);
 
   const updateForm = (
@@ -106,6 +112,23 @@ export default function PostForm({
       } else if (!formData.title.trim()) {
         setError("A title is required to save a draft");
         return;
+      }
+
+      if (pendingDeletes.length > 0) {
+        await Promise.all(
+          pendingDeletes.map((imageUrl) =>
+            fetch(
+              `${API_URL}/posts/${existingPost?.id}/delete_image?image_url=${encodeURIComponent(imageUrl)}`,
+              {
+                method: "DELETE",
+                headers: {
+                  Authorization: `Bearer ${data.session.access_token}`,
+                },
+              },
+            ),
+          ),
+        );
+        setPendingDeletes([]);
       }
 
       const { ok, error } = await submitPost(
@@ -158,6 +181,25 @@ export default function PostForm({
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleDeleteImage = (index: number) => {
+    let imageToDelete = formData.media_asset[index];
+
+    if (imageToDelete.includes("/object/sign/post-images/")) {
+      imageToDelete = imageToDelete
+        .split("/object/sign/post-images/")[1]
+        .split("?")[0];
+    }
+
+    if (existingPost) {
+      setPendingDeletes((prev) => [...prev, imageToDelete]);
+    }
+
+    const updatedPreviews = previewUrls.filter((_, i) => i !== index);
+    const updatedAssets = formData.media_asset.filter((_, i) => i !== index);
+    setPreviewUrls(updatedPreviews);
+    updateForm({ media_asset: updatedAssets }, updatedPreviews);
   };
 
   return (
@@ -261,6 +303,30 @@ export default function PostForm({
             onChange={handleImageUpload}
           />
         </div>
+
+        {previewUrls.length > 0 && (
+          <div className="post-form__previews">
+            {previewUrls.map((url, i) => (
+              <div key={url} className="post-form__preview-item">
+                <Image
+                  src={url}
+                  alt={`Upload ${i + 1}`}
+                  width={100}
+                  height={100}
+                />
+                <button
+                  type="button"
+                  className="post-form__preview-delete"
+                  onClick={() => handleDeleteImage(i)}
+                  disabled={uploading || submitting}
+                  aria-label="Remove image"
+                >
+                  X
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="post-form__actions">
           <Button

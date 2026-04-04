@@ -117,24 +117,35 @@ export default function PostPage() {
       <div className="post-page__content">
         <div className="post-page__header">
           <h1 className="post-page__title">Post Details</h1>
-          <Button
-            variant="contained"
-            component={Link}
-            href={`/campaign/${id}/posts/${postData?.id}/update`}
-            className="post-page__btn"
-          >
-            Update Post
-          </Button>
-          {postData?.scheduled_time ? (
-            <Button
-              variant="contained"
-              className="post-page__btn"
-              onClick={handleCancelPost}
-            >
-              Cancel Post
-            </Button>
-          ) : null}
-          <DeletePostButton postId={postData?.id} campaignId={id} />
+
+          {postData?.post_status !== "posted" && (
+            <>
+              <Button
+                variant="contained"
+                component={Link}
+                href={`/campaign/${id}/posts/${postData?.id}/update`}
+                className="post-page__btn"
+              >
+                Update Post
+              </Button>
+
+              {postData?.scheduled_time ? (
+                <Button
+                  variant="contained"
+                  className="post-page__btn"
+                  onClick={handleCancelPost}
+                >
+                  Cancel Post
+                </Button>
+              ) : null}
+
+              <DeletePostButton postId={postData?.id} campaignId={id} />
+            </>
+          )}
+
+          {postData?.post_status === "posted" && (
+            <span className="post-page__posted-badge">Already Posted</span>
+          )}
         </div>
 
         <div className="post-page__body">
