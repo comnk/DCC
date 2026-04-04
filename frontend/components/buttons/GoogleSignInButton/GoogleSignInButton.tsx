@@ -9,13 +9,15 @@ interface Props {
 }
 
 export default function GoogleSignInButton({ onError }: Props) {
+  const PUBLIC_URL =
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   const supabase = createClient();
 
   const handleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${PUBLIC_URL}/auth/callback`,
       },
     });
 
