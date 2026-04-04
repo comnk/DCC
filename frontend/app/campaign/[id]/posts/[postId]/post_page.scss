@@ -52,6 +52,15 @@
     }
   }
 
+  &__posted-badge {
+    padding: 6px 14px;
+    background-color: #e0e0e0;
+    color: #555;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
   &__body {
     display: grid;
     grid-template-columns: 360px 1fr;

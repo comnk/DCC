@@ -1,6 +1,7 @@
 import jwt
 
 from fastapi import APIRouter, HTTPException, Header
+import supabase
 from ..db.supabase import create_supabase_client_with_token
 from ..services.posts.posts import delete_post_service
 from ..models.post import Post
@@ -74,6 +75,7 @@ def get_post(post_id: int, authorization: str = Header(...)):
 
     return response.data[0]
 
+
 @router.put("/{post_id}/cancel_post")
 def cancel_scheduled_post(post_id: int, authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
@@ -114,9 +116,9 @@ def update_post(post_id: int, post: Post, authorization: str = Header(...)):
 
     supabase = create_supabase_client_with_token(token)
     post_data = post.model_dump(mode="json")
-    photo_urls = post_data.pop("media_asset", [])
+    post_data.pop("media_asset", [])
 
-    if post_data.get("scheduled_time") and is_post_complete({**post_data, "media_asset": photo_urls}):
+    if post_data.get("scheduled_time") and is_post_complete({**post_data}):
         post_data["post_status"] = "scheduled"
     else:
         post_data["post_status"] = "draft"
@@ -131,8 +133,37 @@ def update_post(post_id: int, post: Post, authorization: str = Header(...)):
 
     if not response.data:
         raise HTTPException(status_code=404, detail="Post not found or unauthorized")
-    
+
     return response.data[0]
+
+@router.delete("/{post_id}/delete_image")
+def delete_post_image(post_id: int, image_url: str, authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    payload = jwt.decode(token, options={"verify_signature": False})
+    author_id = payload.get("sub")
+
+    if not author_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    supabase = create_supabase_client_with_token(token)
+    
+    post_response = supabase.table("posts").select("author_id").eq("id", post_id).execute()
+    
+    if not post_response.data or post_response.data[0]["author_id"] != author_id:
+        raise HTTPException(status_code=404, detail="Post not found or unauthorized")
+
+    response = (
+        supabase.table("media_asset")
+        .delete()
+        .eq("post_id", post_id)
+        .eq("file_url", image_url)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(status_code=404, detail="Image not found or unauthorized")
+    
+    return {"message": "Image deleted successfully"}
 
 @router.delete("/{post_id}")
 def delete_post(post_id: int, authorization: str = Header(...)):
