@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
     fetchCampaigns();
     fetchPosts();
-  }, [accessToken]);
+  }, [accessToken, API_URL]);
 
   const filteredCampaigns = campaigns.filter(
     (c) => !c.is_archived && c.end_date > new Date().toISOString(),
@@ -90,6 +90,7 @@ export default function DashboardPage() {
               ))
             )}
           </ul>
+          <Button text="View All Campaigns" link="/campaign" />
         </section>
 
         <section className="dashboard-section">
@@ -108,6 +109,7 @@ export default function DashboardPage() {
                 <PostCard key={post.id} postData={post} />
               ))
             )}
+            <Button text="View All Posts" link="/posts" />
           </ul>
         </section>
       </div>
