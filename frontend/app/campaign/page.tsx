@@ -10,6 +10,7 @@ import { Campaign } from "@/types/Campaign";
 import { CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import CampaignCard from "@/components/cards/CampaignCard/CampaignCard";
+import CampaignSearchBar from "@/components/SearchBars/CampaignSearchBar/CampaignSearchBar";
 
 export default function CampaignsPage() {
   const { user, accessToken, loading } = useRequireAuth();
@@ -17,6 +18,7 @@ export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
   const [tab, setTab] = useState<"active" | "completed" | "archived">("active");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -26,9 +28,18 @@ export default function CampaignsPage() {
   const filteredCampaigns = campaigns.filter((c) => {
     const isCompleted = c.end_date && new Date(c.end_date) < today;
 
-    if (tab === "active") return !c.is_archived && !isCompleted;
-    if (tab === "completed") return isCompleted && !c.is_archived;
-    if (tab === "archived") return c.is_archived;
+    const matchesTab =
+      tab === "active"
+        ? !c.is_archived && !isCompleted
+        : tab === "completed"
+          ? isCompleted && !c.is_archived
+          : c.is_archived;
+
+    const matchesSearch = c.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    return matchesTab && matchesSearch;
   });
 
   useEffect(() => {
@@ -64,6 +75,12 @@ export default function CampaignsPage() {
         <div className="header">
           <h2>Campaigns</h2>
           <Button text="Create Campaign" link="/campaign/new" />
+        </div>
+        <div className="searchBarWrapper">
+          <CampaignSearchBar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
         </div>
         <div className="tabBar">
           <MUIButton
