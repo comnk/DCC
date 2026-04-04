@@ -17,6 +17,7 @@ export default function UpdatePostPage() {
     id: string;
     postId: string;
   }>();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const router = useRouter();
   const [postData, setPostData] = useState<Post | null>(null);
   const [previewData, setPreviewData] = useState<PostPreviewData>({
@@ -39,7 +40,7 @@ export default function UpdatePostPage() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8000/posts/${postId}`, {
+      const res = await fetch(`${API_URL}/posts/${postId}`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
 

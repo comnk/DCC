@@ -27,6 +27,8 @@ export default function PostPage() {
     scheduled_time: "",
   });
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
   useEffect(() => {
     const fetchPost = async () => {
       const supabase = createClient();
@@ -39,7 +41,7 @@ export default function PostPage() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8000/posts/${postId}`, {
+      const res = await fetch(`${API_URL}/posts/${postId}`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
 
@@ -85,13 +87,10 @@ export default function PostPage() {
       return;
     }
 
-    const res = await fetch(
-      `http://localhost:8000/posts/${postId}/cancel_post`,
-      {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      },
-    );
+    const res = await fetch(`${API_URL}/posts/${postId}/cancel_post`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
 
     if (res.ok) {
       const updatedPost = await res.json();

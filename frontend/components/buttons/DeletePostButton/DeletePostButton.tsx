@@ -9,6 +9,7 @@ export default function DeletePostButton({
 }: {
   postId: number | undefined;
 }) {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const router = useRouter();
 
   const handleDelete = async () => {
@@ -26,7 +27,7 @@ export default function DeletePostButton({
       return;
     }
 
-    const res = await fetch(`http://localhost:8000/posts/${postId}`, {
+    const res = await fetch(`${API_URL}/posts/${postId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

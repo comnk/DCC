@@ -3,12 +3,13 @@ export const submitPost = async (
   accessToken: string,
   postId?: number,
 ): Promise<{ ok: boolean; error?: string }> => {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const isUpdate = postId !== undefined;
 
   const res = await fetch(
     isUpdate
-      ? `http://localhost:8000/posts/${postId}`
-      : `http://localhost:8000/posts/create`,
+      ? `${API_URL}/posts/${postId}`
+      : `${API_URL}/posts/create`,
     {
       method: isUpdate ? "PUT" : "POST",
       headers: {

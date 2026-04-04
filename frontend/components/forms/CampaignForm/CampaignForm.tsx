@@ -14,6 +14,7 @@ export default function CampaignForm({
   campaignId?: string;
   campaignData?: Campaign;
 }) {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: campaignData?.name ?? "",
@@ -41,8 +42,8 @@ export default function CampaignForm({
 
     const isUpdate = !!campaignId;
     const url = isUpdate
-      ? `http://localhost:8000/campaigns/${campaignId}`
-      : `http://localhost:8000/campaigns/create`;
+      ? `${API_URL}/campaigns/${campaignId}`
+      : `${API_URL}/campaigns/create`;
     const method = isUpdate ? "PUT" : "POST";
 
     const res = await fetch(url, {

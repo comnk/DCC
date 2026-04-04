@@ -10,6 +10,7 @@ import React, { useEffect, useState } from "react";
 import { uploadProfileImage } from "@/lib/posts/uploadProfileImage";
 
 export default function UpdateProfileForm() {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const { user, accessToken, loading } = useRequireAuth();
 
   const [previewUrl, setPreviewUrl] = useState("");
@@ -25,7 +26,7 @@ export default function UpdateProfileForm() {
     if (!accessToken || !user?.id) return;
 
     const fetchUserData = async () => {
-      const res = await fetch(`http://localhost:8000/users/${user?.id}`, {
+      const res = await fetch(`${API_URL}/users/${user?.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +68,7 @@ export default function UpdateProfileForm() {
 
   const handleUpdateProfile = async (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
-    const res = await fetch(`http://localhost:8000/users/update-profile`, {
+    const res = await fetch(`${API_URL}/users/update-profile`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

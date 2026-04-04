@@ -14,6 +14,7 @@ export default function UpdateCampaignPage() {
     id: string;
     postId: string;
   }>();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const router = useRouter();
   const [campaign, setCampaign] = useState<Campaign>();
 
@@ -31,7 +32,7 @@ export default function UpdateCampaignPage() {
         return;
       }
 
-      const res = await fetch(`http://localhost:8000/campaigns/${id}`, {
+      const res = await fetch(`${API_URL}/campaigns/${id}`, {
         headers: {
           Authorization: `Bearer ${data.session.access_token}`,
         },

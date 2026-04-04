@@ -18,6 +18,7 @@ function getPostStatus(post: Post): Tab {
 }
 
 export default function PostsPage() {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const { user, accessToken, loading } = useRequireAuth();
   const [tab, setTab] = useState<Tab>("published");
   const [postsLoading, setPostsLoading] = useState(true);
@@ -27,7 +28,7 @@ export default function PostsPage() {
     if (!accessToken) return;
 
     const fetchPosts = async () => {
-      const res = await fetch(`http://localhost:8000/posts/all`, {
+      const res = await fetch(`${API_URL}/posts/all`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

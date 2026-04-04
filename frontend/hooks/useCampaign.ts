@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 
 export function useCampaign(campaignId: string) {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [campaign, setCampaign] = useState<Campaign>();
 
   useEffect(() => {
@@ -15,7 +16,7 @@ export function useCampaign(campaignId: string) {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
 
-      const res = await fetch(`http://localhost:8000/campaigns/${campaignId}`, {
+      const res = await fetch(`${API_URL}/campaigns/${campaignId}`, {
         headers: { Authorization: `Bearer ${data.session.access_token}` },
       });
 

@@ -15,6 +15,7 @@ import Button from "@/components/buttons/Button/Button";
 export default function DashboardPage() {
   const { user, accessToken, loading } = useRequireAuth();
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -24,7 +25,7 @@ export default function DashboardPage() {
     if (!accessToken) return;
 
     const fetchCampaigns = async () => {
-      const res = await fetch(`http://localhost:8000/campaigns/list`, {
+      const res = await fetch(`${API_URL}/campaigns/list`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -37,7 +38,7 @@ export default function DashboardPage() {
     };
 
     const fetchPosts = async () => {
-      const res = await fetch(`http://localhost:8000/posts/all`, {
+      const res = await fetch(`${API_URL}/posts/all`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

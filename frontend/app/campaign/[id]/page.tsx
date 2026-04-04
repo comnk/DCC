@@ -22,9 +22,10 @@ export default async function CampaignPage({ params }: { params: Params }) {
     redirect("/login");
   }
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const token = session.access_token;
 
-  const res = await fetch(`http://localhost:8000/campaigns/${id}`, {
+  const res = await fetch(`${API_URL}/campaigns/${id}`, {
     cache: "no-store",
     headers: {
       Authorization: `Bearer ${token}`,

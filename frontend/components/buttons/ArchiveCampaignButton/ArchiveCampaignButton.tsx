@@ -10,6 +10,7 @@ export default function ArchiveCampaignButton({
   id: string;
   is_archived: boolean;
 }) {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const handleToggleArchive = async () => {
     const supabase = createClient();
     const { data } = await supabase.auth.getSession();
@@ -24,16 +25,13 @@ export default function ArchiveCampaignButton({
     );
     if (!confirmed) return;
 
-    const res = await fetch(
-      `http://localhost:8000/campaigns/${id}/toggle_archive`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${data.session.access_token}`,
-        },
+    const res = await fetch(`${API_URL}/campaigns/${id}/toggle_archive`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${data.session.access_token}`,
       },
-    );
+    });
 
     if (!res.ok) {
       console.error("Failed to update campaign:", res.status);

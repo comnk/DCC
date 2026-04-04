@@ -21,6 +21,8 @@ export default function CampaignsPage() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
   const filteredCampaigns = campaigns.filter((c) => {
     const isCompleted = c.end_date && new Date(c.end_date) < today;
 
@@ -33,7 +35,7 @@ export default function CampaignsPage() {
     if (!accessToken) return;
 
     const fetchCampaigns = async () => {
-      const res = await fetch(`http://localhost:8000/campaigns/list`, {
+      const res = await fetch(`${API_URL}/campaigns/list`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

@@ -8,6 +8,7 @@ export default function DeleteCampaignButton({ id }: { id: string }) {
   const router = useRouter();
 
   const handleDelete = async () => {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     const supabase = createClient();
     const { data } = await supabase.auth.getSession();
 
@@ -24,7 +25,7 @@ export default function DeleteCampaignButton({ id }: { id: string }) {
       return;
     }
 
-    const res = await fetch(`http://localhost:8000/campaigns/${id}`, {
+    const res = await fetch(`${API_URL}/campaigns/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
