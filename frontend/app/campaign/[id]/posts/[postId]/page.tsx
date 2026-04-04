@@ -134,7 +134,7 @@ export default function PostPage() {
               Cancel Post
             </Button>
           ) : null}
-          <DeletePostButton postId={postData?.id} />
+          <DeletePostButton postId={postData?.id} campaignId={id} />
         </div>
 
         <div className="post-page__body">

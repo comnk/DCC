@@ -35,12 +35,14 @@ export default function InstagramPreview({ data }: { data: PostPreviewData }) {
                     position: "relative",
                     width: "100%",
                     height: "100%",
+                    paddingBottom: "100%",
                   }}
                 >
                   <Image
                     src={url}
                     alt={`Post image ${index + 1}`}
                     fill
+                    sizes="(max-width: 768px) 100vw, 400px"
                     style={{ objectFit: "contain" }}
                   />
                 </div>

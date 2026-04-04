@@ -44,6 +44,7 @@ export default function DiscordPreview({ data }: { data: PostPreviewData }) {
                   src={url}
                   alt={`Post image ${index + 1}`}
                   fill
+                  sizes="(max-width: 768px) 100vw, 400px"
                   style={{ objectFit: "contain" }}
                 />
               )}

@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import Button from "../Button/Button";
 
 export default function DeletePostButton({
+  campaignId,
   postId,
 }: {
+  campaignId: string;
   postId: number | undefined;
 }) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -42,7 +44,7 @@ export default function DeletePostButton({
     }
 
     alert("Post deleted!");
-    router.push("/dashboard");
+    router.push(`/campaign/${campaignId}`);
   };
 
   return <Button text="Delete Post" link="#" onClick={handleDelete}></Button>;

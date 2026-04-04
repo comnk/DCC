@@ -109,7 +109,11 @@ export default function PostForm({
       }
 
       const { ok, error } = await submitPost(
-        { ...formData, is_draft: isDraft },
+        {
+          ...formData,
+          scheduled_time: formData.scheduled_time || null,
+          is_draft: isDraft,
+        },
         data.session.access_token,
         existingPost?.id,
       );
@@ -170,7 +174,6 @@ export default function PostForm({
             name="title"
             onChange={(e) => updateForm({ title: e.target.value })}
             value={formData.title}
-            required
           />
         </div>
 
@@ -202,7 +205,6 @@ export default function PostForm({
             name="caption"
             onChange={(e) => updateForm({ caption: e.target.value })}
             value={formData.caption}
-            required
           />
         </div>
 
