@@ -66,7 +66,7 @@ export default function PostCard({ postData }: { postData: Post }) {
       <PostStatusBadge post={postData} />
       <div className="post-card__body">
         <Link
-          href={`/campaign/${postData.id}/posts/${postData.id}`}
+          href={`/campaign/${postData.campaign_id}/posts/${postData.id}`}
           className="post-card__title"
         >
           {postData.title}

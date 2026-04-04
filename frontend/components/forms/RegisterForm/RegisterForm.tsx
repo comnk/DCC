@@ -1,9 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import "./RegisterForm.scss";
+
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -11,7 +13,6 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    displayName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -26,7 +27,7 @@ export default function RegisterForm() {
     setLoading(true);
     setError("");
 
-    const { displayName, email, password, confirmPassword } = formData;
+    const { email, password, confirmPassword } = formData;
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -40,9 +41,7 @@ export default function RegisterForm() {
       email,
       password,
       options: {
-        data: {
-          displayName,
-        },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
@@ -56,17 +55,10 @@ export default function RegisterForm() {
   };
 
   return (
-    <div>
-      <form onSubmit={handleRegister}>
+    <div className="register-form">
+      <form className="register-form__form" onSubmit={handleRegister}>
         <input
-          type="text"
-          name="displayName"
-          placeholder="Display Name"
-          value={formData.displayName}
-          onChange={handleChange}
-          required
-        />
-        <input
+          className="register-form__input"
           type="email"
           name="email"
           placeholder="Email"
@@ -75,6 +67,7 @@ export default function RegisterForm() {
           required
         />
         <input
+          className="register-form__input"
           type="password"
           name="password"
           placeholder="Password"
@@ -83,6 +76,7 @@ export default function RegisterForm() {
           required
         />
         <input
+          className="register-form__input"
           type="password"
           name="confirmPassword"
           placeholder="Confirm Password"
@@ -90,12 +84,16 @@ export default function RegisterForm() {
           onChange={handleChange}
           required
         />
-        <button type="submit" disabled={loading}>
+        <button
+          className="register-form__submit"
+          type="submit"
+          disabled={loading}
+        >
           {loading ? "Registering..." : "Register"}
         </button>
       </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <p>
+      {error && <p className="register-form__error">{error}</p>}
+      <p className="register-form__login-link">
         Already have an account? <Link href="/login">Login here</Link>
       </p>
     </div>

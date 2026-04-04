@@ -5,3 +5,5 @@
 **/__pycache__/
 
 instagram_session.json
+.vercel
+.env*.local

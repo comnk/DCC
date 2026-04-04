@@ -34,18 +34,14 @@ export default function InstagramPreview({ data }: { data: PostPreviewData }) {
                   style={{
                     position: "relative",
                     width: "100%",
-                    paddingTop: "100%",
+                    height: "100%",
                   }}
                 >
                   <Image
                     src={url}
                     alt={`Post image ${index + 1}`}
                     fill
-                    loading="eager"
-                    sizes={
-                      "(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
-                    }
-                    style={{ objectFit: "cover", borderRadius: 4 }}
+                    style={{ objectFit: "contain" }}
                   />
                 </div>
               </SwiperSlide>

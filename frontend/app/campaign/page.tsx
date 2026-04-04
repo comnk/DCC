@@ -16,11 +16,18 @@ export default function CampaignsPage() {
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
-  const [tab, setTab] = useState<"active" | "archived">("active");
+  const [tab, setTab] = useState<"active" | "completed" | "archived">("active");
 
-  const filteredCampaigns = campaigns.filter((c) =>
-    tab === "active" ? !c.is_archived : c.is_archived,
-  );
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const filteredCampaigns = campaigns.filter((c) => {
+    const isCompleted = c.end_date && new Date(c.end_date) < today;
+
+    if (tab === "active") return !c.is_archived && !isCompleted;
+    if (tab === "completed") return isCompleted && !c.is_archived;
+    if (tab === "archived") return c.is_archived;
+  });
 
   useEffect(() => {
     if (!accessToken) return;
@@ -62,6 +69,12 @@ export default function CampaignsPage() {
             onClick={() => setTab("active")}
           >
             Active
+          </MUIButton>
+          <MUIButton
+            variant={tab === "completed" ? "contained" : "outlined"}
+            onClick={() => setTab("completed")}
+          >
+            Completed
           </MUIButton>
           <MUIButton
             variant={tab === "archived" ? "contained" : "outlined"}

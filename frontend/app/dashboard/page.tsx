@@ -57,8 +57,6 @@ export default function DashboardPage() {
     (c) => !c.is_archived && c.end_date > new Date().toISOString(),
   );
 
-  console.log(posts);
-
   const filteredPosts =
     posts.length > 0
       ? posts.filter(

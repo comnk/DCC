@@ -1,0 +1,143 @@
+.post-page {
+  min-height: 100vh;
+  background-color: #f7f6f3;
+
+  &__loading {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__content {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    color: #111;
+  }
+
+  &__btn {
+    &.MuiButton-root {
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 600;
+      font-size: 14px;
+      border-radius: 8px;
+      padding: 8px 20px;
+      background-color: #111;
+      box-shadow: none;
+
+      &:hover {
+        background-color: #333;
+        box-shadow: none;
+      }
+    }
+  }
+
+  &__body {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    align-items: start;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.post-overview {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  &__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111;
+    margin: 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  &__fields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  &__label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9ca3af;
+  }
+
+  &__value {
+    font-size: 14px;
+    color: #111;
+    line-height: 1.5;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  &__platform-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    background: #f3f4f6;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+    text-transform: capitalize;
+  }
+}
+
+.post-preview-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111;
+    margin: 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+}

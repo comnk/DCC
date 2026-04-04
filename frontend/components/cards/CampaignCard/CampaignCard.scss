@@ -1,0 +1,35 @@
+.campaign-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: box-shadow 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+  }
+
+  &__name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+
+    a {
+      color: #111;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  &__dates {
+    margin: 0;
+    font-size: 13px;
+    color: #6b7280;
+  }
+}

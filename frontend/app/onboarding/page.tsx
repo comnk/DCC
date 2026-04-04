@@ -1,5 +1,7 @@
 "use client";
 
+import "./onboarding_page.scss";
+
 import Button from "@/components/buttons/Button/Button";
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
@@ -59,40 +61,59 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div>
-      <h2>Welcome to DCC!</h2>
-      <p>Let&apos;s get started!</p>
+    <div className="onboarding-page">
+      <div className="onboarding-page__content">
+        <div className="onboarding-page__header">
+          <h1 className="onboarding-page__title">Welcome to DCC!</h1>
+          <p className="onboarding-page__subtitle">Let&apos;s get started!</p>
+        </div>
 
-      <label>Display Name</label>
-      <input
-        type="text"
-        placeholder="Enter your display name"
-        value={displayName}
-        onChange={(e) => setDisplayName(e.target.value)}
-      />
+        <div className="onboarding-form">
+          <div className="onboarding-form__field">
+            <label className="onboarding-form__label">Display Name</label>
+            <input
+              className="onboarding-form__input"
+              type="text"
+              placeholder="Enter your display name"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+            />
+          </div>
 
-      <label>What is your role?</label>
-      <select value={role} onChange={(e) => setRole(e.target.value)}>
-        {ROLES.map(({ value, label }) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
+          <div className="onboarding-form__field">
+            <label className="onboarding-form__label">What is your role?</label>
+            <select
+              className="onboarding-form__select"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
+              {ROLES.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      {isOther && (
-        <input
-          type="text"
-          placeholder="Enter your role"
-          value={customRole}
-          onChange={(e) => setCustomRole(e.target.value)}
-          autoFocus
-        />
-      )}
+          {isOther && (
+            <div className="onboarding-form__field">
+              <label className="onboarding-form__label">Your Role</label>
+              <input
+                className="onboarding-form__input"
+                type="text"
+                placeholder="Enter your role"
+                value={customRole}
+                onChange={(e) => setCustomRole(e.target.value)}
+                autoFocus
+              />
+            </div>
+          )}
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+          {error && <p className="onboarding-form__error">{error}</p>}
 
-      <Button text="Complete Onboarding" link="#" onClick={handleSubmit} />
+          <Button text="Complete Onboarding" link="#" onClick={handleSubmit} />
+        </div>
+      </div>
     </div>
   );
 }
