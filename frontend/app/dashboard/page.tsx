@@ -113,6 +113,7 @@ export default function DashboardPage() {
                   key={post.id}
                   postData={post}
                   campaignName={campaignMap[post.campaign_id]}
+                  searchTerm=""
                 />
               ))
             )}
