@@ -99,7 +99,7 @@ export default async function CampaignPage({ params }: { params: Params }) {
           <ul className="campaign-posts__list">
             {campaign_posts.map((post: Post) => (
               <li key={post.id}>
-                <PostCard postData={post} />
+                <PostCard postData={post} searchTerm="" />
               </li>
             ))}
           </ul>
