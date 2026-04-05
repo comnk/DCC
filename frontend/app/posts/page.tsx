@@ -4,6 +4,7 @@ import "./posts_page.scss";
 
 import PostCard from "@/components/cards/PostCard/PostCard";
 import Navbar from "@/components/Navbar/Navbar";
+import PostSearchBar from "@/components/SearchBars/PostSearchBar/PostSearchBar";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
 import { Post } from "@/types/Post";
 import { CircularProgress, Button as MUIButton } from "@mui/material";
@@ -23,29 +24,56 @@ export default function PostsPage() {
   const [tab, setTab] = useState<Tab>("published");
   const [postsLoading, setPostsLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [campaigns, setCampaigns] = useState<Record<number, string>>({});
+  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(
+    null,
+  );
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     if (!accessToken) return;
 
-    const fetchPosts = async () => {
-      const res = await fetch(`${API_URL}/posts/all`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
+    const fetchData = async () => {
+      const [postsRes, campaignsRes] = await Promise.all([
+        fetch(`${API_URL}/posts/all`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }),
+        fetch(`${API_URL}/campaigns/list`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }),
+      ]);
+
+      const postsData = await postsRes.json();
+      const campaignsData = await campaignsRes.json();
+
+      setPosts(postsData);
+
+      const campaignMap: Record<number, string> = {};
+      campaignsData.forEach((c: { id: number; name: string }) => {
+        campaignMap[c.id] = c.name;
       });
-      const data = await res.json();
-      setPosts(data);
+      setCampaigns(campaignMap);
       setPostsLoading(false);
     };
 
-    fetchPosts();
+    fetchData();
   }, [accessToken]);
 
-  const filteredPosts = posts.filter(
-    (post: Post) => getPostStatus(post) === tab,
-  );
+  const filteredPosts = posts.filter((post: Post) => {
+    const matchesTab = getPostStatus(post) === tab;
+    const matchesSearch = post.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesCampaign =
+      selectedCampaignId === null || post.campaign_id === selectedCampaignId;
+    return matchesTab && matchesSearch && matchesCampaign;
+  });
 
   const tabs: { label: string; value: Tab }[] = [
     { label: "Published", value: "published" },
@@ -57,8 +85,28 @@ export default function PostsPage() {
     <div className="posts-page">
       <Navbar />
       <div className="posts-page__content">
-        <h1 className="posts-page__title">All Posts</h1>
-
+        <div className="posts-page__filters">
+          <PostSearchBar
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+          />
+          <select
+            className="posts-page__campaign-filter"
+            value={selectedCampaignId ?? ""}
+            onChange={(e) =>
+              setSelectedCampaignId(
+                e.target.value === "" ? null : Number(e.target.value),
+              )
+            }
+          >
+            <option value="">All Campaigns</option>
+            {Object.entries(campaigns).map(([id, name]) => (
+              <option key={id} value={id}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="posts-page__tabs">
           {tabs.map(({ label, value }) => (
             <MUIButton
@@ -71,7 +119,6 @@ export default function PostsPage() {
             </MUIButton>
           ))}
         </div>
-
         {loading || postsLoading ? (
           <div className="posts-page__loading">
             <CircularProgress />
@@ -84,7 +131,11 @@ export default function PostsPage() {
           <ul className="posts-page__list">
             {filteredPosts.map((post: Post) => (
               <li key={post.id}>
-                <PostCard postData={post} />
+                <PostCard
+                  postData={post}
+                  campaignName={campaigns[post.campaign_id]}
+                  searchTerm={searchTerm}
+                />
               </li>
             ))}
           </ul>

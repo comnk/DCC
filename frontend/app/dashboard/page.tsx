@@ -24,35 +24,38 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!accessToken) return;
 
-    const fetchCampaigns = async () => {
-      const res = await fetch(`${API_URL}/campaigns/list`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const data = await res.json();
-      setCampaigns(data);
-      setCampaignsLoading(false);
-    };
+    const fetchData = async () => {
+      const [campaignsRes, postsRes] = await Promise.all([
+        fetch(`${API_URL}/campaigns/list`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }),
+        fetch(`${API_URL}/posts/all`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }),
+      ]);
 
-    const fetchPosts = async () => {
-      const res = await fetch(`${API_URL}/posts/all`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const data = await res.json();
-      setPosts(data);
+      const campaignsData = await campaignsRes.json();
+      const postsData = await postsRes.json();
+
+      setCampaigns(campaignsData);
+      setPosts(postsData);
+      setCampaignsLoading(false);
       setPostsLoading(false);
     };
 
-    fetchCampaigns();
-    fetchPosts();
+    fetchData();
   }, [accessToken, API_URL]);
+
+  const campaignMap: Record<string, string> = {};
+  campaigns.forEach((c) => {
+    campaignMap[c.id] = c.name;
+  });
 
   const filteredCampaigns = campaigns.filter(
     (c) => !c.is_archived && c.end_date > new Date().toISOString(),
@@ -106,7 +109,11 @@ export default function DashboardPage() {
               </div>
             ) : (
               filteredPosts.map((post) => (
-                <PostCard key={post.id} postData={post} />
+                <PostCard
+                  key={post.id}
+                  postData={post}
+                  campaignName={campaignMap[post.campaign_id]}
+                />
               ))
             )}
             <Button text="View All Posts" link="/posts" />

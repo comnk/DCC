@@ -58,7 +58,7 @@ export default function Navbar() {
                 <Button text="Login" link="/login" />
               </li>
             )}
-            {user && <Dropdown />}
+            {user && <Dropdown isMobile={menuOpen} />}
           </>
         )}
       </ul>
