@@ -120,7 +120,11 @@ export default function CampaignsPage() {
           ) : (
             <ul className="campaignList">
               {filteredCampaigns.map((campaign) => (
-                <CampaignCard key={campaign.id} campaignData={campaign} />
+                <CampaignCard
+                  key={campaign.id}
+                  campaignData={campaign}
+                  searchTerm={searchTerm}
+                />
               ))}
             </ul>
           )}

@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 
 const supabase = createClient();
 
-export default function Dropdown() {
+export default function Dropdown({ isMobile = false }: { isMobile?: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -27,6 +27,19 @@ export default function Dropdown() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  if (isMobile) {
+    return (
+      <div className="dropdown dropdown--mobile">
+        <Link href="/profile" className="item">
+          Profile
+        </Link>
+        <button className="item item--logout" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div ref={ref} className="dropdown">
