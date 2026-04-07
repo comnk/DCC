@@ -38,15 +38,12 @@ export default async function CampaignPage({ params }: { params: Params }) {
 
   const campaign = await res.json();
 
-  const campaign_posts = await fetch(
-    `http://localhost:8000/campaigns/${id}/posts`,
-    {
-      cache: "no-store",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  const campaign_posts = await fetch(`${API_URL}/campaigns/${id}/posts`, {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${token}`,
     },
-  ).then((res) => res.json());
+  }).then((res) => res.json());
 
   return (
     <div className="campaign-page">
