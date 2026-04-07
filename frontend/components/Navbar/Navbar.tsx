@@ -6,7 +6,7 @@ import Logo from "./Logos/Logo";
 import MobileLogo from "./Logos/MobileLogo";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
 import Dropdown from "../dropdown/Dropdown";
 import Button from "../buttons/Button/Button";
