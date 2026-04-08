@@ -22,7 +22,7 @@ export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("active");
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>("calendar");
   const [searchTerm, setSearchTerm] = useState("");
 
   const today = new Date();
@@ -91,23 +91,22 @@ export default function CampaignsPage() {
           </div>
           <div className="viewToggle">
             <button
-              className={`viewToggle__btn ${viewMode === "list" ? "viewToggle__btn--active" : ""}`}
-              onClick={() => setViewMode("list")}
-              title="List view"
-            >
-              <ViewList fontSize="small" />
-            </button>
-            <button
               className={`viewToggle__btn ${viewMode === "calendar" ? "viewToggle__btn--active" : ""}`}
               onClick={() => setViewMode("calendar")}
               title="Calendar view"
             >
               <CalendarMonth fontSize="small" />
             </button>
+            <button
+              className={`viewToggle__btn ${viewMode === "list" ? "viewToggle__btn--active" : ""}`}
+              onClick={() => setViewMode("list")}
+              title="List view"
+            >
+              <ViewList fontSize="small" />
+            </button>
           </div>
         </div>
 
-        {/* Tabs only apply to list view */}
         {viewMode === "list" && (
           <div className="tabBar">
             <MUIButton

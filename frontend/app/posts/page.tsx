@@ -25,7 +25,7 @@ export default function PostsPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const { user, accessToken, loading } = useRequireAuth();
   const [tab, setTab] = useState<Tab>("published");
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>("calendar");
   const [postsLoading, setPostsLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
   const [campaigns, setCampaigns] = useState<Record<number, string>>({});
@@ -79,6 +79,15 @@ export default function PostsPage() {
     return matchesTab && matchesSearch && matchesCampaign;
   });
 
+  const calendarPosts = posts.filter((post: Post) => {
+    const matchesSearch = post.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesCampaign =
+      selectedCampaignId === null || post.campaign_id === selectedCampaignId;
+    return matchesSearch && matchesCampaign;
+  });
+
   const tabs: { label: string; value: Tab }[] = [
     { label: "Published", value: "published" },
     { label: "Scheduled", value: "scheduled" },
@@ -115,18 +124,18 @@ export default function PostsPage() {
 
           <div className="posts-page__view-toggle">
             <button
-              className={`posts-page__view-btn ${viewMode === "list" ? "posts-page__view-btn--active" : ""}`}
-              onClick={() => setViewMode("list")}
-              title="List view"
-            >
-              <ViewList fontSize="small" />
-            </button>
-            <button
               className={`posts-page__view-btn ${viewMode === "calendar" ? "posts-page__view-btn--active" : ""}`}
               onClick={() => setViewMode("calendar")}
               title="Calendar view"
             >
               <CalendarMonth fontSize="small" />
+            </button>
+            <button
+              className={`posts-page__view-btn ${viewMode === "list" ? "posts-page__view-btn--active" : ""}`}
+              onClick={() => setViewMode("list")}
+              title="List view"
+            >
+              <ViewList fontSize="small" />
             </button>
           </div>
         </div>
@@ -151,7 +160,7 @@ export default function PostsPage() {
             <CircularProgress />
           </div>
         ) : viewMode === "calendar" ? (
-          <PostCalendarDisplay posts={posts} />
+          <PostCalendarDisplay posts={calendarPosts} />
         ) : filteredPosts.length === 0 ? (
           <div className="posts-page__empty">
             <p>No {tab} posts found.</p>

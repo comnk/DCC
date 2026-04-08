@@ -2,28 +2,78 @@
 
 import "./PostCalendarDisplay.scss";
 
-import { useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import { EventHoveringArg } from "@fullcalendar/core";
 
 import { Post } from "@/types/Post";
 import Link from "next/link";
-import { TooltipState } from "@/types/ToolTipState";
+import { useCalendarTooltip } from "@/hooks/useCalendarTooltip";
+
+interface PostTooltipEvent {
+  id: string;
+  title: string;
+  caption: string | null;
+  platform: string | null;
+  is_draft: boolean;
+  post_status: string | null;
+  campaign_id: number;
+}
+
+function parsePlatforms(
+  platform: string | string[] | null | undefined,
+): string[] {
+  if (!platform) return [];
+  if (Array.isArray(platform)) return platform;
+  try {
+    const cleaned = platform.replace(/'/g, '"');
+    const parsed = JSON.parse(cleaned);
+    return Array.isArray(parsed) ? parsed : [platform];
+  } catch {
+    return [platform];
+  }
+}
+
+function getEventColor(post: Post): {
+  backgroundColor: string;
+  borderColor: string;
+  textColor: string;
+} {
+  if (post.is_draft || !post.scheduled_time) {
+    return {
+      backgroundColor: "#f3f4f6",
+      borderColor: "#9ca3af",
+      textColor: "#374151",
+    };
+  }
+  if (new Date(post.scheduled_time) > new Date()) {
+    return {
+      backgroundColor: "#dbeafe",
+      borderColor: "#3b82f6",
+      textColor: "#1e40af",
+    };
+  }
+  return {
+    backgroundColor: "#dcfce7",
+    borderColor: "#22c55e",
+    textColor: "#15803d",
+  };
+}
 
 export default function PostCalendarDisplay({ posts }: { posts: Post[] }) {
-  const [tooltip, setTooltip] = useState<TooltipState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    event: null,
-  });
-  const hideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const {
+    tooltip,
+    handleEventMouseEnter,
+    handleEventMouseLeave,
+    handleTooltipMouseEnter,
+    handleTooltipMouseLeave,
+  } = useCalendarTooltip<PostTooltipEvent>();
 
   const events = posts.map((post) => ({
     id: String(post.id),
     title: post.title,
     start: post.scheduled_time,
+    ...getEventColor(post),
     extendedProps: {
       caption: post.caption,
       platform: post.platform,
@@ -35,48 +85,35 @@ export default function PostCalendarDisplay({ posts }: { posts: Post[] }) {
     },
   }));
 
-  const handleEventMouseEnter = (arg: EventHoveringArg) => {
-    if (hideTimeout.current) clearTimeout(hideTimeout.current);
-
-    const rect = (arg.el as HTMLElement).getBoundingClientRect();
-
-    setTooltip({
-      visible: true,
-      x: rect.left + window.scrollX,
-      y: rect.bottom + window.scrollY + 6,
-      event: {
-        id: arg.event.id,
-        title: arg.event.title,
-        caption: arg.event.extendedProps.caption,
-        platform: arg.event.extendedProps.platform,
-        is_draft: arg.event.extendedProps.is_draft,
-        post_status: arg.event.extendedProps.post_status,
-        campaign_id: arg.event.extendedProps.campaign_id,
-      },
-    });
-  };
-
-  const handleEventMouseLeave = () => {
-    hideTimeout.current = setTimeout(() => {
-      setTooltip((prev) => ({ ...prev, visible: false }));
-    }, 150);
-  };
-
-  const handleTooltipMouseEnter = () => {
-    if (hideTimeout.current) clearTimeout(hideTimeout.current);
-  };
-
-  const handleTooltipMouseLeave = () => {
-    setTooltip((prev) => ({ ...prev, visible: false }));
-  };
-
   return (
     <div className="calendar-display">
+      <div className="calendar-display__legend">
+        <span className="calendar-display__legend-item calendar-display__legend-item--published">
+          Published
+        </span>
+        <span className="calendar-display__legend-item calendar-display__legend-item--scheduled">
+          Scheduled
+        </span>
+        <span className="calendar-display__legend-item calendar-display__legend-item--draft">
+          Draft
+        </span>
+      </div>
+
       <FullCalendar
         plugins={[dayGridPlugin]}
         initialView="dayGridMonth"
         events={events}
-        eventMouseEnter={handleEventMouseEnter}
+        eventMouseEnter={(arg: EventHoveringArg) =>
+          handleEventMouseEnter(arg, (a) => ({
+            id: a.event.id,
+            title: a.event.title,
+            caption: a.event.extendedProps.caption,
+            platform: a.event.extendedProps.platform,
+            is_draft: a.event.extendedProps.is_draft,
+            post_status: a.event.extendedProps.post_status,
+            campaign_id: a.event.extendedProps.campaign_id,
+          }))
+        }
         eventMouseLeave={handleEventMouseLeave}
       />
 
@@ -89,11 +126,16 @@ export default function PostCalendarDisplay({ posts }: { posts: Post[] }) {
         >
           <div className="event-tooltip__header">
             <span className="event-tooltip__title">{tooltip.event.title}</span>
-            {tooltip.event.platform && (
-              <span className="event-tooltip__platform">
-                {tooltip.event.platform}
-              </span>
-            )}
+            {tooltip.event.platform &&
+              parsePlatforms(tooltip.event.platform).length > 0 && (
+                <div className="event-tooltip__platforms">
+                  {parsePlatforms(tooltip.event.platform).map((p) => (
+                    <span key={p} className="event-tooltip__platform">
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              )}
           </div>
 
           {tooltip.event.post_status && (

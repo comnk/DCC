@@ -1,18 +1,19 @@
 "use client";
 
-import DeletePostButton from "@/components/buttons/DeletePostButton/DeletePostButton";
 import "./post_page.scss";
 
 import Navbar from "@/components/Navbar/Navbar";
+import DeletePostButton from "@/components/buttons/DeletePostButton/DeletePostButton";
 import PostPreviewPanel from "@/components/PostPreviewPanel/PostPreviewPanel";
+import { PostStatusBadge } from "@/components/icons/PostStatusBadge/PostStatusBadge";
 import { createClient } from "@/lib/supabase/client";
 import { MediaAsset } from "@/types/MediaAsset";
 import { Post } from "@/types/Post";
 import { PostPreviewData } from "@/types/PostPreviewData";
-import { Button, CircularProgress } from "@mui/material";
-import Link from "next/link";
+import { CircularProgress } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Button from "@/components/buttons/Button/Button";
 
 export default function PostPage() {
   const { id, postId } = useParams<{ id: string; postId: string }>();
@@ -116,36 +117,31 @@ export default function PostPage() {
       <Navbar />
       <div className="post-page__content">
         <div className="post-page__header">
-          <h1 className="post-page__title">Post Details</h1>
+          <div className="post-page__title-row">
+            <h1 className="post-page__title">Post Details</h1>
+            {postData && <PostStatusBadge post={postData} />}
+          </div>
 
-          {postData?.post_status !== "posted" && (
-            <>
-              <Button
-                variant="contained"
-                component={Link}
-                href={`/campaign/${id}/posts/${postData?.id}/update`}
-                className="post-page__btn"
-              >
-                Update Post
-              </Button>
-
-              {postData?.scheduled_time ? (
+          <div className="post-page__actions">
+            {postData?.post_status !== "posted" && (
+              <>
                 <Button
-                  variant="contained"
-                  className="post-page__btn"
-                  onClick={handleCancelPost}
-                >
-                  Cancel Post
-                </Button>
-              ) : null}
+                  text="Update Post"
+                  link={`/campaign/${id}/posts/${postData?.id}/update`}
+                />
 
-              <DeletePostButton postId={postData?.id} campaignId={id} />
-            </>
-          )}
+                {postData?.scheduled_time ? (
+                  <Button
+                    text="Cancel Post"
+                    link="#"
+                    onClick={handleCancelPost}
+                  />
+                ) : null}
 
-          {postData?.post_status === "posted" && (
-            <span className="post-page__posted-badge">Already Posted</span>
-          )}
+                <DeletePostButton postId={postData?.id} campaignId={id} />
+              </>
+            )}
+          </div>
         </div>
 
         <div className="post-page__body">
