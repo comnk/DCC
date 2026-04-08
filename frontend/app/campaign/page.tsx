@@ -3,21 +3,26 @@
 import "./campaign_list.scss";
 
 import Button from "@/components/buttons/Button/Button";
-import { Button as MUIButton } from "@mui/material";
+import { Button as MUIButton, CircularProgress } from "@mui/material";
+import { CalendarMonth, ViewList } from "@mui/icons-material";
 import Navbar from "@/components/Navbar/Navbar";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
 import { Campaign } from "@/types/Campaign";
-import { CircularProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import CampaignCard from "@/components/cards/CampaignCard/CampaignCard";
 import CampaignSearchBar from "@/components/SearchBars/CampaignSearchBar/CampaignSearchBar";
+import CampaignCalendarDisplay from "@/components/calendars/CampaignCalendarDisplay/CampaignCalendarDisplay";
+
+type Tab = "active" | "completed" | "archived";
+type ViewMode = "list" | "calendar";
 
 export default function CampaignsPage() {
   const { user, accessToken, loading } = useRequireAuth();
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
-  const [tab, setTab] = useState<"active" | "completed" | "archived">("active");
+  const [tab, setTab] = useState<Tab>("active");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [searchTerm, setSearchTerm] = useState("");
 
   const today = new Date();
@@ -76,37 +81,63 @@ export default function CampaignsPage() {
           <h2>Campaigns</h2>
           <Button text="Create Campaign" link="/campaign/new" />
         </div>
-        <div className="searchBarWrapper">
-          <CampaignSearchBar
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-          />
+
+        <div className="toolbar">
+          <div className="searchBarWrapper">
+            <CampaignSearchBar
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+            />
+          </div>
+          <div className="viewToggle">
+            <button
+              className={`viewToggle__btn ${viewMode === "list" ? "viewToggle__btn--active" : ""}`}
+              onClick={() => setViewMode("list")}
+              title="List view"
+            >
+              <ViewList fontSize="small" />
+            </button>
+            <button
+              className={`viewToggle__btn ${viewMode === "calendar" ? "viewToggle__btn--active" : ""}`}
+              onClick={() => setViewMode("calendar")}
+              title="Calendar view"
+            >
+              <CalendarMonth fontSize="small" />
+            </button>
+          </div>
         </div>
-        <div className="tabBar">
-          <MUIButton
-            variant={tab === "active" ? "contained" : "outlined"}
-            onClick={() => setTab("active")}
-          >
-            Active
-          </MUIButton>
-          <MUIButton
-            variant={tab === "completed" ? "contained" : "outlined"}
-            onClick={() => setTab("completed")}
-          >
-            Completed
-          </MUIButton>
-          <MUIButton
-            variant={tab === "archived" ? "contained" : "outlined"}
-            onClick={() => setTab("archived")}
-          >
-            Archived
-          </MUIButton>
-        </div>
+
+        {/* Tabs only apply to list view */}
+        {viewMode === "list" && (
+          <div className="tabBar">
+            <MUIButton
+              variant={tab === "active" ? "contained" : "outlined"}
+              onClick={() => setTab("active")}
+            >
+              Active
+            </MUIButton>
+            <MUIButton
+              variant={tab === "completed" ? "contained" : "outlined"}
+              onClick={() => setTab("completed")}
+            >
+              Completed
+            </MUIButton>
+            <MUIButton
+              variant={tab === "archived" ? "contained" : "outlined"}
+              onClick={() => setTab("archived")}
+            >
+              Archived
+            </MUIButton>
+          </div>
+        )}
+
         <div className="campaignGrid">
           {campaignsLoading ? (
             <div className="spinnerWrapper">
               <CircularProgress />
             </div>
+          ) : viewMode === "calendar" ? (
+            <CampaignCalendarDisplay campaigns={campaigns} />
           ) : filteredCampaigns.length === 0 ? (
             <div className="emptyState">
               <div className="emptyIcon">📭</div>
