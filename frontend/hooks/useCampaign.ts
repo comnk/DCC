@@ -2,9 +2,8 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { Campaign } from "@/types/Campaign";
-import { useState } from "react";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 
 export function useCampaign(campaignId: string) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";

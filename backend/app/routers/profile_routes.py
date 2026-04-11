@@ -4,6 +4,15 @@ from ..db.supabase import create_supabase_client_with_token
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
+@router.get("/all")
+def get_all_profiles(authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    supabase = create_supabase_client_with_token(token)
+
+    response = supabase.table("user_profiles").select("*").execute()
+    
+    return response.data
+
 @router.get("/{user_id}")
 def get_current_user(user_id: str, authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
