@@ -13,11 +13,17 @@ export function useGetUsers() {
             const { data } = await supabase.auth.getSession();
             if (!data.session) return;
 
-            const res = await fetch(`${API_URL}/profiles/all`, {
+            const res = await fetch(`${API_URL}/profile/all`, {
                 headers: { Authorization: `Bearer ${data.session.access_token}` },
             });
 
-            if (res.ok) setUsers(await res.json());
+            if (res.ok) {
+                const json = await res.json();
+                console.log("users from API:", json);
+                setUsers(json);
+            } else {
+                console.error("fetch failed", res.status);
+            }
         };
         fetchUsers();
 

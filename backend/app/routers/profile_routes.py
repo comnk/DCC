@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header
 
 from ..db.supabase import create_supabase_client_with_token
 
@@ -10,8 +10,9 @@ def get_all_profiles(authorization: str = Header(...)):
     supabase = create_supabase_client_with_token(token)
 
     response = supabase.table("user_profiles").select("*").execute()
-    
-    return response.data
+    profiles = response.data
+
+    return profiles
 
 @router.get("/{user_id}")
 def get_current_user(user_id: str, authorization: str = Header(...)):

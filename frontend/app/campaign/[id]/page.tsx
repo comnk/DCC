@@ -3,6 +3,7 @@ import "./campaign_page.scss";
 import ArchiveCampaignButton from "@/components/buttons/ArchiveCampaignButton/ArchiveCampaignButton";
 import Button from "@/components/buttons/Button/Button";
 import DeleteCampaignButton from "@/components/buttons/DeleteCampaignButton/DeleteCampaignButton";
+import CampaignTeam from "@/components/CampaignTeam/CampaignTeam";
 import PostCard from "@/components/cards/PostCard/PostCard";
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/server";
@@ -19,6 +20,14 @@ export default async function CampaignPage({ params }: { params: Params }) {
   } = await supabase.auth.getSession();
 
   if (!session) {
+    redirect("/login");
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     redirect("/login");
   }
 
@@ -44,6 +53,20 @@ export default async function CampaignPage({ params }: { params: Params }) {
       Authorization: `Bearer ${token}`,
     },
   }).then((res) => res.json());
+
+  const profileRes = await fetch(`${API_URL}/profile/${user.id}`, {
+    cache: "no-store",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const creatorProfile = profileRes.ok ? await profileRes.json() : null;
+
+  const creator = {
+    id: user.id,
+    display_name: creatorProfile?.display_name ?? user.email ?? "Creator",
+    role: creatorProfile?.role ?? "Admin",
+    profile_picture: creatorProfile?.profile_picture ?? null,
+    email: user.email ?? "",
+  };
 
   return (
     <div className="campaign-page">
@@ -101,6 +124,7 @@ export default async function CampaignPage({ params }: { params: Params }) {
             ))}
           </ul>
         </section>
+        <CampaignTeam creator={creator} members={[]} />
       </div>
     </div>
   );

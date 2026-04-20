@@ -3,6 +3,7 @@
 import "./campaign_list.scss";
 
 import Button from "@/components/buttons/Button/Button";
+import CampaignTeam from "@/components/CampaignTeam/CampaignTeam";
 import { Button as MUIButton, CircularProgress } from "@mui/material";
 import { CalendarMonth, ViewList } from "@mui/icons-material";
 import Navbar from "@/components/Navbar/Navbar";
