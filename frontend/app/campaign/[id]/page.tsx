@@ -124,7 +124,7 @@ export default async function CampaignPage({ params }: { params: Params }) {
             ))}
           </ul>
         </section>
-        <CampaignTeam creator={creator} members={[]} />
+        <CampaignTeam creator={creator} campaignId={id} accessToken={token} />
       </div>
     </div>
   );

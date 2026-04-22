@@ -4,21 +4,17 @@ import "./CampaignTeam.scss";
 
 import Image from "next/image";
 import UserSearchBar from "@/components/SearchBars/UserSearchBar/UserSearchBar";
-
-type Member = {
-  id: string;
-  display_name: string;
-  role: string;
-  profile_picture?: string;
-  email?: string;
-};
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { User } from "@/types/User";
 
 type Props = {
-  creator: Member;
-  members: Member[];
+  creator: User;
+  campaignId: string;
+  accessToken: string;
 };
 
-function Avatar({ member }: { member: Member }) {
+function Avatar({ member }: { member: User }) {
   return (
     <div className="team-avatar">
       {member.profile_picture ? (
@@ -50,7 +46,81 @@ function Avatar({ member }: { member: Member }) {
   );
 }
 
-export default function CampaignTeam({ creator, members }: Props) {
+export default function CampaignTeam({
+  creator,
+  campaignId,
+  accessToken,
+}: Props) {
+  const [members, setMembers] = useState<User[]>([]);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+  useEffect(() => {
+    if (!accessToken) return;
+
+    const fetchMembers = async () => {
+      const res = await fetch(`${API_URL}/campaigns/${campaignId}/members`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const membersData = await res.json();
+      setMembers(membersData);
+    };
+
+    fetchMembers();
+  }, [accessToken, campaignId]);
+
+  const addMemberToCampaign = async (user: User) => {
+    try {
+      const res = await fetch(`${API_URL}/campaigns/${campaignId}/members`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ user_id: user.id }),
+      });
+
+      if (!res.ok) throw new Error("Failed to add member");
+
+      setMembers((prev) => [...prev, user]);
+    } catch (error) {
+      console.error("Error adding member:", error);
+    }
+  };
+
+  const removeMemberFromCampaign = async (userId: string) => {
+    try {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getSession();
+
+      if (!data.session) {
+        alert("You must be logged in to remove a member from the campaign");
+        return;
+      }
+
+      const confirmed = confirm(
+        "Are you sure you want to remove this member from the campaign?",
+      );
+      if (!confirmed) return;
+
+      const res = await fetch(
+        `${API_URL}/campaigns/${campaignId}/members/${userId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      );
+
+      if (!res.ok) throw new Error("Failed to remove member");
+
+      setMembers((prev) => prev.filter((m) => m.id !== userId));
+    } catch (error) {
+      console.error("Error removing member:", error);
+    }
+  };
+
   return (
     <section className="campaign-team">
       <h2 className="campaign-team__title">Team</h2>
@@ -67,7 +137,16 @@ export default function CampaignTeam({ creator, members }: Props) {
         ) : (
           <div className="campaign-team__members">
             {members.map((m) => (
-              <Avatar key={m.id} member={m} />
+              <div key={m.id} className="campaign-team__member-row">
+                <Avatar member={m} />
+                <button
+                  className="campaign-team__remove-btn"
+                  onClick={() => removeMemberFromCampaign(m.id)}
+                  title="Remove member"
+                >
+                  X
+                </button>
+              </div>
             ))}
           </div>
         )}
@@ -76,7 +155,7 @@ export default function CampaignTeam({ creator, members }: Props) {
       <div className="campaign-team__section">
         <p className="campaign-team__section-label">Add Members</p>
         <UserSearchBar
-          onAdd={(user) => console.log("TODO: add member", user)}
+          onAdd={(user) => addMemberToCampaign(user)}
           excludeIds={[creator.id, ...members.map((m) => m.id)]}
         />
       </div>

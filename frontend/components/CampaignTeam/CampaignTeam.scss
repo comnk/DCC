@@ -105,6 +105,35 @@
     color: #9ca3af;
     margin: 0;
   }
+
+  &__member-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+
+    &:hover .campaign-team__remove-btn {
+      opacity: 1;
+    }
+  }
+
+  &__remove-btn {
+    opacity: 0;
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+
+    &:hover {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+  }
 }
 
 .team-avatar {

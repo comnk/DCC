@@ -2,16 +2,9 @@
 
 import "./UserSearchBar.scss";
 import { useGetUsers } from "@/hooks/useGetUsers";
+import { User } from "@/types/User";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-
-type User = {
-  id: string;
-  display_name: string;
-  role: string;
-  profile_picture?: string | null;
-  email?: string;
-};
 
 type Props = {
   onAdd: (user: User) => void;

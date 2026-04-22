@@ -56,13 +56,23 @@ def create_post(post: Post, authorization: str = Header(...)):
 @router.get("/all")
 def get_all_posts(authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
+    payload = jwt.decode(token, options={"verify_signature": False})
+    user_id = payload.get("sub")
+
     supabase = create_supabase_client_with_token(token)
-    response = supabase.table("posts").select("*").execute()
 
-    if not response.data:
-        raise HTTPException(status_code=404, detail="No posts found")
+    authored = supabase.table("posts").select("*").eq("author_id", user_id).execute()
 
-    return response.data or []
+    memberships = supabase.table("campaign_members").select("campaign_id").eq("user_id", user_id).execute()
+    campaign_ids = [m["campaign_id"] for m in (memberships.data or [])]
+
+    member_posts = []
+    if campaign_ids:
+        member_posts = supabase.table("posts").select("*").in_("campaign_id", campaign_ids).execute().data or []
+
+    all_posts = {p["id"]: p for p in (authored.data or []) + member_posts}
+
+    return list(all_posts.values())
 
 @router.get("/{post_id}")
 def get_post(post_id: int, authorization: str = Header(...)):

@@ -1,6 +1,6 @@
 import jwt
 
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header, Body
 from ..db.supabase import create_supabase_client_with_token
 from ..models.campaign import Campaign
 from ..services.posts.posts import delete_post_service
@@ -27,22 +27,30 @@ def create_campaign(campaign: Campaign, authorization: str = Header(...)):
 
 @router.get("/list")
 def list_campaigns(authorization: str = Header(...)):
-    """List all campaigns for the authenticated user"""
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Invalid authorization header")
     
     token = authorization.replace("Bearer ", "")
-    
     if not token or token == "undefined":
         raise HTTPException(status_code=401, detail="Missing or invalid token")
 
+    payload = jwt.decode(token, options={"verify_signature": False})
+    user_id = payload.get("sub")
+
     supabase = create_supabase_client_with_token(token)
-    response = supabase.table("campaigns").select("*").execute()
+
+    created = supabase.table("campaigns").select("*").eq("created_by", user_id).execute()
+
+    memberships = supabase.table("campaign_members").select("campaign_id").eq("user_id", user_id).execute()
+    member_ids = [m["campaign_id"] for m in (memberships.data or [])]
+
+    member_campaigns = []
+    if member_ids:
+        member_campaigns = supabase.table("campaigns").select("*").in_("id", member_ids).execute().data or []
+
+    all_campaigns = {c["id"]: c for c in (created.data or []) + member_campaigns}
     
-    if not response.data:
-        return []
-    
-    return response.data
+    return list(all_campaigns.values())
 
 @router.get("/{campaign_id}")
 def get_campaign(campaign_id: int, authorization: str = Header(...)):
@@ -120,3 +128,56 @@ def get_campaign_posts(campaign_id: int, authorization: str = Header(...)):
         return []
     
     return response.data
+
+@router.post("/{campaign_id}/members")
+def add_campaign_member(
+    campaign_id: int,
+    user_id: str = Body(..., embed=True),
+    authorization: str = Header(...)
+):
+    """Add a member to a campaign"""
+    supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
+    response = supabase.table("campaign_members").insert({
+        "campaign_id": campaign_id,
+        "user_id": user_id
+    }).execute()
+
+    if not response.data:
+        raise HTTPException(status_code=500, detail="Failed to add member to campaign")
+
+    return response.data[0]
+
+@router.get("/{campaign_id}/members")
+def get_campaign_members(campaign_id: int, authorization: str = Header(...)):
+    """Get all members associated with a campaign"""
+    supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
+    response = (
+        supabase.table("campaign_members")
+        .select("*, user_profiles(*)")
+        .eq("campaign_id", campaign_id)
+        .execute()
+    )
+
+    if not response.data:
+        return []
+
+    members = []
+    for row in response.data:
+        profile = row.get("user_profiles") or {}
+        members.append({
+            "id": profile.get("id", row["user_id"]),
+            "display_name": profile.get("display_name", "Unknown"),
+            "role": profile.get("role", ""),
+            "profile_picture": profile.get("profile_picture"),
+            "email": profile.get("email"),
+        })
+
+    return members
+
+@router.delete("/{campaign_id}/members/{user_id}")
+def remove_campaign_member(campaign_id: int, user_id: str, authorization: str = Header(...)):
+    """Remove a member from a campaign"""
+    supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
+    response = supabase.table("campaign_members").delete().eq("campaign_id", campaign_id).eq("user_id", user_id).execute()
+
+    return {"message": "Member removed from campaign successfully"}
