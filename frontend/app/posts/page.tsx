@@ -6,6 +6,7 @@ import PostCard from "@/components/cards/PostCard/PostCard";
 import Navbar from "@/components/Navbar/Navbar";
 import PostSearchBar from "@/components/SearchBars/PostSearchBar/PostSearchBar";
 import PostCalendarDisplay from "@/components/calendars/PostCalendarDisplay/PostCalendarDisplay";
+import PlatformFilter from "@/components/PlatformFilter/PlatformFilter";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
 import { Post } from "@/types/Post";
 import { CircularProgress, Button as MUIButton } from "@mui/material";
@@ -32,6 +33,7 @@ export default function PostsPage() {
   const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(
     null,
   );
+  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -76,7 +78,9 @@ export default function PostsPage() {
       .includes(searchTerm.toLowerCase());
     const matchesCampaign =
       selectedCampaignId === null || post.campaign_id === selectedCampaignId;
-    return matchesTab && matchesSearch && matchesCampaign;
+    const matchesPlatform =
+      selectedPlatform === null || post.platform.includes(selectedPlatform);
+    return matchesTab && matchesSearch && matchesCampaign && matchesPlatform;
   });
 
   const calendarPosts = posts.filter((post: Post) => {
@@ -85,7 +89,9 @@ export default function PostsPage() {
       .includes(searchTerm.toLowerCase());
     const matchesCampaign =
       selectedCampaignId === null || post.campaign_id === selectedCampaignId;
-    return matchesSearch && matchesCampaign;
+    const matchesPlatform =
+      selectedPlatform === null || post.platform.includes(selectedPlatform);
+    return matchesSearch && matchesCampaign && matchesPlatform;
   });
 
   const tabs: { label: string; value: Tab }[] = [
@@ -120,6 +126,11 @@ export default function PostsPage() {
                 </option>
               ))}
             </select>
+
+            <PlatformFilter
+              value={selectedPlatform}
+              onChange={setSelectedPlatform}
+            />
           </div>
 
           <div className="posts-page__view-toggle">

@@ -42,7 +42,8 @@
     }
   }
 
-  &__campaign-filter {
+  &__campaign-filter,
+  &__platform-filter {
     height: 40px;
     padding: 0 12px;
     border: 1px solid #e5e3de;

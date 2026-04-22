@@ -56,7 +56,6 @@ def list_campaigns(authorization: str = Header(...)):
 def get_campaign(campaign_id: int, authorization: str = Header(...)):
     """Get campaign details by ID"""
     supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
-    response = supabase.table("campaigns").select("*").eq("id", campaign_id).execute()
     
     try:
         response = supabase.table("campaigns").select("*").eq("id", campaign_id).execute()
