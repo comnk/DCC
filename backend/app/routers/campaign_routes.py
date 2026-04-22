@@ -137,47 +137,62 @@ def add_campaign_member(
 ):
     """Add a member to a campaign"""
     supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
-    response = supabase.table("campaign_members").insert({
+    
+    campaign = supabase.table("campaigns").select("id").eq("id", campaign_id).execute()
+    if not campaign.data:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    
+    user = supabase.table("user_profiles").select("id").eq("id", user_id).execute()
+    if not user.data:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    existing_member = supabase.table("campaign_members").select("*").eq("campaign_id", campaign_id).eq("user_id", user_id).execute()
+    if existing_member.data:
+        raise HTTPException(status_code=400, detail="User is already a member of this campaign")
+    
+    supabase.table("campaign_members").insert({
         "campaign_id": campaign_id,
         "user_id": user_id
     }).execute()
-
-    if not response.data:
-        raise HTTPException(status_code=500, detail="Failed to add member to campaign")
-
-    return response.data[0]
-
-@router.get("/{campaign_id}/members")
-def get_campaign_members(campaign_id: int, authorization: str = Header(...)):
-    """Get all members associated with a campaign"""
-    supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
-    response = (
-        supabase.table("campaign_members")
-        .select("*, user_profiles(*)")
-        .eq("campaign_id", campaign_id)
-        .execute()
-    )
-
-    if not response.data:
-        return []
-
-    members = []
-    for row in response.data:
-        profile = row.get("user_profiles") or {}
-        members.append({
-            "id": profile.get("id", row["user_id"]),
-            "display_name": profile.get("display_name", "Unknown"),
-            "role": profile.get("role", ""),
-            "profile_picture": profile.get("profile_picture"),
-            "email": profile.get("email"),
-        })
-
-    return members
+    
+    return {"message": "Member added successfully"}
 
 @router.delete("/{campaign_id}/members/{user_id}")
 def remove_campaign_member(campaign_id: int, user_id: str, authorization: str = Header(...)):
     """Remove a member from a campaign"""
     supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
-    response = supabase.table("campaign_members").delete().eq("campaign_id", campaign_id).eq("user_id", user_id).execute()
+    
+    campaign = supabase.table("campaigns").select("id").eq("id", campaign_id).execute()
+    if not campaign.data:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    
+    user = supabase.table("user_profiles").select("id").eq("id", user_id).execute()
+    if not user.data:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    existing_member = supabase.table("campaign_members").select("*").eq("campaign_id", campaign_id).eq("user_id", user_id).execute()
+    if not existing_member.data:
+        raise HTTPException(status_code=400, detail="User is not a member of this campaign")
+    
+    supabase.table("campaign_members").delete().eq("campaign_id", campaign_id).eq("user_id", user_id).execute()
+    
+    return {"message": "Member removed successfully"}
 
-    return {"message": "Member removed from campaign successfully"}
+@router.get("/{campaign_id}/members")
+def list_campaign_members(campaign_id: int, authorization: str = Header(...)):
+    """List all members of a campaign"""
+    supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
+    
+    campaign = supabase.table("campaigns").select("id").eq("id", campaign_id).execute()
+    if not campaign.data:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    
+    members = supabase.table("campaign_members").select("user_id").eq("campaign_id", campaign_id).execute()
+    member_ids = [m["user_id"] for m in (members.data or [])]
+    
+    if not member_ids:
+        return []
+    
+    users = supabase.table("user_profiles").select("*").in_("id", member_ids).execute()
+    
+    return users.data or []

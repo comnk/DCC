@@ -47,12 +47,13 @@ export default async function CampaignPage({ params }: { params: Params }) {
 
   const campaign = await res.json();
 
-  const campaign_posts = await fetch(`${API_URL}/campaigns/${id}/posts`, {
+  const campaign_posts_res = await fetch(`${API_URL}/campaigns/${id}/posts`, {
     cache: "no-store",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then((res) => res.json());
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const campaign_posts = campaign_posts_res.ok
+    ? await campaign_posts_res.json()
+    : [];
 
   const profileRes = await fetch(`${API_URL}/profile/${user.id}`, {
     cache: "no-store",

@@ -19,7 +19,6 @@ export function useGetUsers() {
 
             if (res.ok) {
                 const json = await res.json();
-                console.log("users from API:", json);
                 setUsers(json);
             } else {
                 console.error("fetch failed", res.status);
