@@ -49,9 +49,7 @@ function buildEvents(campaigns: Campaign[]) {
   today.setHours(0, 0, 0, 0);
   const todayStr = today.toISOString().split("T")[0];
 
-  const events: object[] = [];
-
-  campaigns.forEach((campaign) => {
+  return campaigns.map((campaign) => {
     const status = getCampaignStatus(campaign);
     const startStr = campaign.start_date ?? undefined;
     const endStr = campaign.end_date
@@ -67,60 +65,42 @@ function buildEvents(campaigns: Campaign[]) {
       end_date: campaign.end_date,
     };
 
-    if (status === "active" && startStr) {
-      const campaignStart = new Date(startStr);
-
-      if (campaignStart < today) {
-        events.push({
-          id: `${campaign.id}-past`,
-          title: campaign.name,
-          start: startStr,
-          end: todayStr,
-          classNames: ["campaign-event--past"],
-          backgroundColor: "#dbeafe",
-          borderColor: "#3b82f6",
-          textColor: "#1e40af",
-          extendedProps,
-        });
-      }
-
-      events.push({
-        id: `${campaign.id}-future`,
-        title: campaignStart >= today ? campaign.name : "",
-        start: campaignStart >= today ? startStr : todayStr,
-        end: endStr,
-        classNames: ["campaign-event--future"],
-        backgroundColor: "#dbeafe",
-        borderColor: "#3b82f6",
-        textColor: "#1e40af",
-        extendedProps,
-      });
-    } else {
-      const colors =
-        status === "completed"
-          ? {
-              backgroundColor: "#dcfce7",
-              borderColor: "#22c55e",
-              textColor: "#15803d",
-            }
-          : {
-              backgroundColor: "#f3f4f6",
-              borderColor: "#9ca3af",
-              textColor: "#374151",
-            };
-
-      events.push({
+    if (status === "active") {
+      return {
         id: String(campaign.id),
         title: campaign.name,
         start: startStr,
         end: endStr,
-        ...colors,
+        classNames: ["campaign-event--active"],
+        backgroundColor: "#dbeafe",
+        borderColor: "#3b82f6",
+        textColor: "#1e40af",
         extendedProps,
-      });
+      };
+    } else if (status === "completed") {
+      return {
+        id: String(campaign.id),
+        title: campaign.name,
+        start: startStr,
+        end: endStr,
+        backgroundColor: "#dcfce7",
+        borderColor: "#22c55e",
+        textColor: "#15803d",
+        extendedProps,
+      };
+    } else {
+      return {
+        id: String(campaign.id),
+        title: campaign.name,
+        start: startStr,
+        end: endStr,
+        backgroundColor: "#f3f4f6",
+        borderColor: "#9ca3af",
+        textColor: "#374151",
+        extendedProps,
+      };
     }
   });
-
-  return events;
 }
 
 export default function CampaignCalendarDisplay({
@@ -135,8 +115,6 @@ export default function CampaignCalendarDisplay({
     handleTooltipMouseEnter,
     handleTooltipMouseLeave,
   } = useCalendarTooltip<CampaignTooltipEvent>();
-
-  const events = buildEvents(campaigns);
 
   return (
     <div className="campaign-calendar-display">
@@ -158,7 +136,44 @@ export default function CampaignCalendarDisplay({
       <FullCalendar
         plugins={[dayGridPlugin]}
         initialView="dayGridMonth"
-        events={events}
+        events={buildEvents(campaigns)}
+        eventDidMount={(arg) => {
+          const { status } = arg.event.extendedProps;
+          if (status !== "active") return;
+
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          const weekRow = arg.el.closest(".fc-daygrid-body tr");
+          if (!weekRow) return;
+
+          const firstCell = weekRow.querySelector(".fc-daygrid-day");
+          if (!firstCell) return;
+
+          const dateAttr = firstCell.getAttribute("data-date");
+          if (!dateAttr) return;
+
+          const rowStart = new Date(dateAttr);
+          rowStart.setHours(0, 0, 0, 0);
+
+          const rowEnd = new Date(rowStart);
+          rowEnd.setDate(rowEnd.getDate() + 7);
+          rowEnd.setHours(0, 0, 0, 0);
+
+          let pct = 0;
+          if (today <= rowStart) {
+            pct = 0;
+          } else if (today >= rowEnd) {
+            pct = 100;
+          } else {
+            const total = rowEnd.getTime() - rowStart.getTime();
+            const elapsed = today.getTime() - rowStart.getTime();
+            pct = (elapsed / total) * 100;
+          }
+
+          const mainEl = arg.el.querySelector(".fc-event-main") as HTMLElement;
+          if (mainEl) mainEl.style.setProperty("--stripe-pct", `${pct}%`);
+        }}
         eventMouseEnter={(arg: EventHoveringArg) =>
           handleEventMouseEnter(arg, (a) => ({
             id: a.event.extendedProps.campaignId,
@@ -192,13 +207,11 @@ export default function CampaignCalendarDisplay({
               {tooltip.event.status}
             </span>
           </div>
-
           <div className="campaign-tooltip__dates">
             <span>{formatDate(tooltip.event.start_date)}</span>
             <span className="campaign-tooltip__dates-sep">→</span>
             <span>{formatDate(tooltip.event.end_date)}</span>
           </div>
-
           {tooltip.event.description && (
             <div className="campaign-tooltip__description">
               {tooltip.event.description.length > 100

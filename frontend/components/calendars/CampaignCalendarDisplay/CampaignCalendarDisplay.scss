@@ -48,16 +48,49 @@
 }
 
 .campaign-event--past {
-  .fc-event-main,
-  &.fc-event {
-    background-image: repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 4px,
-      rgba(255, 255, 255, 0.35) 4px,
-      rgba(255, 255, 255, 0.35) 8px
-    ) !important;
-    opacity: 0.85;
+  position: relative;
+
+  .fc-event-main {
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 4px,
+        rgba(255, 255, 255, 0.4) 4px,
+        rgba(255, 255, 255, 0.4) 8px
+      );
+      pointer-events: none;
+    }
+  }
+}
+
+.campaign-event--active {
+  .fc-event-main {
+    position: relative !important;
+    overflow: hidden !important;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--stripe-pct, 0%);
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 4px,
+        rgba(0, 0, 0, 0.15) 4px,
+        rgba(0, 0, 0, 0.15) 8px
+      );
+      pointer-events: none;
+    }
   }
 }
 
