@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, Header, Body
 from ..db.supabase import create_supabase_client_with_token
 from ..models.campaign import Campaign
 from ..services.posts.posts import delete_post_service
+from ..utils.check_owner import check_owner
 
 router = APIRouter(prefix="/campaigns", tags=["campaign"])
 
@@ -69,19 +70,25 @@ def get_campaign(campaign_id: int, authorization: str = Header(...)):
 
 @router.put("/{campaign_id}")
 def update_campaign(campaign_id: int, campaign: Campaign, authorization: str = Header(...)):
-    """Update campaign details by ID"""
-    supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
+    token = authorization.replace("Bearer ", "")
+    payload = jwt.decode(token, options={"verify_signature": False})
+    user_id = payload.get("sub")
+    supabase = create_supabase_client_with_token(token)
+    check_owner(supabase, campaign_id, user_id)
+
     response = supabase.table("campaigns").update(campaign.model_dump(mode="json")).eq("id", campaign_id).execute()
-    
-    if (not response.data):
-        raise HTTPException(status_code=500, detail="Campaign not found or failed to update")
-    
+    if not response.data:
+        raise HTTPException(status_code=500, detail="Failed to update campaign")
     return response.data[0]
 
 @router.post("/{campaign_id}/toggle_archive")
 def toggle_archive_campaign(campaign_id: int, authorization: str = Header(...)):
-    """Toggle archive status of a campaign by ID"""
-    supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
+    token = authorization.replace("Bearer ", "")
+    payload = jwt.decode(token, options={"verify_signature": False})
+    user_id = payload.get("sub")
+    supabase = create_supabase_client_with_token(token)
+    check_owner(supabase, campaign_id, user_id)
+    
     current = supabase.table("campaigns").select("is_archived").eq("id", campaign_id).execute()
     
     if not current.data:
@@ -101,8 +108,11 @@ def toggle_archive_campaign(campaign_id: int, authorization: str = Header(...)):
 
 @router.delete("/{campaign_id}")
 def delete_campaign(campaign_id: int, authorization: str = Header(...)):
-    """Delete a campaign by ID"""
-    supabase = create_supabase_client_with_token(authorization.replace("Bearer ", ""))
+    token = authorization.replace("Bearer ", "")
+    payload = jwt.decode(token, options={"verify_signature": False})
+    user_id = payload.get("sub")
+    supabase = create_supabase_client_with_token(token)
+    check_owner(supabase, campaign_id, user_id)
     
     campaign = supabase.table("campaigns").select("id").eq("id", campaign_id).execute()
     if not campaign.data:
@@ -113,6 +123,7 @@ def delete_campaign(campaign_id: int, authorization: str = Header(...)):
         for post in posts.data:
             delete_post_service(post["id"], authorization)
     
+    supabase.table("campaign_members").delete().eq("campaign_id", campaign_id).execute()
     supabase.table("campaigns").delete().eq("id", campaign_id).execute()
     
     return {"message": "Campaign deleted successfully"}

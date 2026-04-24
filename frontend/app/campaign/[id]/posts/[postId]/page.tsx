@@ -20,6 +20,7 @@ export default function PostPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [postData, setPostData] = useState<Post | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<PostPreviewData>({
     title: "",
     platform: [],
@@ -52,6 +53,7 @@ export default function PostPage() {
       }
 
       const data = await res.json();
+      setCurrentUserId(session.user.id);
       setPostData(data);
 
       const signedUrls = await Promise.all(
@@ -112,6 +114,8 @@ export default function PostPage() {
       </div>
     );
 
+  const isAuthor = currentUserId === postData?.author_id;
+
   return (
     <div className="post-page">
       <Navbar />
@@ -123,7 +127,7 @@ export default function PostPage() {
           </div>
 
           <div className="post-page__actions">
-            {postData?.post_status !== "posted" && (
+            {postData?.post_status !== "posted" && isAuthor && (
               <>
                 <Button
                   text="Update Post"

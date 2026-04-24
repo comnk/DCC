@@ -1,7 +1,6 @@
 import jwt
 
 from fastapi import APIRouter, HTTPException, Header
-import supabase
 from ..db.supabase import create_supabase_client_with_token
 from ..services.posts.posts import delete_post_service
 from ..models.post import Post
@@ -19,6 +18,19 @@ def create_post(post: Post, authorization: str = Header(...)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     supabase = create_supabase_client_with_token(token)
+    
+    campaign = supabase.table("campaigns").select("created_by").eq("id", post.campaign_id).execute()
+    if not campaign.data:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    
+    is_owner = campaign.data[0]["created_by"] == author_id
+    if not is_owner:
+        membership = supabase.table("campaign_members").select("user_id")\
+            .eq("campaign_id", post.campaign_id)\
+            .eq("user_id", author_id)\
+            .execute()
+        if not membership.data:
+            raise HTTPException(status_code=403, detail="Not a member of this campaign")
     
     post_data = post.model_dump(mode="json")
     photo_urls = post_data.pop("media_asset", [])

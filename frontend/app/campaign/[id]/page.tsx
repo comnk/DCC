@@ -46,6 +46,7 @@ export default async function CampaignPage({ params }: { params: Params }) {
   }
 
   const campaign = await res.json();
+  const isOwner = campaign.created_by === user.id;
 
   const campaign_posts_res = await fetch(`${API_URL}/campaigns/${id}/posts`, {
     cache: "no-store",
@@ -77,9 +78,19 @@ export default async function CampaignPage({ params }: { params: Params }) {
           <h2 className="campaign-page__title">Campaign Details</h2>
           <div className="campaign-page__actions">
             <Button text="Create Content" link={`/campaign/${id}/posts/new`} />
-            <Button text="Update Campaign" link={`/campaign/${id}/update`} />
-            <DeleteCampaignButton id={id} />
-            <ArchiveCampaignButton id={id} is_archived={campaign.is_archived} />
+            {isOwner && (
+              <>
+                <Button
+                  text="Update Campaign"
+                  link={`/campaign/${id}/update`}
+                />
+                <DeleteCampaignButton id={id} />
+                <ArchiveCampaignButton
+                  id={id}
+                  is_archived={campaign.is_archived}
+                />
+              </>
+            )}
           </div>
         </div>
 
