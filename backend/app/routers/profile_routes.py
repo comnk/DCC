@@ -1,8 +1,18 @@
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header
 
 from ..db.supabase import create_supabase_client_with_token
 
 router = APIRouter(prefix="/profile", tags=["profile"])
+
+@router.get("/all")
+def get_all_profiles(authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    supabase = create_supabase_client_with_token(token)
+
+    response = supabase.table("user_profiles").select("*").execute()
+    profiles = response.data
+
+    return profiles
 
 @router.get("/{user_id}")
 def get_current_user(user_id: str, authorization: str = Header(...)):
@@ -21,5 +31,10 @@ def get_current_user(user_id: str, authorization: str = Header(...)):
     return user_data
 
 @router.put("/update")
-def update_profile():
+def update_profile(user_id: str, authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    supabase = create_supabase_client_with_token(token)
+
+    # Here you would typically include the logic to update the user's profile
+    # For now, we'll just return a success message
     return {"message": "Profile updated successfully"}

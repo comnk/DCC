@@ -8,30 +8,6 @@ $mobile-breakpoint: 768px;
   display: block;
 }
 
-@media (max-width: $mobile-breakpoint) {
-  .logo-mobile {
-    display: block;
-  }
-
-  .logo-desktop {
-    display: none;
-  }
-
-  .navbar-logo svg {
-    width: 48px;
-    height: auto;
-  }
-
-  .navbar-links {
-    padding: 1rem 0 1.5rem;
-
-    a {
-      font-size: 1.25rem;
-      padding: 0.875rem 1.25rem;
-    }
-  }
-}
-
 .navbar {
   display: flex;
   align-items: center;
@@ -39,6 +15,7 @@ $mobile-breakpoint: 768px;
   padding: 1rem 2rem;
   background-color: #333;
   position: relative;
+  z-index: 50;
 }
 
 .navbar-logo {
@@ -71,6 +48,21 @@ $mobile-breakpoint: 768px;
   a {
     color: white;
     text-decoration: none;
+  }
+
+  .review-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background-color: #e53935;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.4;
+    vertical-align: middle;
   }
 }
 
@@ -110,6 +102,14 @@ $mobile-breakpoint: 768px;
 }
 
 @media (max-width: $mobile-breakpoint) {
+  .logo-mobile {
+    display: block;
+  }
+
+  .logo-desktop {
+    display: none;
+  }
+
   .navbar {
     padding: 1rem 1.25rem;
     flex-wrap: wrap;

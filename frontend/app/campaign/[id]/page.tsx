@@ -3,6 +3,7 @@ import "./campaign_page.scss";
 import ArchiveCampaignButton from "@/components/buttons/ArchiveCampaignButton/ArchiveCampaignButton";
 import Button from "@/components/buttons/Button/Button";
 import DeleteCampaignButton from "@/components/buttons/DeleteCampaignButton/DeleteCampaignButton";
+import CampaignTeam from "@/components/CampaignTeam/CampaignTeam";
 import PostCard from "@/components/cards/PostCard/PostCard";
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/server";
@@ -22,6 +23,14 @@ export default async function CampaignPage({ params }: { params: Params }) {
     redirect("/login");
   }
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const token = session.access_token;
 
@@ -37,13 +46,29 @@ export default async function CampaignPage({ params }: { params: Params }) {
   }
 
   const campaign = await res.json();
+  const isOwner = campaign.created_by === user.id;
 
-  const campaign_posts = await fetch(`${API_URL}/campaigns/${id}/posts`, {
+  const campaign_posts_res = await fetch(`${API_URL}/campaigns/${id}/posts`, {
     cache: "no-store",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then((res) => res.json());
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const campaign_posts = campaign_posts_res.ok
+    ? await campaign_posts_res.json()
+    : [];
+
+  const profileRes = await fetch(`${API_URL}/profile/${user.id}`, {
+    cache: "no-store",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const creatorProfile = profileRes.ok ? await profileRes.json() : null;
+
+  const creator = {
+    id: user.id,
+    display_name: creatorProfile?.display_name ?? user.email ?? "Creator",
+    role: creatorProfile?.role ?? "Admin",
+    profile_picture: creatorProfile?.profile_picture ?? null,
+    email: user.email ?? "",
+  };
 
   return (
     <div className="campaign-page">
@@ -53,9 +78,19 @@ export default async function CampaignPage({ params }: { params: Params }) {
           <h2 className="campaign-page__title">Campaign Details</h2>
           <div className="campaign-page__actions">
             <Button text="Create Content" link={`/campaign/${id}/posts/new`} />
-            <Button text="Update Campaign" link={`/campaign/${id}/update`} />
-            <DeleteCampaignButton id={id} />
-            <ArchiveCampaignButton id={id} is_archived={campaign.is_archived} />
+            {isOwner && (
+              <>
+                <Button
+                  text="Update Campaign"
+                  link={`/campaign/${id}/update`}
+                />
+                <DeleteCampaignButton id={id} />
+                <ArchiveCampaignButton
+                  id={id}
+                  is_archived={campaign.is_archived}
+                />
+              </>
+            )}
           </div>
         </div>
 
@@ -101,6 +136,7 @@ export default async function CampaignPage({ params }: { params: Params }) {
             ))}
           </ul>
         </section>
+        <CampaignTeam creator={creator} campaignId={id} accessToken={token} />
       </div>
     </div>
   );

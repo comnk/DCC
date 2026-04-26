@@ -1,0 +1,13 @@
+.status-dot {
+  display: flex;
+  align-items: center;
+
+  &--blink svg {
+    animation: status-blink 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes status-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
