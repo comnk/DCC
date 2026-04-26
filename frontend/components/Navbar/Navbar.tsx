@@ -25,9 +25,7 @@ export default function Navbar() {
     const fetchReviewCount = async () => {
       try {
         const response = await fetch(`${API_URL}/posts/need_review/count`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: { Authorization: `Bearer ${accessToken}` },
         });
         const data = await response.json();
         setReviewCount(data.count);
@@ -37,6 +35,9 @@ export default function Navbar() {
     };
 
     fetchReviewCount();
+
+    const interval = setInterval(fetchReviewCount, 30000);
+    return () => clearInterval(interval);
   }, [accessToken]);
 
   return (

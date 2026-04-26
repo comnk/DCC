@@ -3,7 +3,7 @@
   background-color: #f9fafb;
 
   .updatePostTitle {
-    padding: 1rem 2rem 0;
+    padding: 1.5rem 2rem 0;
     font-size: 1.5rem;
     font-weight: 600;
   }
@@ -25,5 +25,36 @@
       position: sticky;
       top: 1.5rem;
     }
+  }
+}
+
+.feedback-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 16px 2rem 0;
+  padding: 14px 18px;
+  background: #fff8f8;
+  border: 1px solid #fca5a5;
+  border-left: 4px solid #e53935;
+  border-radius: 8px;
+
+  &__icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #b91c1c;
+    margin: 0 0 4px;
+  }
+
+  &__text {
+    font-size: 14px;
+    color: #374151;
+    font-style: italic;
+    margin: 0;
   }
 }

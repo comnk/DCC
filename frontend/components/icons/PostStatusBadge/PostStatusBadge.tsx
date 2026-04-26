@@ -14,8 +14,10 @@ type PostStatus =
 function getPostStatus(post: Post): PostStatus {
   if (post.post_status) {
     const s = post.post_status.toLowerCase();
+    if (s === "draft") return "draft";
     if (s === "in_review" || s === "in review") return "in_review";
     if (s === "approved") return "approved";
+    if (s === "scheduled") return "scheduled";
     if (s === "rejected") return "rejected";
     if (s === "posted" || s === "published") return "posted";
   }
