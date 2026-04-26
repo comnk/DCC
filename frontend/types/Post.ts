@@ -13,4 +13,5 @@ export type Post = {
   author_id: string;
   created_at: string;
   updated_at?: string;
+  feedback?: string | null;
 };

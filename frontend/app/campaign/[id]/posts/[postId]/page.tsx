@@ -180,6 +180,14 @@ export default function PostPage() {
                   ))}
                 </span>
               </div>
+              {postData?.feedback && (
+                <div className="post-overview__field">
+                  <span className="post-overview__label">Feedback</span>
+                  <span className="post-overview__value post-overview__value--feedback">
+                    {postData.feedback}
+                  </span>
+                </div>
+              )}
             </div>
           </section>
 

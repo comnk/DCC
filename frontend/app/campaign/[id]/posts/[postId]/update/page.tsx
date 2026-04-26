@@ -81,12 +81,24 @@ export default function UpdatePostPage() {
     <div className="updatePostPage">
       <Navbar />
       <h2 className="updatePostTitle">Update Post</h2>
+      {postData?.feedback && (
+        <div className="feedback-banner">
+          <span className="feedback-banner__icon">⚠️</span>
+          <div>
+            <p className="feedback-banner__label">Feedback from review:</p>
+            <p className="feedback-banner__text">
+              &quot;{postData.feedback}&quot;
+            </p>
+          </div>
+        </div>
+      )}
       <div className="updatePostLayout">
         <div className="formSection">
           <PostForm
             campaignId={campaignId}
             onFormChange={setPreviewData}
             existingPost={postData}
+            isUpdate={true}
           />
         </div>
         <div className="previewSection">

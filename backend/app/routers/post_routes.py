@@ -37,6 +37,7 @@ def create_post(post: Post, authorization: str = Header(...)):
     
     if post_data.get("scheduled_time") and is_post_complete({**post_data, "media_asset": photo_urls}):
         post_data["post_status"] = "in_review"
+        post_data["feedback"] = None
     else:
         post_data["post_status"] = "draft"
     
@@ -189,8 +190,12 @@ def update_post(post_id: int, post: Post, authorization: str = Header(...)):
     post_data = post.model_dump(mode="json")
     post_data.pop("media_asset", [])
 
-    if post_data.get("scheduled_time") and is_post_complete({**post_data}):
+    existing_media = supabase.table("media_asset").select("id").eq("post_id", post_id).execute()
+    has_media = len(existing_media.data or []) > 0
+
+    if post_data.get("scheduled_time") and is_post_complete({**post_data, "media_asset": [True] if has_media else []}):
         post_data["post_status"] = "in_review"
+        post_data["feedback"] = None
     else:
         post_data["post_status"] = "draft"
 
@@ -244,6 +249,44 @@ def review_post(post_id: int, approved: bool, authorization: str = Header(...)):
 
     if not response.data:
         raise HTTPException(status_code=500, detail="Failed to update post status")
+
+    return response.data[0]
+
+@router.put("/{post_id}/reject")
+def reject_post(post_id: int, feedback: str, authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    payload = jwt.decode(token, options={"verify_signature": False})
+    reviewer_id = payload.get("sub")
+
+    if not reviewer_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    supabase = create_supabase_client_with_token(token)
+
+    post_response = supabase.table("posts").select("post_status, campaign_id").eq("id", post_id).execute()
+
+    if not post_response.data:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    post = post_response.data[0]
+
+    if post["post_status"] != "in_review":
+        raise HTTPException(status_code=400, detail="Post is not pending review")
+
+    campaign = supabase.table("campaigns").select("created_by").eq("id", post["campaign_id"]).execute()
+
+    if not campaign.data or campaign.data[0]["created_by"] != reviewer_id:
+        raise HTTPException(status_code=403, detail="Only the campaign owner can reject posts")
+
+    response = (
+        supabase.table("posts")
+        .update({"post_status": "draft", "feedback": feedback})
+        .eq("id", post_id)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(status_code=500, detail="Failed to reject post")
 
     return response.data[0]
 

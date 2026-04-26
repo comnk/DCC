@@ -17,10 +17,12 @@ export default function PostForm({
   campaignId,
   onFormChange,
   existingPost,
+  isUpdate = false,
 }: {
   campaignId: string;
   onFormChange: (data: PostPreviewData) => void;
   existingPost?: Post | null;
+  isUpdate?: boolean;
 }) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -68,7 +70,9 @@ export default function PostForm({
       platform: existingPost.platform ?? [],
       caption: existingPost.caption ?? "",
       media_asset: mediaPaths,
-      scheduled_time: existingPost.scheduled_time ?? "",
+      scheduled_time: existingPost.scheduled_time
+        ? existingPost.scheduled_time.slice(0, 16)
+        : "",
       is_draft: existingPost.is_draft ?? false,
     };
 
@@ -113,6 +117,12 @@ export default function PostForm({
         setError("A title is required to save a draft");
         return;
       }
+
+      console.log("Submitting formData:", {
+        ...formData,
+        scheduled_time: formData.scheduled_time || null,
+        is_draft: isDraft,
+      });
 
       if (pendingDeletes.length > 0) {
         await Promise.all(
@@ -345,7 +355,11 @@ export default function PostForm({
             disabled={submitting}
             className="post-form__btn-submit"
           >
-            {submitting ? "Submitting…" : "Create Post"}
+            {submitting
+              ? "Submitting…"
+              : isUpdate
+                ? "Update Post"
+                : "Create Post"}
           </Button>
         </div>
       </form>

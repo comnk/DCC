@@ -73,17 +73,22 @@ export default function ReviewPage() {
     fetchReviewPosts();
   }, [accessToken]);
 
-  const handleReview = async (postId: number, approved: boolean) => {
+  const handleReview = async (
+    postId: number,
+    approved: boolean,
+    feedback?: string,
+  ) => {
     try {
-      const response = await fetch(
-        `${API_URL}/posts/${postId}/review?approved=${approved}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+      const url = approved
+        ? `${API_URL}/posts/${postId}/review?approved=true`
+        : `${API_URL}/posts/${postId}/reject?feedback=${encodeURIComponent(feedback ?? "")}`;
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
         },
-      );
+      });
 
       if (!response.ok) throw new Error("Review action failed");
 
@@ -147,7 +152,9 @@ export default function ReviewPage() {
                     campaignName={campaignNames[post.campaign_id]}
                     authorName={authorNames[post.author_id]}
                     onApprove={() => handleReview(post.id, true)}
-                    onReject={() => handleReview(post.id, false)}
+                    onReject={(feedback) =>
+                      handleReview(post.id, false, feedback)
+                    }
                   />
                 </div>
               ))}
