@@ -49,6 +49,21 @@ $mobile-breakpoint: 768px;
     color: white;
     text-decoration: none;
   }
+
+  .review-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background-color: #e53935;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.4;
+    vertical-align: middle;
+  }
 }
 
 .navbar-hamburger {

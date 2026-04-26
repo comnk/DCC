@@ -12,10 +12,32 @@ import Dropdown from "../dropdown/Dropdown";
 import Button from "../buttons/Button/Button";
 
 export default function Navbar() {
-  const { user, loading } = useRequireAuth({ requireAuth: false });
+  const { user, accessToken, loading } = useRequireAuth({ requireAuth: false });
   const [menuOpen, setMenuOpen] = useState(false);
+  const [reviewCount, setReviewCount] = useState(0);
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const closeMenu = () => setMenuOpen(false);
+
+  useEffect(() => {
+    if (!accessToken) return;
+
+    const fetchReviewCount = async () => {
+      try {
+        const response = await fetch(`${API_URL}/posts/need_review/count`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        const data = await response.json();
+        setReviewCount(data.count);
+      } catch (error) {
+        console.error("Error fetching review count:", error);
+      }
+    };
+
+    fetchReviewCount();
+  }, [accessToken]);
 
   return (
     <nav className="navbar">
@@ -50,6 +72,14 @@ export default function Navbar() {
                 <li>
                   <Link href="/campaign" onClick={closeMenu}>
                     Campaigns
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/review" onClick={closeMenu}>
+                    Review
+                    {reviewCount > 0 && (
+                      <span className="review-badge">{reviewCount}</span>
+                    )}
                   </Link>
                 </li>
               </>
