@@ -31,7 +31,7 @@ def create_photo_container(photo_url, caption="Test photo upload via Instagram G
         print(f"Error creating photo container: {data}")
         return None
 
-def create_carousel_container(media_urls):
+def create_carousel_container(media_urls, caption="Test carousel upload via Instagram Graph API"):
     url = f"{BASE_URL}/{ACCOUNT_ID}/media"
     children = []
     
@@ -48,7 +48,7 @@ def create_carousel_container(media_urls):
     payload = {
         "media_type": "CAROUSEL",
         "children": children,
-        "caption": "Test carousel upload via Instagram Graph API"
+        "caption": caption
     }
     response = requests.post(url, json=payload, headers=HEADERS)
     data = response.json()
@@ -168,9 +168,10 @@ def publish_container(creation_id):
 #     if wait_until_ready(creation_video_id):
 #         publish_container(creation_video_id)
 
-photo_url = "https://image2url.com/r2/default/images/1774978157264-1a3f586a-f907-4560-afbb-dbf608f13ae7.jpg"
-creation_photo_id = create_stories_container(photo_url)
-if creation_photo_id:
-    print("Waiting for photo to be processed...")
-    if wait_until_ready(creation_photo_id):
-        publish_container(creation_photo_id)
+if __name__ == "__main__":
+    photo_url = "https://image2url.com/r2/default/images/1774978157264-1a3f586a-f907-4560-afbb-dbf608f13ae7.jpg"
+    creation_photo_id = create_stories_container(photo_url)
+    if creation_photo_id:
+        print("Waiting for photo to be processed...")
+        if wait_until_ready(creation_photo_id):
+            publish_container(creation_photo_id)

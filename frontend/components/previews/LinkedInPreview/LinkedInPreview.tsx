@@ -56,6 +56,8 @@ export default function LinkedInPreview({ data }: { data: PostPreviewData }) {
                     src={url}
                     alt={`Post image ${index + 1}`}
                     fill
+                    loading="eager"
+                    priority
                     sizes="(max-width: 768px) 100vw, 400px"
                     style={{ objectFit: "contain" }}
                   />
