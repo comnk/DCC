@@ -90,7 +90,8 @@ def post_to_linkedin(post_text, image_url=None, video_url=None):
     else:
         print(f"❌ Failed: {response.json()}")
 
-test_text = "Exciting news from our company! This is a test post for the gram #LinkedInAPI #Automation"
-# test_image_url = "https://image2url.com/r2/default/images/1774978157264-1a3f586a-f907-4560-afbb-dbf608f13ae7.jpg"
-test_video_url = "https://res.cloudinary.com/dlzor5lap/video/upload/v1758201802/b4xfa8yel6chwqx7ou6j.mp4"
-post_to_linkedin(test_text, image_url=None, video_url=test_video_url)
+if __name__ == "__main__":
+    test_text = "Exciting news from our company! This is a test post for the gram #LinkedInAPI #Automation"
+    # test_image_url = "https://image2url.com/r2/default/images/1774978157264-1a3f586a-f907-4560-afbb-dbf608f13ae7.jpg"
+    test_video_url = "https://res.cloudinary.com/dlzor5lap/video/upload/v1758201802/b4xfa8yel6chwqx7ou6j.mp4"
+    post_to_linkedin(test_text, image_url=None, video_url=test_video_url)

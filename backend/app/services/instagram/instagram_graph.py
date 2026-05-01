@@ -31,26 +31,36 @@ def create_photo_container(photo_url, caption="Test photo upload via Instagram G
         print(f"Error creating photo container: {data}")
         return None
 
-def create_carousel_container(media_urls):
+def create_carousel_container(media_urls, caption=""):
     url = f"{BASE_URL}/{ACCOUNT_ID}/media"
-    children = []
     
-    if (len(media_urls) < 2 or len(media_urls) > 10):
+    if len(media_urls) < 2 or len(media_urls) > 10:
         print("Carousel must have between 2 and 10 media items.")
         return None
-    
+
+    child_ids = []
     for media_url in media_urls:
-        if (media_url.endswith(".mp4") or media_url.endswith(".mov")):
-            children.append({"video_url": media_url})
+        if media_url.endswith(".mp4") or media_url.endswith(".mov"):
+            payload = {"video_url": media_url, "media_type": "VIDEO", "is_carousel_item": True}
         else:
-            children.append({"image_url": media_url})
-    
-    payload = {
+            payload = {"image_url": media_url, "is_carousel_item": True}
+        
+        response = requests.post(url, json=payload, headers=HEADERS)
+        data = response.json()
+        
+        if "id" not in data:
+            print(f"Error creating child container: {data}")
+            return None
+        
+        print(f"Child container created: {data['id']}")
+        child_ids.append(data["id"])
+
+    carousel_payload = {
         "media_type": "CAROUSEL",
-        "children": children,
-        "caption": "Test carousel upload via Instagram Graph API"
+        "children": child_ids,
+        "caption": caption,
     }
-    response = requests.post(url, json=payload, headers=HEADERS)
+    response = requests.post(url, json=carousel_payload, headers=HEADERS)
     data = response.json()
 
     if "id" in data:
@@ -168,9 +178,10 @@ def publish_container(creation_id):
 #     if wait_until_ready(creation_video_id):
 #         publish_container(creation_video_id)
 
-photo_url = "https://image2url.com/r2/default/images/1774978157264-1a3f586a-f907-4560-afbb-dbf608f13ae7.jpg"
-creation_photo_id = create_stories_container(photo_url)
-if creation_photo_id:
-    print("Waiting for photo to be processed...")
-    if wait_until_ready(creation_photo_id):
-        publish_container(creation_photo_id)
+if __name__ == "__main__":
+    photo_url = "https://image2url.com/r2/default/images/1774978157264-1a3f586a-f907-4560-afbb-dbf608f13ae7.jpg"
+    creation_photo_id = create_stories_container(photo_url)
+    if creation_photo_id:
+        print("Waiting for photo to be processed...")
+        if wait_until_ready(creation_photo_id):
+            publish_container(creation_photo_id)

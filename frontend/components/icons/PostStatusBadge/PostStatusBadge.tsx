@@ -9,6 +9,7 @@ type PostStatus =
   | "approved"
   | "scheduled"
   | "posted"
+  | "failed"
   | "rejected";
 
 function getPostStatus(post: Post): PostStatus {
@@ -19,6 +20,7 @@ function getPostStatus(post: Post): PostStatus {
     if (s === "approved") return "approved";
     if (s === "scheduled") return "scheduled";
     if (s === "rejected") return "rejected";
+    if (s === "failed") return "failed";
     if (s === "posted" || s === "published") return "posted";
   }
   if (post.is_draft) return "draft";
@@ -74,6 +76,13 @@ const STATUS_CONFIG: Record<
   },
   rejected: {
     label: "Rejected",
+    dotColor: "#ef4444",
+    borderColor: "#fecaca",
+    textColor: "#991b1b",
+    blink: false,
+  },
+  failed: {
+    label: "Failed",
     dotColor: "#ef4444",
     borderColor: "#fecaca",
     textColor: "#991b1b",
