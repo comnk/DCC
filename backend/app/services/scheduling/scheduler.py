@@ -2,7 +2,7 @@ import time
 
 from datetime import datetime, timezone
 
-from ...db.supabase import create_supabase_client
+from ...db.supabase import create_supabase_admin_client
 from ..instagram.instagram_graph import (
     create_photo_container,
     create_carousel_container,
@@ -25,18 +25,21 @@ def _get_public_urls(media_assets: list, supabase) -> list[str]:
 
 
 def check_and_publish_posts():
-    supabase = create_supabase_client()
-    now = datetime.now(timezone.utc).isoformat()
+    print(f"🔍 Scheduler tick at {datetime.now(timezone.utc).isoformat()}")
+    supabase = create_supabase_admin_client()
+    now = datetime.now(timezone.utc).replace(tzinfo=None).isoformat(sep=" ", timespec="seconds")
 
     due_posts = (
         supabase.table("posts")
-        .select("id, platform, caption, media_asset(*)")
+        .select("id, platform, caption, scheduled_time, post_status, media_asset(*)")
         .eq("post_status", "scheduled")
         .lte("scheduled_time", now)
         .execute()
     )
 
+    print(f"📋 Found {len(due_posts.data or [])} due posts, now={now}")
     for post in (due_posts.data or []):
+        print(f"  - Post {post['id']}: scheduled_time={post['scheduled_time']}, platform={post['platform']}")
         _publish_with_retry(post, supabase)
 
 

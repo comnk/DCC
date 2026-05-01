@@ -9,12 +9,19 @@ from contextlib import asynccontextmanager
 from app.routers import auth_routes, profile_routes, campaign_routes, post_routes
 from app.services.scheduling.scheduler import check_and_publish_posts
 
-scheduler = BackgroundScheduler()
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    scheduler.add_job(check_and_publish_posts, "interval", minutes=1)
+    print("🚀 Lifespan started — starting scheduler")
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        check_and_publish_posts,
+        "interval",
+        seconds=30,
+        coalesce=True,
+        max_instances=1,
+    )
     scheduler.start()
+    print(f"✅ Scheduler started, jobs: {scheduler.get_jobs()}")
     yield
     scheduler.shutdown()
 
