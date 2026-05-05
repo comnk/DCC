@@ -65,7 +65,7 @@ export default function DashboardPage() {
     posts.length > 0
       ? posts.filter(
           (p) =>
-            !p.is_draft &&
+            p.post_status === "scheduled" &&
             p.scheduled_time &&
             new Date(p.scheduled_time) > new Date(),
         )

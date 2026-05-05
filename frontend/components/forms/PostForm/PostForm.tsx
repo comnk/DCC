@@ -156,6 +156,9 @@ export default function PostForm({
         );
         setPendingDeletes([]);
       }
+      const scheduledTimeUTC = formData.scheduled_time
+        ? new Date(formData.scheduled_time).toISOString()
+        : null;
 
       const scheduledTimeUTC = formData.scheduled_time
         ? new Date(formData.scheduled_time).toISOString()
@@ -173,8 +176,11 @@ export default function PostForm({
         {
           ...formData,
           scheduled_time: scheduledTimeUTC,
+<<<<<<< HEAD
           discord_event_start: discordEventStartUTC,
           discord_event_end: discordEventEndUTC,
+=======
+>>>>>>> 9390bb0 (added a few fixes)
           is_draft: isDraft,
         },
         data.session.access_token,
