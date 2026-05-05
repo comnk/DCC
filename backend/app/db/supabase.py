@@ -15,6 +15,14 @@ def create_supabase_client() -> Client:
     url, key = _get_supabase_credentials()
     return create_client(url, key)
 
+def create_supabase_admin_client() -> Client:
+    url = os.getenv("SUPABASE_DB_URL")
+    secret_key = os.getenv("SUPABASE_SECRET_KEY")
+    if not url or not secret_key:
+        raise EnvironmentError("SUPABASE_DB_URL and SUPABASE_SECRET_KEY must be set")
+    client = create_client(url, secret_key)
+    return client
+
 def create_supabase_client_with_token(token: str) -> Client:
     url, key = _get_supabase_credentials()
     client = create_client(url, key)
