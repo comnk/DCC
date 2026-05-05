@@ -39,25 +39,45 @@ function getEventColor(post: Post): {
   borderColor: string;
   textColor: string;
 } {
-  if (post.is_draft || !post.scheduled_time) {
-    return {
-      backgroundColor: "#f3f4f6",
-      borderColor: "#9ca3af",
-      textColor: "#374151",
-    };
+  switch (post.post_status) {
+    case "draft":
+      return {
+        backgroundColor: "#f3f4f6",
+        borderColor: "#9ca3af",
+        textColor: "#374151",
+      };
+    case "in_review":
+      return {
+        backgroundColor: "#fff7ed",
+        borderColor: "#f97316",
+        textColor: "#9a3412",
+      };
+    case "scheduled":
+      return {
+        backgroundColor: "#dbeafe",
+        borderColor: "#3b82f6",
+        textColor: "#1e40af",
+      };
+    case "published":
+    case "posted":
+      return {
+        backgroundColor: "#dcfce7",
+        borderColor: "#22c55e",
+        textColor: "#15803d",
+      };
+    case "failed":
+      return {
+        backgroundColor: "#fee2e2",
+        borderColor: "#e53935",
+        textColor: "#991b1b",
+      };
+    default:
+      return {
+        backgroundColor: "#f3f4f6",
+        borderColor: "#9ca3af",
+        textColor: "#374151",
+      };
   }
-  if (new Date(post.scheduled_time) > new Date()) {
-    return {
-      backgroundColor: "#dbeafe",
-      borderColor: "#3b82f6",
-      textColor: "#1e40af",
-    };
-  }
-  return {
-    backgroundColor: "#dcfce7",
-    borderColor: "#22c55e",
-    textColor: "#15803d",
-  };
 }
 
 export default function PostCalendarDisplay({ posts }: { posts: Post[] }) {
@@ -94,8 +114,14 @@ export default function PostCalendarDisplay({ posts }: { posts: Post[] }) {
         <span className="calendar-display__legend-item calendar-display__legend-item--scheduled">
           Scheduled
         </span>
+        <span className="calendar-display__legend-item calendar-display__legend-item--in_review">
+          In Review
+        </span>
         <span className="calendar-display__legend-item calendar-display__legend-item--draft">
           Draft
+        </span>
+        <span className="calendar-display__legend-item calendar-display__legend-item--failed">
+          Failed
         </span>
       </div>
 

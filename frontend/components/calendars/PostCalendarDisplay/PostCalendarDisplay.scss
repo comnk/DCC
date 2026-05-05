@@ -32,6 +32,14 @@
       border-color: #9ca3af;
       color: #374151;
     }
+
+    &--in-review {
+      &::before { background-color: #f97316; }
+    }
+
+    &--failed {
+      &::before { background-color: #e53935; }
+    }
   }
 }
 
