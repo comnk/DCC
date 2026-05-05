@@ -154,6 +154,7 @@ export default function CampaignsPage() {
                   key={campaign.id}
                   campaignData={campaign}
                   searchTerm={searchTerm}
+                  isOwner={campaign.created_by === user?.id}
                 />
               ))}
             </ul>

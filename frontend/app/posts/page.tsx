@@ -9,27 +9,27 @@ import PostCalendarDisplay from "@/components/calendars/PostCalendarDisplay/Post
 import PlatformFilter from "@/components/PlatformFilter/PlatformFilter";
 import { useRequireAuth } from "@/hooks/useRequiredAuth";
 import { Post } from "@/types/Post";
+import { Campaign } from "@/types/Campaign";
 import { CircularProgress, Button as MUIButton } from "@mui/material";
 import { useEffect, useState } from "react";
 import { CalendarMonth, ViewList } from "@mui/icons-material";
+import { getPostStatus } from "@/utils/getPostStatus";
+import { useRouter } from "next/navigation";
 
 type Tab = "published" | "scheduled" | "draft";
 type ViewMode = "list" | "calendar";
 
-function getPostStatus(post: Post): Tab {
-  if (post.is_draft || !post.scheduled_time) return "draft";
-  if (new Date(post.scheduled_time) > new Date()) return "scheduled";
-  return "published";
-}
-
 export default function PostsPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const { user, accessToken, loading } = useRequireAuth();
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("published");
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
   const [postsLoading, setPostsLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
   const [campaigns, setCampaigns] = useState<Record<number, string>>({});
+  const [campaignList, setCampaignList] = useState<Campaign[]>([]); // ← add
+  const [showCampaignPicker, setShowCampaignPicker] = useState(false); // ← add
   const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(
     null,
   );
@@ -59,6 +59,7 @@ export default function PostsPage() {
       const campaignsData = await campaignsRes.json();
 
       setPosts(postsData);
+      setCampaignList(campaignsData); // ← add
 
       const campaignMap: Record<number, string> = {};
       campaignsData.forEach((c: { id: number; name: string }) => {
@@ -100,10 +101,15 @@ export default function PostsPage() {
     { label: "Draft", value: "draft" },
   ];
 
+  const activeCampaigns = campaignList.filter(
+    (c) => !c.is_archived && c.end_date > new Date().toISOString(),
+  );
+
   return (
     <div className="posts-page">
       <Navbar />
       <div className="posts-page__content">
+        {/* ── Toolbar ── */}
         <div className="posts-page__toolbar">
           <div className="posts-page__filters">
             <PostSearchBar
@@ -126,28 +132,35 @@ export default function PostsPage() {
                 </option>
               ))}
             </select>
-
             <PlatformFilter
               value={selectedPlatform}
               onChange={setSelectedPlatform}
             />
           </div>
 
-          <div className="posts-page__view-toggle">
+          <div className="posts-page__toolbar-right">
             <button
-              className={`posts-page__view-btn ${viewMode === "calendar" ? "posts-page__view-btn--active" : ""}`}
-              onClick={() => setViewMode("calendar")}
-              title="Calendar view"
+              className="posts-page__create-btn"
+              onClick={() => setShowCampaignPicker(true)}
             >
-              <CalendarMonth fontSize="small" />
+              + Create Post
             </button>
-            <button
-              className={`posts-page__view-btn ${viewMode === "list" ? "posts-page__view-btn--active" : ""}`}
-              onClick={() => setViewMode("list")}
-              title="List view"
-            >
-              <ViewList fontSize="small" />
-            </button>
+            <div className="posts-page__view-toggle">
+              <button
+                className={`posts-page__view-btn ${viewMode === "calendar" ? "posts-page__view-btn--active" : ""}`}
+                onClick={() => setViewMode("calendar")}
+                title="Calendar view"
+              >
+                <CalendarMonth fontSize="small" />
+              </button>
+              <button
+                className={`posts-page__view-btn ${viewMode === "list" ? "posts-page__view-btn--active" : ""}`}
+                onClick={() => setViewMode("list")}
+                title="List view"
+              >
+                <ViewList fontSize="small" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -158,7 +171,6 @@ export default function PostsPage() {
                 key={value}
                 variant={tab === value ? "contained" : "outlined"}
                 onClick={() => setTab(value)}
-                className={`posts-page__tab ${tab === value ? "posts-page__tab--active" : ""}`}
               >
                 {label}
               </MUIButton>
@@ -190,6 +202,53 @@ export default function PostsPage() {
           </ul>
         )}
       </div>
+
+      {showCampaignPicker && (
+        <div
+          className="campaign-picker-overlay"
+          onClick={() => setShowCampaignPicker(false)}
+        >
+          <div className="campaign-picker" onClick={(e) => e.stopPropagation()}>
+            <h3 className="campaign-picker__title">Select a Campaign</h3>
+            {activeCampaigns.length === 0 ? (
+              <p className="campaign-picker__empty">
+                No active campaigns. Create one first.
+              </p>
+            ) : (
+              <ul className="campaign-picker__list">
+                {activeCampaigns.map((c) => (
+                  <li key={c.id}>
+                    <button
+                      className="campaign-picker__item"
+                      onClick={() => {
+                        setShowCampaignPicker(false);
+                        router.push(`/campaign/${c.id}/posts/new`);
+                      }}
+                    >
+                      <span className="campaign-picker__name">{c.name}</span>
+                      <span className="campaign-picker__dates">
+                        {new Date(
+                          c.start_date + "T00:00:00",
+                        ).toLocaleDateString()}{" "}
+                        —{" "}
+                        {new Date(
+                          c.end_date + "T00:00:00",
+                        ).toLocaleDateString()}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button
+              className="campaign-picker__cancel"
+              onClick={() => setShowCampaignPicker(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -102,8 +102,14 @@ export default function PostForm({
       const supabase = createClient();
       const { data } = await supabase.auth.getSession();
 
-      if (!data.session) {
-        setError("You must be logged in to create a post");
+      let token = data.session?.access_token;
+      if (!token) {
+        const { data: refreshed } = await supabase.auth.refreshSession();
+        token = refreshed.session?.access_token;
+      }
+
+      if (!token) {
+        setError("Your session expired. Please log in again.");
         return;
       }
 
@@ -132,7 +138,7 @@ export default function PostForm({
               {
                 method: "DELETE",
                 headers: {
-                  Authorization: `Bearer ${data.session.access_token}`,
+                  Authorization: `Bearer ${token}`,
                 },
               },
             ),
@@ -150,7 +156,7 @@ export default function PostForm({
           scheduled_time: scheduledTimeUTC,
           is_draft: isDraft,
         },
-        data.session.access_token,
+        token,
         existingPost?.id,
       );
       if (!ok) {
@@ -276,7 +282,7 @@ export default function PostForm({
               campaign
                 ? new Date(
                     Math.max(
-                      new Date(campaign.start_date).getTime(),
+                      new Date(campaign.start_date + "T00:00:00").getTime(),
                       new Date().getTime(),
                     ),
                   )
@@ -286,7 +292,9 @@ export default function PostForm({
             }
             max={
               campaign
-                ? new Date(campaign.end_date).toISOString().slice(0, 16)
+                ? new Date(campaign.end_date + "T23:59:59")
+                    .toISOString()
+                    .slice(0, 16)
                 : ""
             }
             onChange={(e) => updateForm({ scheduled_time: e.target.value })}
@@ -302,7 +310,7 @@ export default function PostForm({
             {uploading
               ? "Uploading…"
               : formData.media_asset.length > 0
-                ? `${formData.media_asset.length} image(s) uploaded ✓`
+                ? `${formData.media_asset.length} file(s) uploaded ✓`
                 : "Choose files"}
           </label>
           <input
@@ -310,36 +318,36 @@ export default function PostForm({
             type="file"
             id="image"
             name="image"
-            accept="image/*"
+            accept="image/*,video/*"
             multiple
             disabled={uploading}
             onChange={handleImageUpload}
           />
         </div>
 
-        {previewUrls.length > 0 && (
-          <div className="post-form__previews">
-            {previewUrls.map((url, i) => (
-              <div key={url} className="post-form__preview-item">
-                <Image
-                  src={url}
-                  alt={`Upload ${i + 1}`}
-                  width={100}
-                  height={100}
-                />
-                <button
-                  type="button"
-                  className="post-form__preview-delete"
-                  onClick={() => handleDeleteImage(i)}
-                  disabled={uploading || submitting}
-                  aria-label="Remove image"
-                >
-                  X
-                </button>
-              </div>
-            ))}
+        {previewUrls.map((url, i) => (
+          <div key={url} className="post-form__preview-item">
+            {url.match(/\.(mp4|mov|webm)(\?|$)/i) ? (
+              <video src={url} width={100} height={100} controls muted />
+            ) : (
+              <Image
+                src={url}
+                alt={`Upload ${i + 1}`}
+                width={100}
+                height={100}
+              />
+            )}
+            <button
+              type="button"
+              className="post-form__preview-delete"
+              onClick={() => handleDeleteImage(i)}
+              disabled={uploading || submitting}
+              aria-label="Remove image"
+            >
+              X
+            </button>
           </div>
-        )}
+        ))}
 
         <div className="post-form__actions">
           <Button

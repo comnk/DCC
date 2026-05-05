@@ -6,4 +6,5 @@ export type Campaign = {
   end_date: string;
   is_archived: boolean;
   archived_at: string | null;
+  created_by: string;
 };
