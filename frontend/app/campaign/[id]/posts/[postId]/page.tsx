@@ -29,6 +29,10 @@ export default function PostPage() {
     media_asset: [],
     scheduled_time: "",
   });
+  const [cancelPending, setCancelPending] = useState(false);
+  const [cancelTimeoutId, setCancelTimeoutId] = useState<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -81,31 +85,47 @@ export default function PostPage() {
   }, [postId, router, id]);
 
   const handleCancelPost = async () => {
-    const supabase = createClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    setCancelPending(true);
 
-    if (!session) {
-      router.push("/login");
-      return;
+    const timeoutId = setTimeout(async () => {
+      setCancelPending(false);
+      setCancelTimeoutId(null);
+
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/posts/${postId}/cancel_post`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (res.ok) {
+        const updatedPost = await res.json();
+        setPostData(updatedPost);
+        setPreviewData((prev) => ({
+          ...prev,
+          scheduled_time: updatedPost.scheduled_time,
+        }));
+      } else {
+        console.error("Failed to cancel post");
+      }
+    }, 4000);
+
+    setCancelTimeoutId(timeoutId);
+  };
+
+  const handleUndoCancel = () => {
+    if (cancelTimeoutId) {
+      clearTimeout(cancelTimeoutId);
+      setCancelTimeoutId(null);
     }
-
-    const res = await fetch(`${API_URL}/posts/${postId}/cancel_post`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    });
-
-    if (res.ok) {
-      const updatedPost = await res.json();
-      setPostData(updatedPost);
-      setPreviewData((prev) => ({
-        ...prev,
-        scheduled_time: updatedPost.scheduled_time,
-      }));
-    } else {
-      console.error("Failed to cancel post");
-    }
+    setCancelPending(false);
   };
 
   if (loading)
@@ -196,12 +216,22 @@ export default function PostPage() {
             <PostPreviewPanel data={previewData} />
           </section>
         </div>
+<<<<<<< HEAD
 
         {postData && (
           <PostTasksSection
             postId={postData.id}
             campaignId={postData.campaign_id}
           />
+=======
+        {cancelPending && (
+          <div className="cancel-toast">
+            <span>Post will be cancelled...</span>
+            <button className="cancel-toast__undo" onClick={handleUndoCancel}>
+              Undo
+            </button>
+          </div>
+>>>>>>> 7acbafe (UX additions and bug fixes)
         )}
       </div>
     </div>

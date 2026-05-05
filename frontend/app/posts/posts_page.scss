@@ -163,4 +163,128 @@
     flex-direction: column;
     gap: 12px;
   }
+
+  &__toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  &__create-btn {
+    height: 36px;
+    padding: 0 16px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+
+    &:hover { background: #333; }
+  }
+}
+
+// At the bottom of posts_page.scss, outside .posts-page { }
+
+.campaign-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: overlayIn 0.15s ease;
+}
+
+.campaign-picker {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+  animation: modalIn 0.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+
+  &__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 16px;
+  }
+
+  &__empty {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 16px;
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  &__item {
+    width: 100%;
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition: background 0.15s, border-color 0.15s;
+
+    &:hover {
+      background: #f9fafb;
+      border-color: #111;
+    }
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111;
+  }
+
+  &__dates {
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  &__cancel {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #f3f4f6;
+    font-size: 14px;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover { background: #e5e7eb; }
+  }
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }

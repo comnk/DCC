@@ -2,32 +2,8 @@ import { Post } from "@/types/Post";
 import { Chip } from "@mui/material";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import "./PostStatusBadge.scss";
-
-type PostStatus =
-  | "draft"
-  | "in_review"
-  | "approved"
-  | "scheduled"
-  | "posted"
-  | "failed"
-  | "rejected";
-
-function getPostStatus(post: Post): PostStatus {
-  if (post.post_status) {
-    const s = post.post_status.toLowerCase();
-    if (s === "draft") return "draft";
-    if (s === "in_review" || s === "in review") return "in_review";
-    if (s === "approved") return "approved";
-    if (s === "scheduled") return "scheduled";
-    if (s === "rejected") return "rejected";
-    if (s === "failed") return "failed";
-    if (s === "posted" || s === "published") return "posted";
-  }
-  if (post.is_draft) return "draft";
-  if (post.scheduled_time && new Date(post.scheduled_time) > new Date())
-    return "scheduled";
-  return "posted";
-}
+import { PostStatus } from "@/types/PostStatus";
+import { getPostStatus } from "@/utils/getPostStatus";
 
 const STATUS_CONFIG: Record<
   PostStatus,
@@ -80,6 +56,13 @@ const STATUS_CONFIG: Record<
     borderColor: "#fecaca",
     textColor: "#991b1b",
     blink: false,
+  },
+  publishing: {
+    label: "Publishing",
+    dotColor: "#60a5fa",
+    borderColor: "#bfdbfe",
+    textColor: "#1e40af",
+    blink: true,
   },
   failed: {
     label: "Failed",

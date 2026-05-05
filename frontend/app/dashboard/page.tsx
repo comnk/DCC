@@ -90,7 +90,11 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 filteredCampaigns.map((campaign) => (
-                  <CampaignCard key={campaign.id} campaignData={campaign} />
+                  <CampaignCard
+                    key={campaign.id}
+                    campaignData={campaign}
+                    isOwner={campaign.created_by === user?.id}
+                  />
                 ))
               )}
             </ul>

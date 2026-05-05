@@ -39,13 +39,22 @@ def get_all_posts_service(token: str):
     user_id = payload.get("sub")
 
     supabase = create_supabase_client_with_token(token)
+
+    # Posts authored by user
     authored = supabase.table("posts").select("*").eq("author_id", user_id).execute()
+
+    # Posts from campaigns user is a member of
     memberships = supabase.table("campaign_members").select("campaign_id").eq("user_id", user_id).execute()
     campaign_ids = [m["campaign_id"] for m in (memberships.data or [])]
 
+    owned_campaigns = supabase.table("campaigns").select("id").eq("created_by", user_id).execute()
+    owned_campaign_ids = [c["id"] for c in (owned_campaigns.data or [])]
+
+    all_campaign_ids = list(set(campaign_ids + owned_campaign_ids))
+
     member_posts = []
-    if campaign_ids:
-        member_posts = supabase.table("posts").select("*").in_("campaign_id", campaign_ids).execute().data or []
+    if all_campaign_ids:
+        member_posts = supabase.table("posts").select("*").in_("campaign_id", all_campaign_ids).execute().data or []
 
     all_posts = {p["id"]: p for p in (authored.data or []) + member_posts}
     return list(all_posts.values())

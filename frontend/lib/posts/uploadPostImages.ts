@@ -14,13 +14,11 @@ export const uploadPostImages = async (
 
     if (uploadError) throw new Error(uploadError.message);
 
-    const { data: signedData, error: signedError } = await supabase.storage
+    const publicUrl = supabase.storage
       .from("post-images")
-      .createSignedUrl(path, 60 * 60);
+      .getPublicUrl(path).data.publicUrl;
 
-    if (signedError) throw new Error(signedError.message);
-
-    return { path, previewUrl: signedData.signedUrl };
+    return { path, previewUrl: publicUrl };
   });
 
   const results = await Promise.all(uploadPromises);

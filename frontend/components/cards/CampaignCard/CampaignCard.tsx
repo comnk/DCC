@@ -2,6 +2,7 @@ import "./CampaignCard.scss";
 
 import { Campaign } from "@/types/Campaign";
 import Link from "next/link";
+import EditIcon from "@mui/icons-material/Edit";
 
 function HighlightText({
   text,
@@ -59,22 +60,36 @@ function HighlightText({
 export default function CampaignCard({
   campaignData,
   searchTerm = "",
+  isOwner = false,
 }: {
   campaignData: Campaign;
   searchTerm?: string;
+  isOwner?: boolean;
 }) {
   return (
     <div className="campaign-card">
-      <h3 className="campaign-card__title">
-        <HighlightText
-          text={campaignData.name}
-          highlight={searchTerm}
-          href={`/campaign/${campaignData.id}`}
-        />
-      </h3>
+      <div className="campaign-card__header">
+        <h3 className="campaign-card__title">
+          <HighlightText
+            text={campaignData.name}
+            highlight={searchTerm}
+            href={`/campaign/${campaignData.id}`}
+          />
+        </h3>
+        {isOwner && (
+          <Link
+            href={`/campaign/${campaignData.id}/update`}
+            className="campaign-card__edit"
+            onClick={(e) => e.stopPropagation()}
+            title="Edit campaign"
+          >
+            <EditIcon fontSize="small" />
+          </Link>
+        )}
+      </div>
       <p className="campaign-card__dates">
-        {new Date(campaignData.start_date).toLocaleDateString()} —{" "}
-        {new Date(campaignData.end_date).toLocaleDateString()}
+        {new Date(campaignData.start_date + "T00:00:00").toLocaleDateString()} —{" "}
+        {new Date(campaignData.end_date + "T00:00:00").toLocaleDateString()}
       </p>
     </div>
   );
