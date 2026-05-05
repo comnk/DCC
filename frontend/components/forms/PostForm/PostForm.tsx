@@ -140,11 +140,14 @@ export default function PostForm({
         );
         setPendingDeletes([]);
       }
+      const scheduledTimeUTC = formData.scheduled_time
+        ? new Date(formData.scheduled_time).toISOString()
+        : null;
 
       const { ok, error } = await submitPost(
         {
           ...formData,
-          scheduled_time: formData.scheduled_time || null,
+          scheduled_time: scheduledTimeUTC,
           is_draft: isDraft,
         },
         data.session.access_token,

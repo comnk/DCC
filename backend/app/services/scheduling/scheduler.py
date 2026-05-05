@@ -44,6 +44,8 @@ def check_and_publish_posts():
 
 
 def _publish_with_retry(post: dict, supabase):
+    supabase.table("posts").update({"post_status": "publishing"}).eq("id", post["id"]).execute()
+    
     media_assets = post.get("media_asset") or []
     public_urls = _get_public_urls(media_assets, supabase)
 
