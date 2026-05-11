@@ -18,7 +18,6 @@ def create_campaign(campaign: Campaign, authorization: str = Header(...)):
     supabase = create_supabase_client_with_token(token)
     data = campaign.model_dump(mode="json")
     data["created_by"] = user_id
-    data["post_status"] = "in_review"
     response = supabase.table("campaigns").insert(data).execute()
 
     if not response.data:
