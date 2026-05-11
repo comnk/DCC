@@ -183,10 +183,17 @@ export default function PostForm({
           ...formData,
           scheduled_time: scheduledTimeUTC,
 <<<<<<< HEAD
+<<<<<<< HEAD
           discord_event_start: discordEventStartUTC,
           discord_event_end: discordEventEndUTC,
 =======
 >>>>>>> 9390bb0 (added a few fixes)
+=======
+=======
+          discord_event_start: discordEventStartUTC,
+          discord_event_end: discordEventEndUTC,
+>>>>>>> b1f93dd (starter code for posting on discord, expanding on the post form, and a bug fix)
+>>>>>>> d098705 (starter code for posting on discord, expanding on the post form, and a bug fix)
           is_draft: isDraft,
         },
         token,
