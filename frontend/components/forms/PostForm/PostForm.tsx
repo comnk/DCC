@@ -52,6 +52,10 @@ export default function PostForm({
     media_asset: [] as string[],
     scheduled_time: "",
     is_draft: false,
+    discord_location: "Online",
+    discord_event_start: "",
+    discord_event_end: "",
+    instagram_post_type: "post" as "post" | "story",
   });
 
   useEffect(() => {
@@ -74,6 +78,18 @@ export default function PostForm({
         ? existingPost.scheduled_time.slice(0, 16)
         : "",
       is_draft: existingPost.is_draft ?? false,
+
+      discord_location: existingPost.discord_location ?? "Online",
+
+      discord_event_start: existingPost.discord_event_start
+        ? existingPost.discord_event_start.slice(0, 16)
+        : "",
+
+      discord_event_end: existingPost.discord_event_end
+        ? existingPost.discord_event_end.slice(0, 16)
+        : "",
+
+      instagram_post_type: existingPost.instagram_post_type ?? "post",
     };
 
     setFormData(prefilled);
@@ -141,10 +157,24 @@ export default function PostForm({
         setPendingDeletes([]);
       }
 
+      const scheduledTimeUTC = formData.scheduled_time
+        ? new Date(formData.scheduled_time).toISOString()
+        : null;
+
+      const discordEventStartUTC = formData.discord_event_start
+        ? new Date(formData.discord_event_start).toISOString()
+        : null;
+
+      const discordEventEndUTC = formData.discord_event_end
+        ? new Date(formData.discord_event_end).toISOString()
+        : null;
+
       const { ok, error } = await submitPost(
         {
           ...formData,
-          scheduled_time: formData.scheduled_time || null,
+          scheduled_time: scheduledTimeUTC,
+          discord_event_start: discordEventStartUTC,
+          discord_event_end: discordEventEndUTC,
           is_draft: isDraft,
         },
         data.session.access_token,
@@ -259,6 +289,74 @@ export default function PostForm({
             value={formData.caption}
           />
         </div>
+
+        {formData.platform.includes("instagram") && (
+          <div className="post-form__field">
+            <label className="post-form__label">Instagram Post Type</label>
+            <div className="post-form__checkboxes">
+              {(["post", "story"] as const).map((type) => (
+                <label key={type} className="post-form__checkbox-label">
+                  <input
+                    type="radio"
+                    name="instagram_post_type"
+                    value={type}
+                    checked={formData.instagram_post_type === type}
+                    onChange={() => updateForm({ instagram_post_type: type })}
+                  />
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {formData.platform.includes("discord") && (
+          <>
+            <div className="post-form__field">
+              <label className="post-form__label" htmlFor="discord_location">
+                Event Location
+              </label>
+              <input
+                className="post-form__input"
+                type="text"
+                id="discord_location"
+                placeholder="e.g. DIB 208, Zoom, Online"
+                onChange={(e) =>
+                  updateForm({ discord_location: e.target.value })
+                }
+                value={formData.discord_location}
+              />
+            </div>
+            <div className="post-form__field">
+              <label className="post-form__label" htmlFor="discord_event_start">
+                Event Start Time
+              </label>
+              <input
+                className="post-form__input"
+                type="datetime-local"
+                id="discord_event_start"
+                onChange={(e) =>
+                  updateForm({ discord_event_start: e.target.value })
+                }
+                value={formData.discord_event_start}
+              />
+            </div>
+            <div className="post-form__field">
+              <label className="post-form__label" htmlFor="discord_event_end">
+                Event End Time
+              </label>
+              <input
+                className="post-form__input"
+                type="datetime-local"
+                id="discord_event_end"
+                onChange={(e) =>
+                  updateForm({ discord_event_end: e.target.value })
+                }
+                value={formData.discord_event_end}
+              />
+            </div>
+          </>
+        )}
 
         <div className="post-form__field">
           <label className="post-form__label" htmlFor="scheduled_time">
