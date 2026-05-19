@@ -1,0 +1,501 @@
+// ─── Design tokens (matches app light theme) ─────────────────────────────────
+$font-sans:   system-ui, sans-serif;
+$font-mono:   'DM Mono', monospace;
+
+$bg:          #fff;
+$surface:     #ffffff;
+$surface-2:   #f3f4f6;
+$border:      #e5e7eb;
+$border-soft: #ececec;
+
+$text:        #111111;
+$text-muted:  #6b7280;
+$text-dim:    #9ca3af;
+
+$accent:      #111111;
+$done-green:  #22c55e;
+$overdue-red: #e53935;
+$urgent-amber:#f59e0b;
+
+$radius-sm:   6px;
+$radius-md:   10px;
+$radius-lg:   12px;
+
+.tl-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: $text-muted;
+  font-family: $font-sans;
+  font-size: 14px;
+
+  &__spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid $border;
+    border-top-color: $text;
+    border-radius: 50%;
+    animation: tl-spin 0.7s linear infinite;
+  }
+}
+
+.tl-error {
+  padding: 32px 24px;
+  color: $overdue-red;
+  font-family: $font-sans;
+  font-size: 14px;
+}
+
+@keyframes tl-spin {
+  to { transform: rotate(360deg); }
+}
+
+// ─── Root ────────────────────────────────────────────────────────────────────
+.tl {
+  font-family: $font-sans;
+  background: $bg;
+  color: $text;
+  min-height: 100vh;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  display: flex;
+  flex-direction: column;
+
+  // ── Header ─────────────────────────────────────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  &__header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  &__title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin: 0;
+    color: $text;
+  }
+
+  &__subtitle {
+    font-size: 13px;
+    color: $text-muted;
+    margin: 0;
+  }
+
+  // ── View toggle ────────────────────────────────────────────────────────────
+  &__view-toggle {
+    display: flex;
+    border: 1px solid $border;
+    border-radius: 20px;
+    overflow: hidden;
+    background: $surface;
+  }
+
+  &__view-btn {
+    padding: 5px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: $font-sans;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: $text-muted;
+    transition: all 0.15s;
+
+    &:hover {
+      color: $text;
+    }
+
+    &--active {
+      background: $text;
+      color: #fff;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
+  &__stats {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  &__stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+    color: $text;
+
+    &--done    { color: $done-green; }
+    &--overdue { color: $overdue-red; }
+  }
+
+  &__stat-label {
+    font-size: 11px;
+    color: $text-dim;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+
+  // ── Filters ────────────────────────────────────────────────────────────────
+  &__filters {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  &__filter {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid $border;
+    background: $surface;
+    color: $text-muted;
+    font-family: $font-sans;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+      border-color: $text;
+      color: $text;
+    }
+
+    &--active {
+      background: $text;
+      border-color: $text;
+      color: #fff;
+
+      &:hover { color: #fff; }
+    }
+  }
+
+  // ── Global progress ────────────────────────────────────────────────────────
+  &__progress-track {
+    height: 3px;
+    background: $border;
+    border-radius: 2px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    background: $done-green;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  // ── Empty ──────────────────────────────────────────────────────────────────
+  &__empty {
+    padding: 48px 0;
+    text-align: center;
+    color: $text-muted;
+    font-size: 14px;
+  }
+
+  // ── Groups ─────────────────────────────────────────────────────────────────
+  &__groups {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+// ─── Role Group ──────────────────────────────────────────────────────────────
+.rg {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+
+  &:hover {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 14px 18px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    gap: 12px;
+    transition: background 0.12s;
+
+    &:hover { background: $surface-2; }
+  }
+
+  &__header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__chevron {
+    font-size: 11px;
+    color: $text-dim;
+    width: 12px;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: $text;
+    letter-spacing: -0.1px;
+    text-transform: capitalize;
+  }
+
+  &__count {
+    font-size: 11px;
+    color: $text-dim;
+    background: $surface-2;
+    border: 1px solid $border-soft;
+    border-radius: 10px;
+    padding: 1px 8px;
+  }
+
+  &__header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__fraction {
+    font-size: 12px;
+    color: $text-muted;
+    white-space: nowrap;
+  }
+
+  &__mini-track {
+    width: 72px;
+    height: 4px;
+    background: $border;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  &__mini-fill {
+    height: 100%;
+    background: $done-green;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid $border;
+  }
+}
+
+// ─── Task Row ─────────────────────────────────────────────────────────────────
+.tr {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid $border-soft;
+  transition: background 0.12s;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: $surface-2; }
+
+  &--done {
+    opacity: 0.5;
+
+    .tr__title {
+      text-decoration: line-through;
+      color: $text-muted;
+    }
+  }
+
+  &__accent {
+    width: 3px;
+    align-self: stretch;
+    flex-shrink: 0;
+    opacity: 0.6;
+  }
+
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    min-width: 0;
+  }
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__title {
+    font-size: 14px;
+    font-weight: 500;
+    color: $text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__chips {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  &__type {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: capitalize;
+  }
+
+  &__status {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+
+    &.status--todo        { background: $surface-2; color: $text-muted; }
+    &.status--in-progress { background: #dbeafe;    color: #1e40af; }
+    &.status--done        { background: #dcfce7;    color: #15803d; }
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  &__role {
+    font-size: 12px;
+    color: $text-muted;
+    white-space: nowrap;
+  }
+
+  &__post {
+    font-size: 12px;
+    color: $text-muted;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+  }
+
+  &__campaign {
+    color: $text-dim;
+  }
+
+  &__due {
+    font-size: 12px;
+    white-space: nowrap;
+
+    &--normal  { color: $text-dim; }
+    &--soon    { color: $urgent-amber; }
+    &--urgent  { color: $urgent-amber; font-weight: 600; }
+    &--overdue { color: $overdue-red;  font-weight: 600; }
+  }
+
+  &__select {
+    flex-shrink: 0;
+    margin-right: 16px;
+    padding: 5px 10px;
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: $radius-sm;
+    color: $text-muted;
+    font-family: $font-sans;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.12s, color 0.12s;
+    appearance: none;
+
+    &:hover,
+    &:focus {
+      border-color: $text;
+      color: $text;
+      outline: none;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .tl {
+    padding: 24px 16px 48px;
+
+    &__header {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    &__header-right {
+      align-items: flex-start;
+      flex-direction: column-reverse;
+    }
+
+    &__stats {
+      flex-direction: row;
+      gap: 20px;
+    }
+
+    &__stat {
+      align-items: flex-start;
+    }
+  }
+
+  .tr {
+    &__top {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    &__select { display: none; }
+  }
+
+  .rg {
+    &__mini-track { display: none; }
+  }
+}

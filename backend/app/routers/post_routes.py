@@ -45,6 +45,22 @@ def get_need_review_posts(authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
     return get_review_posts_service(token)
 
+@router.put("/{post_id}/submit_for_review")
+def submit_for_review(post_id: int, authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    supabase = create_supabase_client_with_token(token)
+
+    post = supabase.table("posts").select("post_status").eq("id", post_id).execute()
+    if not post.data:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    current_status = post.data[0]["post_status"]
+    if current_status in ("needs_review", "approved", "posted"):
+        return post.data[0]
+
+    response = supabase.table("posts").update({"post_status": "needs_review"}).eq("id", post_id).execute()
+    return response.data[0]
+
 @router.get("/{post_id}")
 def get_post(post_id: int, authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")

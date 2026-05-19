@@ -197,7 +197,12 @@ export default function PostPage() {
           </section>
         </div>
 
-        {postData && <PostTasksSection postId={postData.id} />}
+        {postData && (
+          <PostTasksSection
+            postId={postData.id}
+            campaignId={postData.campaign_id}
+          />
+        )}
       </div>
     </div>
   );

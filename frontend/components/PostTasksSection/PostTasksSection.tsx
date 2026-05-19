@@ -19,8 +19,22 @@ const TYPE_COLORS: Record<PostTask["type"], string> = {
   review: "#22c55e",
 };
 
-export default function PostTasksSection({ postId }: { postId: number }) {
+export default function PostTasksSection({
+  postId,
+  campaignId,
+  onAllTasksDone,
+}: {
+  postId: number;
+  campaignId: number;
+  onAllTasksDone?: () => void;
+}) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const [members, setMembers] = useState<
+    {
+      user_id: string;
+      user_profiles: { display_name: string; profile_picture: string | null };
+    }[]
+  >([]);
   const [tasks, setTasks] = useState<PostTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -54,6 +68,15 @@ export default function PostTasksSection({ postId }: { postId: number }) {
       if (res.ok) {
         setTasks(await res.json());
       }
+
+      const membersRes = await fetch(
+        `${API_URL}/campaigns/${campaignId}/members`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      if (membersRes.ok) setMembers(await membersRes.json());
+
       setLoading(false);
     };
 
@@ -111,6 +134,20 @@ export default function PostTasksSection({ postId }: { postId: number }) {
       setTasks((prev) =>
         prev.map((t) => (t.id === taskId ? { ...t, status } : t)),
       );
+
+      if (status === "done" && tasks.length > 0) {
+        const allDone = tasks
+          .map((t) => (t.id === taskId ? { ...t, status } : t))
+          .every((t) => t.status === "done");
+
+        if (allDone) {
+          await fetch(`${API_URL}/posts/${postId}/submit_for_review`, {
+            method: "PUT",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          onAllTasksDone?.();
+        }
+      }
     }
   };
 
@@ -123,6 +160,28 @@ export default function PostTasksSection({ postId }: { postId: number }) {
       headers: { Authorization: `Bearer ${token}` },
     });
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
+  };
+
+  const handleUserAssign = async (taskId: number, userId: string | null) => {
+    const token = await getToken();
+    if (!token) return;
+
+    const res = await fetch(`${API_URL}/tasks/${taskId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ assigned_user_id: userId }),
+    });
+
+    if (res.ok) {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === taskId ? { ...t, assigned_user_id: userId } : t,
+        ),
+      );
+    }
   };
 
   const allDone = tasks.length > 0 && tasks.every((t) => t.status === "done");
@@ -282,6 +341,22 @@ export default function PostTasksSection({ postId }: { postId: number }) {
               </div>
 
               <div className="post-tasks__item-right">
+                <select
+                  className="post-tasks__user-select"
+                  value={task.assigned_user_id ?? ""}
+                  onChange={(e) =>
+                    handleUserAssign(task.id, e.target.value || null)
+                  }
+                >
+                  {" "}
+                  <option value="">Unassigned</option>{" "}
+                  {members.map((m) => (
+                    <option key={m.user_id} value={m.user_id}>
+                      {" "}
+                      {m.user_profiles.display_name}{" "}
+                    </option>
+                  ))}{" "}
+                </select>
                 <select
                   className="post-tasks__status-select"
                   value={task.status}
