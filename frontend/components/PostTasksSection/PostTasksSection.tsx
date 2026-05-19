@@ -19,6 +19,7 @@ const TYPE_COLORS: Record<PostTask["type"], string> = {
   review: "#22c55e",
 };
 
+<<<<<<< HEAD
 export default function PostTasksSection({
   postId,
   campaignId,
@@ -35,6 +36,10 @@ export default function PostTasksSection({
       user_profiles: { display_name: string; profile_picture: string | null };
     }[]
   >([]);
+=======
+export default function PostTasksSection({ postId }: { postId: number }) {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+>>>>>>> 73e21ee (starter tasks component for posts)
   const [tasks, setTasks] = useState<PostTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -68,6 +73,7 @@ export default function PostTasksSection({
       if (res.ok) {
         setTasks(await res.json());
       }
+<<<<<<< HEAD
 
       const membersRes = await fetch(
         `${API_URL}/campaigns/${campaignId}/members`,
@@ -77,6 +83,8 @@ export default function PostTasksSection({
       );
       if (membersRes.ok) setMembers(await membersRes.json());
 
+=======
+>>>>>>> 73e21ee (starter tasks component for posts)
       setLoading(false);
     };
 
@@ -134,6 +142,7 @@ export default function PostTasksSection({
       setTasks((prev) =>
         prev.map((t) => (t.id === taskId ? { ...t, status } : t)),
       );
+<<<<<<< HEAD
 
       if (status === "done" && tasks.length > 0) {
         const allDone = tasks
@@ -148,6 +157,8 @@ export default function PostTasksSection({
           onAllTasksDone?.();
         }
       }
+=======
+>>>>>>> 73e21ee (starter tasks component for posts)
     }
   };
 
@@ -162,6 +173,7 @@ export default function PostTasksSection({
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
+<<<<<<< HEAD
   const handleUserAssign = async (taskId: number, userId: string | null) => {
     const token = await getToken();
     if (!token) return;
@@ -184,6 +196,8 @@ export default function PostTasksSection({
     }
   };
 
+=======
+>>>>>>> 73e21ee (starter tasks component for posts)
   const allDone = tasks.length > 0 && tasks.every((t) => t.status === "done");
   const doneCount = tasks.filter((t) => t.status === "done").length;
 
@@ -342,6 +356,7 @@ export default function PostTasksSection({
 
               <div className="post-tasks__item-right">
                 <select
+<<<<<<< HEAD
                   className="post-tasks__user-select"
                   value={task.assigned_user_id ?? ""}
                   onChange={(e) =>
@@ -358,6 +373,8 @@ export default function PostTasksSection({
                   ))}{" "}
                 </select>
                 <select
+=======
+>>>>>>> 73e21ee (starter tasks component for posts)
                   className="post-tasks__status-select"
                   value={task.status}
                   onChange={(e) =>

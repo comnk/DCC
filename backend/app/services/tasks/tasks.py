@@ -17,6 +17,10 @@ def create_task_service(post_id: int, task_data: TaskCreate, token: str):
         raise HTTPException(status_code=500, detail="Failed to create task")
     return response.data[0]
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 73e21ee (starter tasks component for posts)
 def get_tasks_service(post_id: int, token: str):
     _, _ = extract_token(token)
     supabase = create_supabase_client_with_token(token)
@@ -83,6 +87,7 @@ def get_tasks_by_role_service(token: str):
             grouped[role] = []
         grouped[role].append(task)
 
+<<<<<<< HEAD
     return grouped
 
 def get_my_tasks_service(token: str):
@@ -97,3 +102,6 @@ def get_my_tasks_service(token: str):
         .execute()
 
     return response.data or []
+=======
+    return grouped
+>>>>>>> 73e21ee (starter tasks component for posts)
