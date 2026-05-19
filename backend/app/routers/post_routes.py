@@ -1,5 +1,5 @@
-import jwt
 from fastapi import APIRouter, HTTPException, Header
+
 from ..db.supabase import create_supabase_client_with_token
 from ..services.posts.posts import (
     delete_post_service, get_post_service, get_all_posts_service,
@@ -8,16 +8,9 @@ from ..services.posts.posts import (
     create_post_service, update_post_service,
 )
 from ..models.post import Post
+from ..utils.extract_token import extract_token
 
-router = APIRouter(prefix="/posts", tags=["posts"])
-
-def extract_token(authorization: str) -> tuple[str, str]:
-    token = authorization.replace("Bearer ", "")
-    payload = jwt.decode(token, options={"verify_signature": False})
-    user_id = payload.get("sub")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return token, user_id
+router = APIRouter(prefix="/posts", tags=["posts", "tasks"])
 
 @router.post("/create")
 def create_post(post: Post, authorization: str = Header(...)):

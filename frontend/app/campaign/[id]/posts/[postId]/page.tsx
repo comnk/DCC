@@ -14,6 +14,7 @@ import { CircularProgress } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Button from "@/components/buttons/Button/Button";
+import PostTasksSection from "@/components/PostTasksSection/PostTasksSection";
 
 export default function PostPage() {
   const { id, postId } = useParams<{ id: string; postId: string }>();
@@ -195,6 +196,8 @@ export default function PostPage() {
             <PostPreviewPanel data={previewData} />
           </section>
         </div>
+
+        {postData && <PostTasksSection postId={postData.id} />}
       </div>
     </div>
   );
