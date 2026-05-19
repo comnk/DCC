@@ -18,9 +18,12 @@ def create_task_service(post_id: int, task_data: TaskCreate, token: str):
     return response.data[0]
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> 73e21ee (starter tasks component for posts)
+=======
+>>>>>>> 88da3ae (second version of tasks system)
 def get_tasks_service(post_id: int, token: str):
     _, _ = extract_token(token)
     supabase = create_supabase_client_with_token(token)
@@ -88,6 +91,9 @@ def get_tasks_by_role_service(token: str):
         grouped[role].append(task)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 88da3ae (second version of tasks system)
     return grouped
 
 def get_my_tasks_service(token: str):
@@ -101,7 +107,11 @@ def get_my_tasks_service(token: str):
         .order("due_date") \
         .execute()
 
+<<<<<<< HEAD
     return response.data or []
 =======
     return grouped
 >>>>>>> 73e21ee (starter tasks component for posts)
+=======
+    return response.data or []
+>>>>>>> 88da3ae (second version of tasks system)

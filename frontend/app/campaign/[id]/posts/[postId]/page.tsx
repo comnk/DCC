@@ -238,8 +238,17 @@ export default function PostPage() {
         )}
 =======
 
+<<<<<<< HEAD
         {postData && <PostTasksSection postId={postData.id} />}
 >>>>>>> 55f8cd8 (starter tasks component for posts)
+=======
+        {postData && (
+          <PostTasksSection
+            postId={postData.id}
+            campaignId={postData.campaign_id}
+          />
+        )}
+>>>>>>> 5dac044 (second version of tasks system)
       </div>
     </div>
   );
