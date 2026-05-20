@@ -205,3 +205,24 @@ def list_campaign_members(campaign_id: int, authorization: str = Header(...)):
     users = supabase.table("user_profiles").select("*").in_("id", member_ids).execute()
     
     return users.data or []
+
+@router.get("/{campaign_id}/task-summary")
+def get_campaign_task_summary(campaign_id: int, authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    supabase = create_supabase_client_with_token(token)
+
+    response = supabase.table("post_tasks") \
+        .select("post_id, status, posts!inner(campaign_id)") \
+        .eq("posts.campaign_id", campaign_id) \
+        .execute()
+
+    summary: dict = {}
+    for task in (response.data or []):
+        pid = task["post_id"]
+        if pid not in summary:
+            summary[pid] = {"total": 0, "done": 0}
+        summary[pid]["total"] += 1
+        if task["status"] == "done":
+            summary[pid]["done"] += 1
+
+    return summary

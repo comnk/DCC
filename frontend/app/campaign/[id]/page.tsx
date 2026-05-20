@@ -70,6 +70,16 @@ export default async function CampaignPage({ params }: { params: Params }) {
     email: user.email ?? "",
   };
 
+  const taskSummaryRes = await fetch(
+    `${API_URL}/campaigns/${id}/task-summary`,
+    {
+      cache: "no-store",
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+  const taskSummary: Record<number, { total: number; done: number }> =
+    taskSummaryRes.ok ? await taskSummaryRes.json() : {};
+
   return (
     <div className="campaign-page">
       <Navbar />
@@ -131,7 +141,11 @@ export default async function CampaignPage({ params }: { params: Params }) {
           <ul className="campaign-posts__list">
             {campaign_posts.map((post: Post) => (
               <li key={post.id}>
-                <PostCard postData={post} searchTerm="" />
+                <PostCard
+                  postData={post}
+                  searchTerm=""
+                  taskSummary={taskSummary[post.id]}
+                />
               </li>
             ))}
           </ul>

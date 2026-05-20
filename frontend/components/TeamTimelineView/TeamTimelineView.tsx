@@ -71,11 +71,28 @@ export default function TeamTimelineView() {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [filterStatus, setFilterStatus] = useState<TaskStatus | "all">("all");
   const [view, setView] = useState<"team" | "mine">("team");
+  const [myRole, setMyRole] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       setError(null);
+
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      // Fetch the current user's role from user_profiles
+      if (user) {
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        if (profile?.role) setMyRole(profile.role);
+      }
+
       const token = await getToken();
       if (!token) {
         setLoading(false);
@@ -152,6 +169,13 @@ export default function TeamTimelineView() {
       .filter(([, tasks]) => (tasks as TimelineTask[]).length > 0),
   );
 
+  // Sort so the current user's role group always appears first
+  const sortedGroups = Object.entries(filteredGrouped).sort(([a], [b]) => {
+    if (myRole && a.toLowerCase() === myRole.toLowerCase()) return -1;
+    if (myRole && b.toLowerCase() === myRole.toLowerCase()) return 1;
+    return 0;
+  });
+
   if (loading)
     return (
       <div className="tl-loading">
@@ -173,9 +197,18 @@ export default function TeamTimelineView() {
             {view === "team" ? "Team Timeline" : "My Tasks"}
           </h1>
           <p className="tl__subtitle">
-            {view === "team"
-              ? "Pre-production workload by role"
-              : "Tasks assigned to you"}
+            {view === "team" ? (
+              myRole ? (
+                <>
+                  Pre-production workload by role{" "}
+                  <span className="tl__your-role">· {myRole}</span>
+                </>
+              ) : (
+                "Pre-production workload by role"
+              )
+            ) : (
+              "Tasks assigned to you"
+            )}
           </p>
         </div>
 
@@ -241,7 +274,7 @@ export default function TeamTimelineView() {
       )}
 
       {/* ── Groups ── */}
-      {Object.keys(filteredGrouped).length === 0 ? (
+      {sortedGroups.length === 0 ? (
         <div className="tl__empty">
           <p>
             {view === "mine"
@@ -251,14 +284,18 @@ export default function TeamTimelineView() {
         </div>
       ) : (
         <div className="tl__groups">
-          {Object.entries(filteredGrouped).map(([group, tasks]) => {
+          {sortedGroups.map(([group, tasks]) => {
             const isCollapsed = !!collapsed[group];
             const groupDone = tasks.filter((t) => t.status === "done").length;
+            const isMyRole =
+              view === "team" &&
+              myRole &&
+              group.toLowerCase() === myRole.toLowerCase();
 
             return (
               <section
                 key={group}
-                className={`rg ${isCollapsed ? "rg--collapsed" : ""}`}
+                className={`rg ${isCollapsed ? "rg--collapsed" : ""} ${isMyRole ? "rg--mine" : ""}`}
               >
                 <button
                   className="rg__header"
@@ -271,6 +308,7 @@ export default function TeamTimelineView() {
                       {isCollapsed ? "▸" : "▾"}
                     </span>
                     <span className="rg__name">{group}</span>
+                    {isMyRole && <span className="rg__you-badge">you</span>}
                     <span className="rg__count">{tasks.length}</span>
                   </div>
                   <div className="rg__header-right">
