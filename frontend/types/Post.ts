@@ -14,4 +14,8 @@ export type Post = {
   created_at: string;
   updated_at?: string;
   feedback?: string | null;
+  discord_location?: string | null;
+  discord_event_start?: string | null;
+  discord_event_end?: string | null;
+  instagram_post_type?: "post" | "story" | null;
 };
