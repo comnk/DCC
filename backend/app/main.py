@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 from contextlib import asynccontextmanager
 
-from app.routers import auth_routes, profile_routes, campaign_routes, post_routes
+from app.routers import auth_routes, profile_routes, campaign_routes, post_routes, task_routes
 from app.services.scheduling.scheduler import check_and_publish_posts
 
 @asynccontextmanager
@@ -39,6 +39,8 @@ app.include_router(auth_routes.router)
 app.include_router(profile_routes.router)
 app.include_router(campaign_routes.router)
 app.include_router(post_routes.router)
+app.include_router(task_routes.post_tasks_router)
+app.include_router(task_routes.tasks_router)
 
 @app.get("/")
 async def root():

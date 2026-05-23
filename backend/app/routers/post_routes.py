@@ -1,5 +1,5 @@
-import jwt
 from fastapi import APIRouter, HTTPException, Header
+
 from ..db.supabase import create_supabase_client_with_token
 from ..services.posts.posts import (
     delete_post_service, get_post_service, get_all_posts_service,
@@ -8,16 +8,9 @@ from ..services.posts.posts import (
     create_post_service, update_post_service,
 )
 from ..models.post import Post
+from ..utils.extract_token import extract_token
 
-router = APIRouter(prefix="/posts", tags=["posts"])
-
-def extract_token(authorization: str) -> tuple[str, str]:
-    token = authorization.replace("Bearer ", "")
-    payload = jwt.decode(token, options={"verify_signature": False})
-    user_id = payload.get("sub")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return token, user_id
+router = APIRouter(prefix="/posts", tags=["posts", "tasks"])
 
 @router.post("/create")
 def create_post(post: Post, authorization: str = Header(...)):
@@ -51,6 +44,22 @@ def get_need_review_count(authorization: str = Header(...)):
 def get_need_review_posts(authorization: str = Header(...)):
     token = authorization.replace("Bearer ", "")
     return get_review_posts_service(token)
+
+@router.put("/{post_id}/submit_for_review")
+def submit_for_review(post_id: int, authorization: str = Header(...)):
+    token = authorization.replace("Bearer ", "")
+    supabase = create_supabase_client_with_token(token)
+
+    post = supabase.table("posts").select("post_status").eq("id", post_id).execute()
+    if not post.data:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    current_status = post.data[0]["post_status"]
+    if current_status in ("needs_review", "approved", "posted"):
+        return post.data[0]
+
+    response = supabase.table("posts").update({"post_status": "needs_review"}).eq("id", post_id).execute()
+    return response.data[0]
 
 @router.get("/{post_id}")
 def get_post(post_id: int, authorization: str = Header(...)):

@@ -64,11 +64,15 @@ export default function PostCard({
   postData,
   campaignName,
   searchTerm,
+  taskSummary,
 }: {
   postData: Post;
   campaignName?: string;
   searchTerm: string;
+  taskSummary?: { total: number; done: number };
 }) {
+  const allDone = taskSummary && taskSummary.done === taskSummary.total;
+
   return (
     <div className="post-card">
       <PostStatusBadge post={postData} />
@@ -79,6 +83,26 @@ export default function PostCard({
           href={`/campaign/${postData.campaign_id}/posts/${postData.id}`}
         />
         <p className="post-card__caption">{postData.caption}</p>
+
+        {taskSummary && taskSummary.total > 0 && (
+          <div
+            className={`post-card__tasks ${allDone ? "post-card__tasks--done" : ""}`}
+          >
+            <div className="post-card__tasks-bar">
+              <div
+                className="post-card__tasks-fill"
+                style={{
+                  width: `${(taskSummary.done / taskSummary.total) * 100}%`,
+                }}
+              />
+            </div>
+            <span className="post-card__tasks-label">
+              {allDone
+                ? "All tasks done ✓"
+                : `${taskSummary.done}/${taskSummary.total} tasks`}
+            </span>
+          </div>
+        )}
         {campaignName && (
           <Link
             href={`/campaign/${postData.campaign_id}`}

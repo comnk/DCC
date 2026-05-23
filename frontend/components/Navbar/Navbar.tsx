@@ -76,6 +76,11 @@ export default function Navbar() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/timeline" onClick={closeMenu}>
+                    Timeline
+                  </Link>
+                </li>
+                <li>
                   <Link href="/review" onClick={closeMenu}>
                     Review
                     {reviewCount > 0 && (

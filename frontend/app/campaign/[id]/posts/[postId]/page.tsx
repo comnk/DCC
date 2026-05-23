@@ -14,6 +14,7 @@ import { CircularProgress } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Button from "@/components/buttons/Button/Button";
+import PostTasksSection from "@/components/PostTasksSection/PostTasksSection";
 
 export default function PostPage() {
   const { id, postId } = useParams<{ id: string; postId: string }>();
@@ -215,6 +216,13 @@ export default function PostPage() {
             <PostPreviewPanel data={previewData} />
           </section>
         </div>
+
+        {postData && (
+          <PostTasksSection
+            postId={postData.id}
+            campaignId={postData.campaign_id}
+          />
+        )}
         {cancelPending && (
           <div className="cancel-toast">
             <span>Post will be cancelled...</span>
@@ -222,6 +230,13 @@ export default function PostPage() {
               Undo
             </button>
           </div>
+        )}
+
+        {postData && (
+          <PostTasksSection
+            postId={postData.id}
+            campaignId={postData.campaign_id}
+          />
         )}
       </div>
     </div>

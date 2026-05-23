@@ -64,4 +64,35 @@
     border-radius: 2px;
     padding: 0 1px;
   }
+
+  &__tasks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+
+  &--done &-label { color: #15803d; }
+}
+
+  &__tasks-bar {
+    width: 64px;
+    height: 3px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__tasks-fill {
+    height: 100%;
+    background: #22c55e;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  &__tasks-label {
+    font-size: 11px;
+    color: #6b7280;
+    white-space: nowrap;
+  }
 }
