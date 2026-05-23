@@ -216,17 +216,13 @@ export default function PostPage() {
             <PostPreviewPanel data={previewData} />
           </section>
         </div>
-<<<<<<< HEAD
-<<<<<<< HEAD
 
         {postData && (
           <PostTasksSection
             postId={postData.id}
             campaignId={postData.campaign_id}
           />
-=======
-=======
->>>>>>> 73e21ee (starter tasks component for posts)
+        )}
         {cancelPending && (
           <div className="cancel-toast">
             <span>Post will be cancelled...</span>
@@ -234,21 +230,14 @@ export default function PostPage() {
               Undo
             </button>
           </div>
->>>>>>> 7acbafe (UX additions and bug fixes)
         )}
-=======
 
-<<<<<<< HEAD
-        {postData && <PostTasksSection postId={postData.id} />}
->>>>>>> 55f8cd8 (starter tasks component for posts)
-=======
         {postData && (
           <PostTasksSection
             postId={postData.id}
             campaignId={postData.campaign_id}
           />
         )}
->>>>>>> 5dac044 (second version of tasks system)
       </div>
     </div>
   );

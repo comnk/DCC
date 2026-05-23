@@ -166,10 +166,6 @@ export default function PostForm({
         ? new Date(formData.scheduled_time).toISOString()
         : null;
 
-      const scheduledTimeUTC = formData.scheduled_time
-        ? new Date(formData.scheduled_time).toISOString()
-        : null;
-
       const discordEventStartUTC = formData.discord_event_start
         ? new Date(formData.discord_event_start).toISOString()
         : null;
@@ -182,18 +178,8 @@ export default function PostForm({
         {
           ...formData,
           scheduled_time: scheduledTimeUTC,
-<<<<<<< HEAD
-<<<<<<< HEAD
           discord_event_start: discordEventStartUTC,
           discord_event_end: discordEventEndUTC,
-=======
->>>>>>> 9390bb0 (added a few fixes)
-=======
-=======
-          discord_event_start: discordEventStartUTC,
-          discord_event_end: discordEventEndUTC,
->>>>>>> b1f93dd (starter code for posting on discord, expanding on the post form, and a bug fix)
->>>>>>> d098705 (starter code for posting on discord, expanding on the post form, and a bug fix)
           is_draft: isDraft,
         },
         token,
