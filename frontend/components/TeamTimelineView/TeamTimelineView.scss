@@ -1,16 +1,7 @@
-<<<<<<< HEAD
-// ─── Design tokens ────────────────────────────────────────────────────────────
-$font-sans:   system-ui, sans-serif;
-$font-mono:   'DM Mono', monospace;
-
-$bg:          #f7f6f3;
-=======
-// ─── Design tokens (matches app light theme) ─────────────────────────────────
 $font-sans:   system-ui, sans-serif;
 $font-mono:   'DM Mono', monospace;
 
 $bg:          #fff;
->>>>>>> 88da3ae (second version of tasks system)
 $surface:     #ffffff;
 $surface-2:   #f3f4f6;
 $border:      #e5e7eb;
@@ -20,24 +11,15 @@ $text:        #111111;
 $text-muted:  #6b7280;
 $text-dim:    #9ca3af;
 
-<<<<<<< HEAD
-=======
 $accent:      #111111;
->>>>>>> 88da3ae (second version of tasks system)
 $done-green:  #22c55e;
 $overdue-red: #e53935;
 $urgent-amber:#f59e0b;
 
 $radius-sm:   6px;
-<<<<<<< HEAD
-$radius-lg:   12px;
-
-// ─── Loading / Error ──────────────────────────────────────────────────────────
-=======
 $radius-md:   10px;
 $radius-lg:   12px;
 
->>>>>>> 88da3ae (second version of tasks system)
 .tl-loading {
   display: flex;
   align-items: center;
@@ -68,11 +50,6 @@ $radius-lg:   12px;
   to { transform: rotate(360deg); }
 }
 
-<<<<<<< HEAD
-// ─── Root ─────────────────────────────────────────────────────────────────────
-=======
-// ─── Root ────────────────────────────────────────────────────────────────────
->>>>>>> 88da3ae (second version of tasks system)
 .tl {
   font-family: $font-sans;
   background: $bg;
@@ -85,11 +62,6 @@ $radius-lg:   12px;
   display: flex;
   flex-direction: column;
 
-<<<<<<< HEAD
-  // ── Header ──────────────────────────────────────────────────────────────────
-=======
-  // ── Header ─────────────────────────────────────────────────────────────────
->>>>>>> 88da3ae (second version of tasks system)
   &__header {
     display: flex;
     align-items: flex-start;
@@ -126,16 +98,11 @@ $radius-lg:   12px;
     margin: 0;
   }
 
-<<<<<<< HEAD
   &__your-role {
     color: $text;
     font-weight: 500;
   }
 
-  // ── View toggle ─────────────────────────────────────────────────────────────
-=======
-  // ── View toggle ────────────────────────────────────────────────────────────
->>>>>>> 88da3ae (second version of tasks system)
   &__view-toggle {
     display: flex;
     border: 1px solid $border;
@@ -155,24 +122,13 @@ $radius-lg:   12px;
     color: $text-muted;
     transition: all 0.15s;
 
-<<<<<<< HEAD
-    &:hover { color: $text; }
-=======
     &:hover {
       color: $text;
     }
->>>>>>> 88da3ae (second version of tasks system)
 
     &--active {
       background: $text;
       color: #fff;
-<<<<<<< HEAD
-      &:hover { color: #fff; }
-    }
-  }
-
-  // ── Stats ───────────────────────────────────────────────────────────────────
-=======
 
       &:hover {
         color: #fff;
@@ -180,8 +136,6 @@ $radius-lg:   12px;
     }
   }
 
-  // ── Stats ──────────────────────────────────────────────────────────────────
->>>>>>> 88da3ae (second version of tasks system)
   &__stats {
     display: flex;
     gap: 24px;
@@ -213,11 +167,6 @@ $radius-lg:   12px;
     font-weight: 600;
   }
 
-<<<<<<< HEAD
-  // ── Filters ─────────────────────────────────────────────────────────────────
-=======
-  // ── Filters ────────────────────────────────────────────────────────────────
->>>>>>> 88da3ae (second version of tasks system)
   &__filters {
     display: flex;
     gap: 6px;
@@ -236,32 +185,19 @@ $radius-lg:   12px;
     cursor: pointer;
     transition: all 0.15s;
 
-<<<<<<< HEAD
-    &:hover { border-color: $text; color: $text; }
-=======
     &:hover {
       border-color: $text;
       color: $text;
     }
->>>>>>> 88da3ae (second version of tasks system)
 
     &--active {
       background: $text;
       border-color: $text;
       color: #fff;
-<<<<<<< HEAD
-=======
-
->>>>>>> 88da3ae (second version of tasks system)
       &:hover { color: #fff; }
     }
   }
 
-<<<<<<< HEAD
-  // ── Progress ────────────────────────────────────────────────────────────────
-=======
-  // ── Global progress ────────────────────────────────────────────────────────
->>>>>>> 88da3ae (second version of tasks system)
   &__progress-track {
     height: 3px;
     background: $border;
@@ -277,11 +213,6 @@ $radius-lg:   12px;
     transition: width 0.4s ease;
   }
 
-<<<<<<< HEAD
-  // ── Empty ───────────────────────────────────────────────────────────────────
-=======
-  // ── Empty ──────────────────────────────────────────────────────────────────
->>>>>>> 88da3ae (second version of tasks system)
   &__empty {
     padding: 48px 0;
     text-align: center;
@@ -289,11 +220,6 @@ $radius-lg:   12px;
     font-size: 14px;
   }
 
-<<<<<<< HEAD
-  // ── Groups ──────────────────────────────────────────────────────────────────
-=======
-  // ── Groups ─────────────────────────────────────────────────────────────────
->>>>>>> 88da3ae (second version of tasks system)
   &__groups {
     display: flex;
     flex-direction: column;
@@ -301,28 +227,17 @@ $radius-lg:   12px;
   }
 }
 
-<<<<<<< HEAD
-// ─── Role Group ───────────────────────────────────────────────────────────────
-=======
-// ─── Role Group ──────────────────────────────────────────────────────────────
->>>>>>> 88da3ae (second version of tasks system)
 .rg {
   background: $surface;
   border: 1px solid $border;
   border-radius: $radius-lg;
   overflow: hidden;
-<<<<<<< HEAD
   transition: box-shadow 0.15s, border-color 0.15s;
-=======
-  transition: box-shadow 0.15s;
->>>>>>> 88da3ae (second version of tasks system)
 
   &:hover {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   }
 
-<<<<<<< HEAD
-  // ── Role highlight: current user's role ─────────────────────────────────────
   &--mine {
     border-color: $text;
     border-width: 1.5px;
@@ -340,8 +255,6 @@ $radius-lg:   12px;
     }
   }
 
-=======
->>>>>>> 88da3ae (second version of tasks system)
   &__header {
     display: flex;
     align-items: center;
@@ -379,8 +292,6 @@ $radius-lg:   12px;
     text-transform: capitalize;
   }
 
-<<<<<<< HEAD
-  // "you" badge next to role name
   &__you-badge {
     font-size: 10px;
     font-weight: 600;
@@ -392,8 +303,6 @@ $radius-lg:   12px;
     text-transform: uppercase;
   }
 
-=======
->>>>>>> 88da3ae (second version of tasks system)
   &__count {
     font-size: 11px;
     color: $text-dim;
@@ -438,7 +347,6 @@ $radius-lg:   12px;
   }
 }
 
-// ─── Task Row ─────────────────────────────────────────────────────────────────
 .tr {
   display: flex;
   align-items: center;
@@ -450,10 +358,6 @@ $radius-lg:   12px;
 
   &--done {
     opacity: 0.5;
-<<<<<<< HEAD
-=======
-
->>>>>>> 88da3ae (second version of tasks system)
     .tr__title {
       text-decoration: line-through;
       color: $text-muted;
@@ -540,13 +444,9 @@ $radius-lg:   12px;
     max-width: 280px;
   }
 
-<<<<<<< HEAD
-  &__campaign { color: $text-dim; }
-=======
   &__campaign {
     color: $text-dim;
   }
->>>>>>> 88da3ae (second version of tasks system)
 
   &__due {
     font-size: 12px;
@@ -581,36 +481,20 @@ $radius-lg:   12px;
   }
 }
 
-<<<<<<< HEAD
-// ─── Responsive ───────────────────────────────────────────────────────────────
-=======
->>>>>>> 88da3ae (second version of tasks system)
 @media (max-width: 600px) {
   .tl {
     padding: 24px 16px 48px;
 
-<<<<<<< HEAD
-    &__header { flex-direction: column; gap: 16px; }
-=======
     &__header {
       flex-direction: column;
       gap: 16px;
     }
->>>>>>> 88da3ae (second version of tasks system)
 
     &__header-right {
       align-items: flex-start;
       flex-direction: column-reverse;
     }
 
-<<<<<<< HEAD
-    &__stats { flex-direction: row; gap: 20px; }
-    &__stat  { align-items: flex-start; }
-  }
-
-  .tr {
-    &__top { flex-direction: column; align-items: flex-start; gap: 6px; }
-=======
     &__stats {
       flex-direction: row;
       gap: 20px;
@@ -628,7 +512,6 @@ $radius-lg:   12px;
       gap: 6px;
     }
 
->>>>>>> 88da3ae (second version of tasks system)
     &__select { display: none; }
   }
 

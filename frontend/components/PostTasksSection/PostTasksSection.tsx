@@ -19,10 +19,6 @@ const TYPE_COLORS: Record<PostTask["type"], string> = {
   review: "#22c55e",
 };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 88da3ae (second version of tasks system)
 export default function PostTasksSection({
   postId,
   campaignId,
@@ -32,7 +28,6 @@ export default function PostTasksSection({
   campaignId: number;
   onAllTasksDone?: () => void;
 }) {
-<<<<<<< HEAD
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [members, setMembers] = useState<
     {
@@ -40,19 +35,7 @@ export default function PostTasksSection({
       user_profiles: { display_name: string; profile_picture: string | null };
     }[]
   >([]);
-=======
-export default function PostTasksSection({ postId }: { postId: number }) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
->>>>>>> 73e21ee (starter tasks component for posts)
-=======
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-  const [members, setMembers] = useState<
-    {
-      user_id: string;
-      user_profiles: { display_name: string; profile_picture: string | null };
-    }[]
-  >([]);
->>>>>>> 88da3ae (second version of tasks system)
+
   const [tasks, setTasks] = useState<PostTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -86,10 +69,6 @@ export default function PostTasksSection({ postId }: { postId: number }) {
       if (res.ok) {
         setTasks(await res.json());
       }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 88da3ae (second version of tasks system)
 
       const membersRes = await fetch(
         `${API_URL}/campaigns/${campaignId}/members`,
@@ -99,11 +78,6 @@ export default function PostTasksSection({ postId }: { postId: number }) {
       );
       if (membersRes.ok) setMembers(await membersRes.json());
 
-<<<<<<< HEAD
-=======
->>>>>>> 73e21ee (starter tasks component for posts)
-=======
->>>>>>> 88da3ae (second version of tasks system)
       setLoading(false);
     };
 
@@ -161,10 +135,6 @@ export default function PostTasksSection({ postId }: { postId: number }) {
       setTasks((prev) =>
         prev.map((t) => (t.id === taskId ? { ...t, status } : t)),
       );
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 88da3ae (second version of tasks system)
 
       if (status === "done" && tasks.length > 0) {
         const allDone = tasks
@@ -179,11 +149,6 @@ export default function PostTasksSection({ postId }: { postId: number }) {
           onAllTasksDone?.();
         }
       }
-<<<<<<< HEAD
-=======
->>>>>>> 73e21ee (starter tasks component for posts)
-=======
->>>>>>> 88da3ae (second version of tasks system)
     }
   };
 
@@ -198,10 +163,6 @@ export default function PostTasksSection({ postId }: { postId: number }) {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 88da3ae (second version of tasks system)
   const handleUserAssign = async (taskId: number, userId: string | null) => {
     const token = await getToken();
     if (!token) return;
@@ -224,11 +185,6 @@ export default function PostTasksSection({ postId }: { postId: number }) {
     }
   };
 
-<<<<<<< HEAD
-=======
->>>>>>> 73e21ee (starter tasks component for posts)
-=======
->>>>>>> 88da3ae (second version of tasks system)
   const allDone = tasks.length > 0 && tasks.every((t) => t.status === "done");
   const doneCount = tasks.filter((t) => t.status === "done").length;
 
@@ -387,10 +343,6 @@ export default function PostTasksSection({ postId }: { postId: number }) {
 
               <div className="post-tasks__item-right">
                 <select
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 88da3ae (second version of tasks system)
                   className="post-tasks__user-select"
                   value={task.assigned_user_id ?? ""}
                   onChange={(e) =>
@@ -407,11 +359,6 @@ export default function PostTasksSection({ postId }: { postId: number }) {
                   ))}{" "}
                 </select>
                 <select
-<<<<<<< HEAD
-=======
->>>>>>> 73e21ee (starter tasks component for posts)
-=======
->>>>>>> 88da3ae (second version of tasks system)
                   className="post-tasks__status-select"
                   value={task.status}
                   onChange={(e) =>
