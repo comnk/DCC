@@ -71,16 +71,12 @@ export default function TeamTimelineView() {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [filterStatus, setFilterStatus] = useState<TaskStatus | "all">("all");
   const [view, setView] = useState<"team" | "mine">("team");
-<<<<<<< HEAD
   const [myRole, setMyRole] = useState<string | null>(null);
-=======
->>>>>>> 88da3ae (second version of tasks system)
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       setError(null);
-<<<<<<< HEAD
 
       const supabase = createClient();
       const {
@@ -97,8 +93,6 @@ export default function TeamTimelineView() {
         if (profile?.role) setMyRole(profile.role);
       }
 
-=======
->>>>>>> 88da3ae (second version of tasks system)
       const token = await getToken();
       if (!token) {
         setLoading(false);
@@ -175,16 +169,12 @@ export default function TeamTimelineView() {
       .filter(([, tasks]) => (tasks as TimelineTask[]).length > 0),
   );
 
-<<<<<<< HEAD
-  // Sort so the current user's role group always appears first
   const sortedGroups = Object.entries(filteredGrouped).sort(([a], [b]) => {
     if (myRole && a.toLowerCase() === myRole.toLowerCase()) return -1;
     if (myRole && b.toLowerCase() === myRole.toLowerCase()) return 1;
     return 0;
   });
 
-=======
->>>>>>> 88da3ae (second version of tasks system)
   if (loading)
     return (
       <div className="tl-loading">
@@ -206,7 +196,6 @@ export default function TeamTimelineView() {
             {view === "team" ? "Team Timeline" : "My Tasks"}
           </h1>
           <p className="tl__subtitle">
-<<<<<<< HEAD
             {view === "team" ? (
               myRole ? (
                 <>
@@ -219,11 +208,6 @@ export default function TeamTimelineView() {
             ) : (
               "Tasks assigned to you"
             )}
-=======
-            {view === "team"
-              ? "Pre-production workload by role"
-              : "Tasks assigned to you"}
->>>>>>> 88da3ae (second version of tasks system)
           </p>
         </div>
 
@@ -289,11 +273,7 @@ export default function TeamTimelineView() {
       )}
 
       {/* ── Groups ── */}
-<<<<<<< HEAD
       {sortedGroups.length === 0 ? (
-=======
-      {Object.keys(filteredGrouped).length === 0 ? (
->>>>>>> 88da3ae (second version of tasks system)
         <div className="tl__empty">
           <p>
             {view === "mine"
@@ -303,7 +283,6 @@ export default function TeamTimelineView() {
         </div>
       ) : (
         <div className="tl__groups">
-<<<<<<< HEAD
           {sortedGroups.map(([group, tasks]) => {
             const isCollapsed = !!collapsed[group];
             const groupDone = tasks.filter((t) => t.status === "done").length;
@@ -311,20 +290,11 @@ export default function TeamTimelineView() {
               view === "team" &&
               myRole &&
               group.toLowerCase() === myRole.toLowerCase();
-=======
-          {Object.entries(filteredGrouped).map(([group, tasks]) => {
-            const isCollapsed = !!collapsed[group];
-            const groupDone = tasks.filter((t) => t.status === "done").length;
->>>>>>> 88da3ae (second version of tasks system)
 
             return (
               <section
                 key={group}
-<<<<<<< HEAD
                 className={`rg ${isCollapsed ? "rg--collapsed" : ""} ${isMyRole ? "rg--mine" : ""}`}
-=======
-                className={`rg ${isCollapsed ? "rg--collapsed" : ""}`}
->>>>>>> 88da3ae (second version of tasks system)
               >
                 <button
                   className="rg__header"
@@ -337,10 +307,7 @@ export default function TeamTimelineView() {
                       {isCollapsed ? "▸" : "▾"}
                     </span>
                     <span className="rg__name">{group}</span>
-<<<<<<< HEAD
                     {isMyRole && <span className="rg__you-badge">you</span>}
-=======
->>>>>>> 88da3ae (second version of tasks system)
                     <span className="rg__count">{tasks.length}</span>
                   </div>
                   <div className="rg__header-right">
