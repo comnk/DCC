@@ -276,19 +276,6 @@
     flex-shrink: 0;
   }
 
-  &__status-select {
-    height: 28px;
-    padding: 0 6px;
-    border: 1px solid #e5e7eb;
-    border-radius: 5px;
-    font-size: 11px;
-    color: #374151;
-    background: #fff;
-    cursor: pointer;
-
-    &:focus { outline: none; border-color: #111; }
-  }
-
   &__delete-btn {
     width: 24px;
     height: 24px;
