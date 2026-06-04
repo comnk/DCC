@@ -6,11 +6,6 @@ import "./PostTasksSection.scss";
 import { PostTask } from "@/types/PostTask";
 
 const TASK_TYPES = ["copy", "design", "media", "review"] as const;
-const STATUS_LABELS: Record<PostTask["status"], string> = {
-  todo: "To Do",
-  in_progress: "In Progress",
-  done: "Done",
-};
 
 const TYPE_COLORS: Record<PostTask["type"], string> = {
   copy: "#3b82f6",
@@ -29,13 +24,6 @@ export default function PostTasksSection({
   onAllTasksDone?: () => void;
 }) {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-  const [members, setMembers] = useState<
-    {
-      user_id: string;
-      user_profiles: { display_name: string; profile_picture: string | null };
-    }[]
-  >([]);
-
   const [tasks, setTasks] = useState<PostTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -69,14 +57,6 @@ export default function PostTasksSection({
       if (res.ok) {
         setTasks(await res.json());
       }
-
-      const membersRes = await fetch(
-        `${API_URL}/campaigns/${campaignId}/members`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      if (membersRes.ok) setMembers(await membersRes.json());
 
       setLoading(false);
     };
@@ -161,28 +141,6 @@ export default function PostTasksSection({
       headers: { Authorization: `Bearer ${token}` },
     });
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
-  };
-
-  const handleUserAssign = async (taskId: number, userId: string | null) => {
-    const token = await getToken();
-    if (!token) return;
-
-    const res = await fetch(`${API_URL}/tasks/${taskId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ assigned_user_id: userId }),
-    });
-
-    if (res.ok) {
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === taskId ? { ...t, assigned_user_id: userId } : t,
-        ),
-      );
-    }
   };
 
   const allDone = tasks.length > 0 && tasks.every((t) => t.status === "done");
@@ -310,15 +268,6 @@ export default function PostTasksSection({
                 <div className="post-tasks__item-info">
                   <span className="post-tasks__item-title">{task.title}</span>
                   <div className="post-tasks__item-meta">
-                    <span
-                      className="post-tasks__type-badge"
-                      style={{
-                        background: TYPE_COLORS[task.type] + "20",
-                        color: TYPE_COLORS[task.type],
-                      }}
-                    >
-                      {task.type}
-                    </span>
                     {task.assigned_role && (
                       <span className="post-tasks__role">
                         {task.assigned_role}
@@ -342,38 +291,15 @@ export default function PostTasksSection({
               </div>
 
               <div className="post-tasks__item-right">
-                <select
-                  className="post-tasks__user-select"
-                  value={task.assigned_user_id ?? ""}
-                  onChange={(e) =>
-                    handleUserAssign(task.id, e.target.value || null)
-                  }
+                <span
+                  className="post-tasks__type-badge"
+                  style={{
+                    background: TYPE_COLORS[task.type] + "20",
+                    color: TYPE_COLORS[task.type],
+                  }}
                 >
-                  {" "}
-                  <option value="">Unassigned</option>{" "}
-                  {members.map((m) => (
-                    <option key={m.user_id} value={m.user_id}>
-                      {" "}
-                      {m.user_profiles.display_name}{" "}
-                    </option>
-                  ))}{" "}
-                </select>
-                <select
-                  className="post-tasks__status-select"
-                  value={task.status}
-                  onChange={(e) =>
-                    handleStatusChange(
-                      task.id,
-                      e.target.value as PostTask["status"],
-                    )
-                  }
-                >
-                  {Object.entries(STATUS_LABELS).map(([val, label]) => (
-                    <option key={val} value={val}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
+                  {task.type}
+                </span>
                 <button
                   className="post-tasks__delete-btn"
                   onClick={() => handleDelete(task.id)}
