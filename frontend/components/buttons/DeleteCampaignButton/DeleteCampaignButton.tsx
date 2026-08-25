@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { apiRequest } from "@/lib/api/client";
 import { useRouter } from "next/navigation";
 import Button from "../Button/Button";
 
@@ -8,7 +9,6 @@ export default function DeleteCampaignButton({ id }: { id: string }) {
   const router = useRouter();
 
   const handleDelete = async () => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     const supabase = createClient();
     const { data } = await supabase.auth.getSession();
 
@@ -25,16 +25,12 @@ export default function DeleteCampaignButton({ id }: { id: string }) {
       return;
     }
 
-    const res = await fetch(`${API_URL}/campaigns/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${data.session.access_token}`,
-      },
-    });
-
-    if (!res.ok) {
-      console.error("Failed to delete campaign:", res.status);
+    try {
+      await apiRequest(`/campaigns/${id}`, data.session.access_token, {
+        method: "DELETE",
+      });
+    } catch (err) {
+      console.error("Failed to delete campaign:", err);
       alert("Failed to delete campaign. Please try again.");
       return;
     }

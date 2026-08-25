@@ -7,7 +7,8 @@ import MobileLogo from "./Logos/MobileLogo";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRequireAuth } from "@/hooks/useRequiredAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { apiRequest } from "@/lib/api/client";
 import Dropdown from "../dropdown/Dropdown";
 import Button from "../buttons/Button/Button";
 
@@ -16,7 +17,6 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [reviewCount, setReviewCount] = useState(0);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const closeMenu = () => setMenuOpen(false);
 
   useEffect(() => {
@@ -24,10 +24,10 @@ export default function Navbar() {
 
     const fetchReviewCount = async () => {
       try {
-        const response = await fetch(`${API_URL}/posts/need_review/count`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        const data = await response.json();
+        const data = await apiRequest<{ count: number }>(
+          "/posts/need_review/count",
+          accessToken,
+        );
         setReviewCount(data.count);
       } catch (error) {
         console.error("Error fetching review count:", error);

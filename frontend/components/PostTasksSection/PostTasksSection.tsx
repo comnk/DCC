@@ -1,29 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { getClientToken, apiRequest } from "@/lib/api/client";
+import { useTaskStatus } from "@/hooks/useTaskStatus";
+import { TASK_TYPE_COLORS } from "@/lib/tasks/taskTypeColors";
 import "./PostTasksSection.scss";
 import { PostTask } from "@/types/PostTask";
 
 const TASK_TYPES = ["copy", "design", "media", "review"] as const;
 
-const TYPE_COLORS: Record<PostTask["type"], string> = {
-  copy: "#3b82f6",
-  design: "#8b5cf6",
-  media: "#f97316",
-  review: "#22c55e",
-};
-
 export default function PostTasksSection({
   postId,
-  campaignId,
   onAllTasksDone,
 }: {
   postId: number;
-  campaignId: number;
   onAllTasksDone?: () => void;
 }) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [tasks, setTasks] = useState<PostTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -34,28 +26,22 @@ export default function PostTasksSection({
     assigned_role: "",
     due_date: "",
   });
-
-  const getToken = async () => {
-    const supabase = createClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    return session?.access_token ?? null;
-  };
+  const [token, setToken] = useState<string | null>(null);
+  const { updateTaskStatus } = useTaskStatus(token);
 
   useEffect(() => {
     const fetchTasks = async () => {
-      const token = await getToken();
-      if (!token) {
+      const currentToken = await getClientToken();
+      setToken(currentToken);
+      if (!currentToken) {
         setLoading(false);
         return;
       }
 
-      const res = await fetch(`${API_URL}/posts/${postId}/tasks`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        setTasks(await res.json());
+      try {
+        setTasks(await apiRequest<PostTask[]>(`/posts/${postId}/tasks`, currentToken));
+      } catch {
+        // preserves prior "silent on failure" behavior
       }
 
       setLoading(false);
@@ -69,28 +55,26 @@ export default function PostTasksSection({
     if (!newTask.title.trim()) return;
     setSubmitting(true);
 
-    const token = await getToken();
-    if (!token) return;
+    if (!token) {
+      setSubmitting(false);
+      return;
+    }
 
-    const res = await fetch(`${API_URL}/posts/${postId}/tasks`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        title: newTask.title,
-        type: newTask.type,
-        assigned_role: newTask.assigned_role || null,
-        due_date: newTask.due_date || null,
-      }),
-    });
-
-    if (res.ok) {
-      const created = await res.json();
+    try {
+      const created = await apiRequest<PostTask>(`/posts/${postId}/tasks`, token, {
+        method: "POST",
+        body: JSON.stringify({
+          title: newTask.title,
+          type: newTask.type,
+          assigned_role: newTask.assigned_role || null,
+          due_date: newTask.due_date || null,
+        }),
+      });
       setTasks((prev) => [...prev, created]);
       setNewTask({ title: "", type: "copy", assigned_role: "", due_date: "" });
       setShowForm(false);
+    } catch {
+      // preserves prior "silent on failure" behavior
     }
     setSubmitting(false);
   };
@@ -99,48 +83,40 @@ export default function PostTasksSection({
     taskId: number,
     status: PostTask["status"],
   ) => {
-    const token = await getToken();
-    if (!token) return;
+    const updated = await updateTaskStatus(taskId, status);
+    if (!updated) return;
 
-    const res = await fetch(`${API_URL}/tasks/${taskId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ status }),
-    });
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, status } : t)),
+    );
 
-    if (res.ok) {
-      setTasks((prev) =>
-        prev.map((t) => (t.id === taskId ? { ...t, status } : t)),
-      );
+    if (status === "done" && tasks.length > 0) {
+      const allDone = tasks
+        .map((t) => (t.id === taskId ? { ...t, status } : t))
+        .every((t) => t.status === "done");
 
-      if (status === "done" && tasks.length > 0) {
-        const allDone = tasks
-          .map((t) => (t.id === taskId ? { ...t, status } : t))
-          .every((t) => t.status === "done");
-
-        if (allDone) {
-          await fetch(`${API_URL}/posts/${postId}/submit_for_review`, {
+      if (allDone && token) {
+        try {
+          await apiRequest(`/posts/${postId}/submit_for_review`, token, {
             method: "PUT",
-            headers: { Authorization: `Bearer ${token}` },
           });
-          onAllTasksDone?.();
+        } catch {
+          // preserves prior "fire and forget" behavior
         }
+        onAllTasksDone?.();
       }
     }
   };
 
   const handleDelete = async (taskId: number) => {
-    const token = await getToken();
     if (!token) return;
 
-    await fetch(`${API_URL}/tasks/${taskId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    try {
+      await apiRequest(`/tasks/${taskId}`, token, { method: "DELETE" });
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    } catch {
+      // preserves prior behavior (no error surfaced to user)
+    }
   };
 
   const allDone = tasks.length > 0 && tasks.every((t) => t.status === "done");
@@ -294,8 +270,8 @@ export default function PostTasksSection({
                 <span
                   className="post-tasks__type-badge"
                   style={{
-                    background: TYPE_COLORS[task.type] + "20",
-                    color: TYPE_COLORS[task.type],
+                    background: TASK_TYPE_COLORS[task.type] + "20",
+                    color: TASK_TYPE_COLORS[task.type],
                   }}
                 >
                   {task.type}

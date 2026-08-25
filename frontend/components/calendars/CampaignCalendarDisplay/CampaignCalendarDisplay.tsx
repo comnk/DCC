@@ -45,10 +45,6 @@ function formatDate(dateStr: string | null): string {
 }
 
 function buildEvents(campaigns: Campaign[]) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayStr = today.toISOString().split("T")[0];
-
   return campaigns.map((campaign) => {
     const status = getCampaignStatus(campaign);
     const startStr = campaign.start_date ?? undefined;

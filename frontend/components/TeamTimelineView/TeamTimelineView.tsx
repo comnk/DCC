@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getClientToken, apiRequest } from "@/lib/api/client";
+import { useTaskStatus } from "@/hooks/useTaskStatus";
+import { TASK_TYPE_COLORS } from "@/lib/tasks/taskTypeColors";
 import "./TeamTimelineView.scss";
 
 type TaskStatus = "todo" | "in_progress" | "done";
@@ -24,13 +27,6 @@ interface TimelineTask {
 }
 
 type GroupedTasks = Record<string, TimelineTask[]>;
-
-const TYPE_COLORS: Record<string, string> = {
-  copy: "#3b82f6",
-  design: "#8b5cf6",
-  media: "#f97316",
-  review: "#22c55e",
-};
 
 const STATUS_CONFIG: Record<TaskStatus, { label: string; cls: string }> = {
   todo: { label: "To Do", cls: "status--todo" },
@@ -55,16 +51,7 @@ function formatDue(dueDate: string): string {
   });
 }
 
-const getToken = async () => {
-  const supabase = createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  return session?.access_token ?? null;
-};
-
 export default function TeamTimelineView() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [grouped, setGrouped] = useState<GroupedTasks>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,6 +59,8 @@ export default function TeamTimelineView() {
   const [filterStatus, setFilterStatus] = useState<TaskStatus | "all">("all");
   const [view, setView] = useState<"team" | "mine">("team");
   const [myRole, setMyRole] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const { updateTaskStatus } = useTaskStatus(token);
 
   useEffect(() => {
     const load = async () => {
@@ -93,30 +82,35 @@ export default function TeamTimelineView() {
         if (profile?.role) setMyRole(profile.role);
       }
 
-      const token = await getToken();
-      if (!token) {
+      const currentToken = await getClientToken();
+      setToken(currentToken);
+      if (!currentToken) {
         setLoading(false);
         return;
       }
 
-      if (view === "team") {
-        const res = await fetch(`${API_URL}/tasks/by-role`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) setGrouped(await res.json());
-        else setError("Failed to load team timeline.");
-      } else {
-        const res = await fetch(`${API_URL}/tasks/my-tasks`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const flat: TimelineTask[] = await res.json();
+      try {
+        if (view === "team") {
+          setGrouped(
+            await apiRequest<GroupedTasks>("/tasks/by-role", currentToken),
+          );
+        } else {
+          const flat = await apiRequest<TimelineTask[]>(
+            "/tasks/my-tasks",
+            currentToken,
+          );
           const byType = flat.reduce((acc, task) => {
             acc[task.type] = [...(acc[task.type] ?? []), task];
             return acc;
           }, {} as GroupedTasks);
           setGrouped(byType);
-        } else setError("Failed to load your tasks.");
+        }
+      } catch {
+        setError(
+          view === "team"
+            ? "Failed to load team timeline."
+            : "Failed to load your tasks.",
+        );
       }
       setLoading(false);
     };
@@ -128,17 +122,8 @@ export default function TeamTimelineView() {
     status: TaskStatus,
     group: string,
   ) => {
-    const token = await getToken();
-    if (!token) return;
-    const res = await fetch(`${API_URL}/tasks/${taskId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ status }),
-    });
-    if (res.ok) {
+    const updated = await updateTaskStatus(taskId, status);
+    if (updated) {
       setGrouped((prev) => ({
         ...prev,
         [group]: prev[group].map((t) =>
@@ -333,7 +318,7 @@ export default function TeamTimelineView() {
                         <li key={task.id} className={`tr tr--${task.status}`}>
                           <span
                             className="tr__accent"
-                            style={{ background: TYPE_COLORS[task.type] }}
+                            style={{ background: TASK_TYPE_COLORS[task.type] }}
                           />
 
                           <div className="tr__body">
@@ -343,8 +328,8 @@ export default function TeamTimelineView() {
                                 <span
                                   className="tr__type"
                                   style={{
-                                    background: TYPE_COLORS[task.type] + "1a",
-                                    color: TYPE_COLORS[task.type],
+                                    background: TASK_TYPE_COLORS[task.type] + "1a",
+                                    color: TASK_TYPE_COLORS[task.type],
                                   }}
                                 >
                                   {task.type}

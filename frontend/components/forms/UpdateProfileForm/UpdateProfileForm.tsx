@@ -1,16 +1,16 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { apiRequest } from "@/lib/api/client";
 import "./UpdateProfileForm.scss";
 
-import { useRequireAuth } from "@/hooks/useRequiredAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { Button, CircularProgress } from "@mui/material";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { uploadProfileImage } from "@/lib/posts/uploadProfileImage";
 
 export default function UpdateProfileForm() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const { user, accessToken, loading } = useRequireAuth();
 
   const [previewUrl, setPreviewUrl] = useState("");
@@ -26,14 +26,12 @@ export default function UpdateProfileForm() {
     if (!accessToken || !user?.id) return;
 
     const fetchUserData = async () => {
-      const res = await fetch(`${API_URL}/users/${user?.id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const data = await res.json();
+      const data = await apiRequest<{
+        email: string;
+        display_name: string;
+        profile_picture: string;
+        role: string;
+      }>(`/users/${user?.id}`, accessToken);
       setFormData({
         email: data.email,
         password: "",
@@ -68,16 +66,10 @@ export default function UpdateProfileForm() {
 
   const handleUpdateProfile = async (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
-    const res = await fetch(`${API_URL}/users/update-profile`, {
+    await apiRequest("/users/update-profile", accessToken, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
       body: JSON.stringify(formData),
     });
-    const data = await res.json();
-    console.log(data);
   };
 
   if (loading)

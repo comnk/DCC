@@ -6,61 +6,50 @@ import DeleteCampaignButton from "@/components/buttons/DeleteCampaignButton/Dele
 import CampaignTeam from "@/components/CampaignTeam/CampaignTeam";
 import PostCard from "@/components/cards/PostCard/PostCard";
 import Navbar from "@/components/Navbar/Navbar";
-import { createClient } from "@/lib/supabase/server";
+import { getServerAuth, apiRequest } from "@/lib/api/server";
 import { Params } from "@/types/Params";
 import { Post } from "@/types/Post";
+import { Campaign } from "@/types/Campaign";
+import { User } from "@/types/User";
 import { redirect } from "next/navigation";
 
 export default async function CampaignPage({ params }: { params: Params }) {
   const { id } = await params;
 
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { token, user } = await getServerAuth();
 
-  if (!session) {
+  if (!token || !user) {
     redirect("/login");
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
+  let campaign: Campaign;
+  try {
+    campaign = await apiRequest<Campaign>(`/campaigns/${id}`, token, {
+      cache: "no-store",
+    });
+  } catch (err) {
+    console.error("Entry fetch failed:", err);
+    throw err;
   }
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-  const token = session.access_token;
-
-  const res = await fetch(`${API_URL}/campaigns/${id}`, {
-    cache: "no-store",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!res.ok) {
-    console.error("Entry fetch failed:", res.status);
-  }
-
-  const campaign = await res.json();
   const isOwner = campaign.created_by === user.id;
 
-  const campaign_posts_res = await fetch(`${API_URL}/campaigns/${id}/posts`, {
-    cache: "no-store",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const campaign_posts = campaign_posts_res.ok
-    ? await campaign_posts_res.json()
-    : [];
+  let campaign_posts: Post[] = [];
+  try {
+    campaign_posts = await apiRequest<Post[]>(`/campaigns/${id}/posts`, token, {
+      cache: "no-store",
+    });
+  } catch {
+    // preserves prior "degrade to []" behavior
+  }
 
-  const profileRes = await fetch(`${API_URL}/profile/${user.id}`, {
-    cache: "no-store",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const creatorProfile = profileRes.ok ? await profileRes.json() : null;
+  let creatorProfile: User | null = null;
+  try {
+    creatorProfile = await apiRequest<User>(`/profile/${user.id}`, token, {
+      cache: "no-store",
+    });
+  } catch {
+    // preserves prior "degrade to null" behavior
+  }
 
   const creator = {
     id: user.id,
@@ -70,15 +59,14 @@ export default async function CampaignPage({ params }: { params: Params }) {
     email: user.email ?? "",
   };
 
-  const taskSummaryRes = await fetch(
-    `${API_URL}/campaigns/${id}/task-summary`,
-    {
+  let taskSummary: Record<number, { total: number; done: number }> = {};
+  try {
+    taskSummary = await apiRequest(`/campaigns/${id}/task-summary`, token, {
       cache: "no-store",
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
-  const taskSummary: Record<number, { total: number; done: number }> =
-    taskSummaryRes.ok ? await taskSummaryRes.json() : {};
+    });
+  } catch {
+    // preserves prior "degrade to {}" behavior
+  }
 
   return (
     <div className="campaign-page">

@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { apiRequest } from "@/lib/api/client";
 import { useRouter } from "next/navigation";
 import Button from "../Button/Button";
 
@@ -11,7 +12,6 @@ export default function DeletePostButton({
   campaignId: string;
   postId: number | undefined;
 }) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const router = useRouter();
 
   const handleDelete = async () => {
@@ -29,16 +29,12 @@ export default function DeletePostButton({
       return;
     }
 
-    const res = await fetch(`${API_URL}/posts/${postId}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${data.session.access_token}`,
-      },
-    });
-
-    if (!res.ok) {
-      console.error("Failed to delete post:", res.status);
+    try {
+      await apiRequest(`/posts/${postId}`, data.session.access_token, {
+        method: "DELETE",
+      });
+    } catch (err) {
+      console.error("Failed to delete post:", err);
       alert("Failed to delete post. Please try again.");
       return;
     }

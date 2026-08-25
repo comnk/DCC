@@ -3,6 +3,7 @@
 import "./CampaignForm.scss";
 
 import { createClient } from "@/lib/supabase/client";
+import { apiRequest, ApiError } from "@/lib/api/client";
 import { Campaign } from "@/types/Campaign";
 import { Button } from "@mui/material";
 import { useState } from "react";
@@ -14,7 +15,6 @@ export default function CampaignForm({
   campaignId?: string;
   campaignData?: Campaign;
 }) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: campaignData?.name ?? "",
@@ -41,27 +41,19 @@ export default function CampaignForm({
     }
 
     const isUpdate = !!campaignId;
-    const url = isUpdate
-      ? `${API_URL}/campaigns/${campaignId}`
-      : `${API_URL}/campaigns/create`;
+    const url = isUpdate ? `/campaigns/${campaignId}` : "/campaigns/create";
     const method = isUpdate ? "PUT" : "POST";
 
-    const res = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${data.session.access_token}`,
-      },
-      body: JSON.stringify(formData),
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      setError(errorData.detail ?? "Something went wrong");
-    } else {
+    try {
+      await apiRequest(url, data.session.access_token, {
+        method,
+        body: JSON.stringify(formData),
+      });
       window.location.href = isUpdate
         ? `/campaign/${campaignId}`
         : "/dashboard";
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Something went wrong");
     }
   };
 

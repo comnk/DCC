@@ -22,12 +22,7 @@ export default function InstagramPreview({ data }: { data: PostPreviewData }) {
 
       <div className="igImageWrap">
         {data.media_asset && data.media_asset.length > 0 ? (
-          <Swiper
-            spaceBetween={50}
-            slidesPerView={1}
-            onSlideChange={() => console.log("slide change")}
-            onSwiper={(swiper) => console.log(swiper)}
-          >
+          <Swiper spaceBetween={50} slidesPerView={1}>
             {data.media_asset.map((url, index) => (
               <SwiperSlide key={index}>
                 <div

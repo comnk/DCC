@@ -4,10 +4,10 @@ import "./profile_page.scss";
 
 import Navbar from "@/components/Navbar/Navbar";
 import UpdateProfileForm from "@/components/forms/UpdateProfileForm/UpdateProfileForm";
-import { useRequireAuth } from "@/hooks/useRequiredAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 export default function ProfilePage() {
-  const { user, loading } = useRequireAuth();
+  const { loading } = useRequireAuth();
 
   if (loading) return null;
 

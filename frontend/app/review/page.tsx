@@ -4,11 +4,14 @@ import "./review.scss";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar/Navbar";
 import ReviewCard from "@/components/cards/ReviewCard/ReviewCard";
-import { useRequireAuth } from "@/hooks/useRequiredAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { apiRequest } from "@/lib/api/client";
 import { Post } from "@/types/Post";
+import { Campaign } from "@/types/Campaign";
+import type { User } from "@/types/User";
 
 export default function ReviewPage() {
-  const { accessToken, loading: authLoading } = useRequireAuth();
+  const { accessToken } = useRequireAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,27 +20,18 @@ export default function ReviewPage() {
   );
   const [authorNames, setAuthorNames] = useState<Record<string, string>>({});
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
   useEffect(() => {
     if (!accessToken) return;
 
     const fetchReviewPosts = async () => {
       try {
-        const [postsRes, campaignsRes] = await Promise.all([
-          fetch(`${API_URL}/posts/need_review`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }),
-          fetch(`${API_URL}/campaigns/list`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }),
+        const [postsData, campaignsData] = await Promise.all([
+          apiRequest<Post[]>("/posts/need_review", accessToken),
+          apiRequest<Campaign[]>("/campaigns/list", accessToken),
         ]);
 
-        const postsData = await postsRes.json();
-        const campaignsData = await campaignsRes.json();
-
         const campaignMap: Record<number, string> = {};
-        campaignsData.forEach((c: { id: number; name: string }) => {
+        campaignsData.forEach((c) => {
           campaignMap[c.id] = c.name;
         });
         setCampaignNames(campaignMap);
@@ -49,9 +43,7 @@ export default function ReviewPage() {
         ];
         const profileResults = await Promise.all(
           uniqueAuthorIds.map((id) =>
-            fetch(`${API_URL}/profile/${id}`, {
-              headers: { Authorization: `Bearer ${accessToken}` },
-            }).then((r) => r.json()),
+            apiRequest<User>(`/profile/${id}`, accessToken),
           ),
         );
 
@@ -79,18 +71,11 @@ export default function ReviewPage() {
     feedback?: string,
   ) => {
     try {
-      const url = approved
-        ? `${API_URL}/posts/${postId}/review?approved=true`
-        : `${API_URL}/posts/${postId}/reject?feedback=${encodeURIComponent(feedback ?? "")}`;
+      const path = approved
+        ? `/posts/${postId}/review?approved=true`
+        : `/posts/${postId}/reject?feedback=${encodeURIComponent(feedback ?? "")}`;
 
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (!response.ok) throw new Error("Review action failed");
+      await apiRequest(path, accessToken, { method: "PUT" });
 
       setPosts((prev) => prev.filter((p) => p.id !== postId));
     } catch (err) {
