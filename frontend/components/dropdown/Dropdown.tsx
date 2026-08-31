@@ -3,6 +3,7 @@
 import "./Dropdown.scss";
 
 import { createClient } from "@/lib/supabase/client";
+import { apiRequest } from "@/lib/api/client";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -48,8 +49,6 @@ function Avatar({ profile }: { profile: UserProfile | null }) {
 }
 
 export default function Dropdown({ isMobile = false }: { isMobile?: boolean }) {
-  const NEXT_PUBLIC_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -81,19 +80,12 @@ export default function Dropdown({ isMobile = false }: { isMobile?: boolean }) {
         const token = session?.access_token;
         if (!token) return;
 
-        const res = await fetch(`${NEXT_PUBLIC_API_URL}/profile/${user.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) return;
-
-        const data: UserProfile = await res.json();
-        setProfile(data);
+        setProfile(await apiRequest<UserProfile>(`/profile/${user.id}`, token));
       } catch {}
     };
 
     fetchProfile();
-  }, [user?.id, NEXT_PUBLIC_API_URL]);
+  }, [user?.id]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

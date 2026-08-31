@@ -1,27 +1,18 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
+import { apiFetch, ApiError } from "@/lib/api/client";
 import { useState, useEffect } from "react";
+import { User } from "@/types/User";
 
 export function useGetUsers() {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-    const [users, setUsers] = useState([]);
+    const [users, setUsers] = useState<User[]>([]);
 
     useEffect(() => {
         const fetchUsers = async () => {
-            const supabase = createClient();
-            const { data } = await supabase.auth.getSession();
-            if (!data.session) return;
-
-            const res = await fetch(`${API_URL}/profile/all`, {
-                headers: { Authorization: `Bearer ${data.session.access_token}` },
-            });
-
-            if (res.ok) {
-                const json = await res.json();
-                setUsers(json);
-            } else {
-                console.error("fetch failed", res.status);
+            try {
+                setUsers(await apiFetch<User[]>("/profile/all"));
+            } catch (err) {
+                console.error("fetch failed", err instanceof ApiError ? err.status : err);
             }
         };
         fetchUsers();

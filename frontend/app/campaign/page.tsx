@@ -6,7 +6,8 @@ import Button from "@/components/buttons/Button/Button";
 import { Button as MUIButton, CircularProgress } from "@mui/material";
 import { CalendarMonth, ViewList } from "@mui/icons-material";
 import Navbar from "@/components/Navbar/Navbar";
-import { useRequireAuth } from "@/hooks/useRequiredAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { apiRequest } from "@/lib/api/client";
 import { Campaign } from "@/types/Campaign";
 import { useEffect, useState } from "react";
 import CampaignCard from "@/components/cards/CampaignCard/CampaignCard";
@@ -27,8 +28,6 @@ export default function CampaignsPage() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   const filteredCampaigns = campaigns.filter((c) => {
     const isCompleted = c.end_date && new Date(c.end_date) < today;
@@ -51,14 +50,7 @@ export default function CampaignsPage() {
     if (!accessToken) return;
 
     const fetchCampaigns = async () => {
-      const res = await fetch(`${API_URL}/campaigns/list`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const data = await res.json();
+      const data = await apiRequest<Campaign[]>("/campaigns/list", accessToken);
       setCampaigns(data);
       setCampaignsLoading(false);
     };

@@ -5,6 +5,7 @@ import "./update_campaign.scss";
 import CampaignForm from "@/components/forms/CampaignForm/CampaignForm";
 import Navbar from "@/components/Navbar/Navbar";
 import { createClient } from "@/lib/supabase/client";
+import { apiRequest } from "@/lib/api/client";
 import { Campaign } from "@/types/Campaign";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,7 +15,6 @@ export default function UpdateCampaignPage() {
     id: string;
     postId: string;
   }>();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const router = useRouter();
   const [campaign, setCampaign] = useState<Campaign>();
 
@@ -32,18 +32,17 @@ export default function UpdateCampaignPage() {
         return;
       }
 
-      const res = await fetch(`${API_URL}/campaigns/${id}`, {
-        headers: {
-          Authorization: `Bearer ${data.session.access_token}`,
-        },
-      });
-
-      if (!res.ok) {
+      let campaign: Campaign;
+      try {
+        campaign = await apiRequest<Campaign>(
+          `/campaigns/${id}`,
+          data.session.access_token,
+        );
+      } catch {
         router.push("/dashboard");
         return;
       }
 
-      const campaign = await res.json();
       setCampaign(campaign);
     };
 

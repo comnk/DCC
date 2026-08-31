@@ -4,10 +4,10 @@ import "./new_campaign.scss";
 
 import CampaignForm from "@/components/forms/CampaignForm/CampaignForm";
 import Navbar from "@/components/Navbar/Navbar";
-import { useRequireAuth } from "@/hooks/useRequiredAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 export default function NewCampaignPage() {
-  const { user, loading } = useRequireAuth();
+  const { loading } = useRequireAuth();
 
   if (loading) return null;
 

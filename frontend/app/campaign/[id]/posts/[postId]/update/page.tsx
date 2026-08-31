@@ -9,6 +9,7 @@ import { PostPreviewData } from "@/types/PostPreviewData";
 import PostForm from "@/components/forms/PostForm/PostForm";
 import { Post } from "@/types/Post";
 import { createClient } from "@/lib/supabase/client";
+import { apiRequest } from "@/lib/api/client";
 import { MediaAsset } from "@/types/MediaAsset";
 import Navbar from "@/components/Navbar/Navbar";
 
@@ -17,7 +18,6 @@ export default function UpdatePostPage() {
     id: string;
     postId: string;
   }>();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const router = useRouter();
   const [postData, setPostData] = useState<Post | null>(null);
   const [previewData, setPreviewData] = useState<PostPreviewData>({
@@ -40,16 +40,13 @@ export default function UpdatePostPage() {
         return;
       }
 
-      const res = await fetch(`${API_URL}/posts/${postId}`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-
-      if (!res.ok) {
+      let data: Post;
+      try {
+        data = await apiRequest<Post>(`/posts/${postId}`, session.access_token);
+      } catch {
         router.push(`/campaign/${campaignId}/posts`);
         return;
       }
-
-      const data = await res.json();
 
       const signedAssets = await Promise.all(
         data.media_asset.map(async (a: MediaAsset) => {

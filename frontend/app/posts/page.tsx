@@ -7,7 +7,8 @@ import Navbar from "@/components/Navbar/Navbar";
 import PostSearchBar from "@/components/SearchBars/PostSearchBar/PostSearchBar";
 import PostCalendarDisplay from "@/components/calendars/PostCalendarDisplay/PostCalendarDisplay";
 import PlatformFilter from "@/components/PlatformFilter/PlatformFilter";
-import { useRequireAuth } from "@/hooks/useRequiredAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { apiRequest } from "@/lib/api/client";
 import { Post } from "@/types/Post";
 import { Campaign } from "@/types/Campaign";
 import { CircularProgress, Button as MUIButton } from "@mui/material";
@@ -20,16 +21,15 @@ type Tab = "published" | "scheduled" | "draft";
 type ViewMode = "list" | "calendar";
 
 export default function PostsPage() {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-  const { user, accessToken, loading } = useRequireAuth();
+  const { accessToken, loading } = useRequireAuth();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("published");
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
   const [postsLoading, setPostsLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
   const [campaigns, setCampaigns] = useState<Record<number, string>>({});
-  const [campaignList, setCampaignList] = useState<Campaign[]>([]); // ← add
-  const [showCampaignPicker, setShowCampaignPicker] = useState(false); // ← add
+  const [campaignList, setCampaignList] = useState<Campaign[]>([]);
+  const [showCampaignPicker, setShowCampaignPicker] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(
     null,
   );
@@ -40,29 +40,16 @@ export default function PostsPage() {
     if (!accessToken) return;
 
     const fetchData = async () => {
-      const [postsRes, campaignsRes] = await Promise.all([
-        fetch(`${API_URL}/posts/all`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }),
-        fetch(`${API_URL}/campaigns/list`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }),
+      const [postsData, campaignsData] = await Promise.all([
+        apiRequest<Post[]>("/posts/all", accessToken),
+        apiRequest<Campaign[]>("/campaigns/list", accessToken),
       ]);
 
-      const postsData = await postsRes.json();
-      const campaignsData = await campaignsRes.json();
-
       setPosts(postsData);
-      setCampaignList(campaignsData); // ← add
+      setCampaignList(campaignsData);
 
       const campaignMap: Record<number, string> = {};
-      campaignsData.forEach((c: { id: number; name: string }) => {
+      campaignsData.forEach((c) => {
         campaignMap[c.id] = c.name;
       });
       setCampaigns(campaignMap);
@@ -70,7 +57,7 @@ export default function PostsPage() {
     };
 
     fetchData();
-  }, [accessToken, API_URL]);
+  }, [accessToken]);
 
   const filteredPosts = posts.filter((post: Post) => {
     const matchesTab = getPostStatus(post) === tab;

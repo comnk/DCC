@@ -1,5 +1,5 @@
 export type Campaign = {
-  id: string;
+  id: number;
   name: string;
   description: string;
   start_date: string;

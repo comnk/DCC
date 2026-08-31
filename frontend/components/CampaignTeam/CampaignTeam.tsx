@@ -5,6 +5,7 @@ import "./CampaignTeam.scss";
 import Image from "next/image";
 import UserSearchBar from "@/components/SearchBars/UserSearchBar/UserSearchBar";
 import { useEffect, useState } from "react";
+import { apiRequest } from "@/lib/api/client";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@/types/User";
 
@@ -53,18 +54,14 @@ export default function CampaignTeam({
 }: Props) {
   const [members, setMembers] = useState<User[]>([]);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
   useEffect(() => {
     if (!accessToken) return;
 
     const fetchMembers = async () => {
-      const res = await fetch(`${API_URL}/campaigns/${campaignId}/members`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const membersData = await res.json();
+      const membersData = await apiRequest<User[]>(
+        `/campaigns/${campaignId}/members`,
+        accessToken,
+      );
       setMembers(membersData);
     };
 
@@ -73,16 +70,10 @@ export default function CampaignTeam({
 
   const addMemberToCampaign = async (user: User) => {
     try {
-      const res = await fetch(`${API_URL}/campaigns/${campaignId}/members`, {
+      await apiRequest(`/campaigns/${campaignId}/members`, accessToken, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
         body: JSON.stringify({ user_id: user.id }),
       });
-
-      if (!res.ok) throw new Error("Failed to add member");
 
       setMembers((prev) => [...prev, user]);
     } catch (error) {
@@ -105,15 +96,9 @@ export default function CampaignTeam({
       );
       if (!confirmed) return;
 
-      const res = await fetch(
-        `${API_URL}/campaigns/${campaignId}/members/${userId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${accessToken}` },
-        },
-      );
-
-      if (!res.ok) throw new Error("Failed to remove member");
+      await apiRequest(`/campaigns/${campaignId}/members/${userId}`, accessToken, {
+        method: "DELETE",
+      });
 
       setMembers((prev) => prev.filter((m) => m.id !== userId));
     } catch (error) {

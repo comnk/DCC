@@ -7,6 +7,7 @@ import DeletePostButton from "@/components/buttons/DeletePostButton/DeletePostBu
 import PostPreviewPanel from "@/components/PostPreviewPanel/PostPreviewPanel";
 import { PostStatusBadge } from "@/components/icons/PostStatusBadge/PostStatusBadge";
 import { createClient } from "@/lib/supabase/client";
+import { apiRequest } from "@/lib/api/client";
 import { MediaAsset } from "@/types/MediaAsset";
 import { Post } from "@/types/Post";
 import { PostPreviewData } from "@/types/PostPreviewData";
@@ -34,8 +35,6 @@ export default function PostPage() {
     typeof setTimeout
   > | null>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
   useEffect(() => {
     const fetchPost = async () => {
       const supabase = createClient();
@@ -48,16 +47,14 @@ export default function PostPage() {
         return;
       }
 
-      const res = await fetch(`${API_URL}/posts/${postId}`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-
-      if (!res.ok) {
+      let data: Post;
+      try {
+        data = await apiRequest<Post>(`/posts/${postId}`, session.access_token);
+      } catch {
         router.push(`/campaign/${id}/posts`);
         return;
       }
 
-      const data = await res.json();
       setCurrentUserId(session.user.id);
       setPostData(data);
 
@@ -100,19 +97,18 @@ export default function PostPage() {
         return;
       }
 
-      const res = await fetch(`${API_URL}/posts/${postId}/cancel_post`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-
-      if (res.ok) {
-        const updatedPost = await res.json();
+      try {
+        const updatedPost = await apiRequest<Post>(
+          `/posts/${postId}/cancel_post`,
+          session.access_token,
+          { method: "PUT" },
+        );
         setPostData(updatedPost);
         setPreviewData((prev) => ({
           ...prev,
           scheduled_time: updatedPost.scheduled_time,
         }));
-      } else {
+      } catch {
         console.error("Failed to cancel post");
       }
     }, 4000);
@@ -217,12 +213,7 @@ export default function PostPage() {
           </section>
         </div>
 
-        {postData && (
-          <PostTasksSection
-            postId={postData.id}
-            campaignId={postData.campaign_id}
-          />
-        )}
+        {postData && <PostTasksSection postId={postData.id} />}
         {cancelPending && (
           <div className="cancel-toast">
             <span>Post will be cancelled...</span>

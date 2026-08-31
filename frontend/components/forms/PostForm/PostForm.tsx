@@ -3,15 +3,29 @@
 import "./PostForm.scss";
 
 import { useCampaign } from "@/hooks/useCampaign";
-import { submitPost } from "@/lib/posts/submitPost";
 import { uploadPostImages } from "@/lib/posts/uploadPostImages";
-import { validatePost } from "@/lib/posts/validatePost";
 import { createClient } from "@/lib/supabase/client";
 import { Post } from "@/types/Post";
 import { PostPreviewData } from "@/types/PostPreviewData";
 import { Button } from "@mui/material";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import DiscordFields from "./DiscordFields";
+import ImageUploader from "./ImageUploader";
+import { usePostFormSubmit } from "./usePostFormSubmit";
+
+export type PostFormData = {
+  title: string;
+  campaign_id: number;
+  platform: string[];
+  caption: string;
+  media_asset: string[];
+  scheduled_time: string;
+  is_draft: boolean;
+  discord_location: string;
+  discord_event_start: string;
+  discord_event_end: string;
+  instagram_post_type: "post" | "story";
+};
 
 export default function PostForm({
   campaignId,
@@ -24,11 +38,8 @@ export default function PostForm({
   existingPost?: Post | null;
   isUpdate?: boolean;
 }) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-  const [error, setError] = useState("");
+  const [imageError, setImageError] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const [pendingDeletes, setPendingDeletes] = useState<string[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const previewUrlsRef = useRef<string[]>([]);
@@ -39,23 +50,28 @@ export default function PostForm({
   }, [onFormChange]);
 
   const campaign = useCampaign(campaignId);
-  const campaignRef = useRef(campaign);
-  useEffect(() => {
-    campaignRef.current = campaign;
-  }, [campaign]);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PostFormData>({
     title: "",
     campaign_id: parseInt(campaignId),
-    platform: [] as string[],
+    platform: [],
     caption: "",
-    media_asset: [] as string[],
+    media_asset: [],
     scheduled_time: "",
     is_draft: false,
     discord_location: "Online",
     discord_event_start: "",
     discord_event_end: "",
-    instagram_post_type: "post" as "post" | "story",
+    instagram_post_type: "post",
+  });
+
+  const { submitting, error, handleSubmit } = usePostFormSubmit({
+    campaignId,
+    existingPost,
+    formData,
+    pendingDeletes,
+    campaign,
+    onDeletesFlushed: () => setPendingDeletes([]),
   });
 
   useEffect(() => {
@@ -68,7 +84,7 @@ export default function PostForm({
     const mediaPaths = existingPost.media_asset?.map((a) => a.file_url) ?? [];
     const mediaSignedUrls =
       existingPost.media_asset?.map((a) => a.signed_url ?? a.file_url) ?? [];
-    const prefilled = {
+    const prefilled: PostFormData = {
       title: existingPost.title ?? "",
       campaign_id: parseInt(campaignId),
       platform: existingPost.platform ?? [],
@@ -98,7 +114,7 @@ export default function PostForm({
   }, [existingPost, campaignId]);
 
   const updateForm = (
-    updates: Partial<typeof formData>,
+    updates: Partial<PostFormData>,
     displayUrls?: string[],
   ) => {
     const next = { ...formData, ...updates };
@@ -107,92 +123,6 @@ export default function PostForm({
       ...next,
       media_asset: displayUrls ?? previewUrlsRef.current,
     });
-  };
-
-  const handleSubmit = async (e: React.BaseSyntheticEvent, isDraft = false) => {
-    e.preventDefault();
-    setError("");
-    setSubmitting(true);
-
-    try {
-      const supabase = createClient();
-      const { data } = await supabase.auth.getSession();
-
-      let token = data.session?.access_token;
-      if (!token) {
-        const { data: refreshed } = await supabase.auth.refreshSession();
-        token = refreshed.session?.access_token;
-      }
-
-      if (!token) {
-        setError("Your session expired. Please log in again.");
-        return;
-      }
-
-      if (!isDraft) {
-        const validationError = validatePost(formData, campaignRef.current);
-        if (validationError) {
-          setError(validationError);
-          return;
-        }
-      } else if (!formData.title.trim()) {
-        setError("A title is required to save a draft");
-        return;
-      }
-
-      console.log("Submitting formData:", {
-        ...formData,
-        scheduled_time: formData.scheduled_time || null,
-        is_draft: isDraft,
-      });
-
-      if (pendingDeletes.length > 0) {
-        await Promise.all(
-          pendingDeletes.map((imageUrl) =>
-            fetch(
-              `${API_URL}/posts/${existingPost?.id}/delete_image?image_url=${encodeURIComponent(imageUrl)}`,
-              {
-                method: "DELETE",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              },
-            ),
-          ),
-        );
-        setPendingDeletes([]);
-      }
-      const scheduledTimeUTC = formData.scheduled_time
-        ? new Date(formData.scheduled_time).toISOString()
-        : null;
-
-      const discordEventStartUTC = formData.discord_event_start
-        ? new Date(formData.discord_event_start).toISOString()
-        : null;
-
-      const discordEventEndUTC = formData.discord_event_end
-        ? new Date(formData.discord_event_end).toISOString()
-        : null;
-
-      const { ok, error } = await submitPost(
-        {
-          ...formData,
-          scheduled_time: scheduledTimeUTC,
-          discord_event_start: discordEventStartUTC,
-          discord_event_end: discordEventEndUTC,
-          is_draft: isDraft,
-        },
-        token,
-        existingPost?.id,
-      );
-      if (!ok) {
-        setError(error ?? "Something went wrong");
-      } else {
-        window.location.href = "/campaign/" + campaignId;
-      }
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   const handlePlatformChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -207,7 +137,7 @@ export default function PostForm({
     if (files.length === 0) return;
 
     setUploading(true);
-    setError("");
+    setImageError("");
 
     try {
       const supabase = createClient();
@@ -222,7 +152,7 @@ export default function PostForm({
         updatedPreviews,
       );
     } catch (err) {
-      setError("Failed to upload images: " + (err as Error).message);
+      setImageError("Failed to upload images: " + (err as Error).message);
     } finally {
       setUploading(false);
     }
@@ -316,51 +246,14 @@ export default function PostForm({
         )}
 
         {formData.platform.includes("discord") && (
-          <>
-            <div className="post-form__field">
-              <label className="post-form__label" htmlFor="discord_location">
-                Event Location
-              </label>
-              <input
-                className="post-form__input"
-                type="text"
-                id="discord_location"
-                placeholder="e.g. DIB 208, Zoom, Online"
-                onChange={(e) =>
-                  updateForm({ discord_location: e.target.value })
-                }
-                value={formData.discord_location}
-              />
-            </div>
-            <div className="post-form__field">
-              <label className="post-form__label" htmlFor="discord_event_start">
-                Event Start Time
-              </label>
-              <input
-                className="post-form__input"
-                type="datetime-local"
-                id="discord_event_start"
-                onChange={(e) =>
-                  updateForm({ discord_event_start: e.target.value })
-                }
-                value={formData.discord_event_start}
-              />
-            </div>
-            <div className="post-form__field">
-              <label className="post-form__label" htmlFor="discord_event_end">
-                Event End Time
-              </label>
-              <input
-                className="post-form__input"
-                type="datetime-local"
-                id="discord_event_end"
-                onChange={(e) =>
-                  updateForm({ discord_event_end: e.target.value })
-                }
-                value={formData.discord_event_end}
-              />
-            </div>
-          </>
+          <DiscordFields
+            value={{
+              discord_location: formData.discord_location,
+              discord_event_start: formData.discord_event_start,
+              discord_event_end: formData.discord_event_end,
+            }}
+            onChange={updateForm}
+          />
         )}
 
         <div className="post-form__field">
@@ -396,52 +289,14 @@ export default function PostForm({
           />
         </div>
 
-        <div className="post-form__field">
-          <label className="post-form__label" htmlFor="image">
-            Images
-          </label>
-          <label className="post-form__file-label" htmlFor="image">
-            {uploading
-              ? "Uploading…"
-              : formData.media_asset.length > 0
-                ? `${formData.media_asset.length} file(s) uploaded ✓`
-                : "Choose files"}
-          </label>
-          <input
-            className="post-form__file-input"
-            type="file"
-            id="image"
-            name="image"
-            accept="image/*,video/*"
-            multiple
-            disabled={uploading}
-            onChange={handleImageUpload}
-          />
-        </div>
-
-        {previewUrls.map((url, i) => (
-          <div key={url} className="post-form__preview-item">
-            {url.match(/\.(mp4|mov|webm)(\?|$)/i) ? (
-              <video src={url} width={100} height={100} controls muted />
-            ) : (
-              <Image
-                src={url}
-                alt={`Upload ${i + 1}`}
-                width={100}
-                height={100}
-              />
-            )}
-            <button
-              type="button"
-              className="post-form__preview-delete"
-              onClick={() => handleDeleteImage(i)}
-              disabled={uploading || submitting}
-              aria-label="Remove image"
-            >
-              X
-            </button>
-          </div>
-        ))}
+        <ImageUploader
+          previewUrls={previewUrls}
+          mediaCount={formData.media_asset.length}
+          uploading={uploading}
+          submitting={submitting}
+          onUpload={handleImageUpload}
+          onDeleteImage={handleDeleteImage}
+        />
 
         <div className="post-form__actions">
           <Button
@@ -468,7 +323,9 @@ export default function PostForm({
           </Button>
         </div>
       </form>
-      {error && <p className="post-form__error">{error}</p>}
+      {(error || imageError) && (
+        <p className="post-form__error">{error || imageError}</p>
+      )}
     </div>
   );
 }

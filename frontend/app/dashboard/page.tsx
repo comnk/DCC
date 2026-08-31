@@ -4,7 +4,8 @@ import "./dashboard_page.scss";
 
 import CampaignCard from "@/components/cards/CampaignCard/CampaignCard";
 import Navbar from "@/components/Navbar/Navbar";
-import { useRequireAuth } from "@/hooks/useRequiredAuth";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { apiRequest } from "@/lib/api/client";
 import { Campaign } from "@/types/Campaign";
 import { useEffect, useState } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -15,7 +16,6 @@ import Button from "@/components/buttons/Button/Button";
 export default function DashboardPage() {
   const { user, accessToken, loading } = useRequireAuth();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -25,23 +25,10 @@ export default function DashboardPage() {
     if (!accessToken) return;
 
     const fetchData = async () => {
-      const [campaignsRes, postsRes] = await Promise.all([
-        fetch(`${API_URL}/campaigns/list`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }),
-        fetch(`${API_URL}/posts/all`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }),
+      const [campaignsData, postsData] = await Promise.all([
+        apiRequest<Campaign[]>("/campaigns/list", accessToken),
+        apiRequest<Post[]>("/posts/all", accessToken),
       ]);
-
-      const campaignsData = await campaignsRes.json();
-      const postsData = await postsRes.json();
 
       setCampaigns(campaignsData);
       setPosts(postsData);
@@ -50,9 +37,9 @@ export default function DashboardPage() {
     };
 
     fetchData();
-  }, [accessToken, API_URL]);
+  }, [accessToken]);
 
-  const campaignMap: Record<string, string> = {};
+  const campaignMap: Record<number, string> = {};
   campaigns.forEach((c) => {
     campaignMap[c.id] = c.name;
   });
